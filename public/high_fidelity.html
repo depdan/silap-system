@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SILAP - High-Fidelity UI Showcase (Program Aplikasi SILAP)</title>
+  <title>SILAP - High-Fidelity UI Showcase (login.php · user.php · admin.php)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -125,7 +125,7 @@
             <span class="text-xs font-mono text-slate-500">Live Production Design System</span>
           </div>
           <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Antarmuka Program Aplikasi SILAP (Kelurahan Pekayon)</h1>
-          <p class="text-xs text-slate-600">Sistem Informasi Laporan Pekerjaan PPSU · Struktur Halaman Asli Sistem</p>
+          <p class="text-xs text-slate-600">Representasi Visual Sistem Riil: login.php · user.php · admin.php</p>
         </div>
       </div>
 
@@ -140,19 +140,19 @@
       </div>
     </div>
 
-    <!-- PROGRAM NAVIGATION TABS (Sesuai File & Modul Program Anda) -->
+    <!-- PROGRAM NAVIGATION TABS (Sesuai File Program PHP) -->
     <nav class="flex flex-wrap items-center gap-2 pt-3" id="program-nav-hi">
-      <button onclick="showHiModule('login')" id="tab-hi-login" class="prog-tab-hi active px-4 py-2 bg-blue-900 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-blue-950/20 transition-all flex items-center gap-1.5">
-        <i data-lucide="shield-check" class="w-4 h-4"></i> 1. Modul Login (login.php)
+      <button onclick="showHiPage('login')" id="tab-hi-login" class="page-tab-hi active px-4 py-2 bg-blue-900 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-blue-950/20 transition-all flex items-center gap-1.5">
+        <i data-lucide="shield-check" class="w-4 h-4"></i> 1. login.php (Halaman Login & Registrasi)
       </button>
-      <button onclick="showHiModule('user')" id="tab-hi-user" class="prog-tab-hi px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5">
-        <i data-lucide="smartphone" class="w-4 h-4"></i> 2. Modul Petugas Mobile (user.php)
+      <button onclick="showHiPage('user')" id="tab-hi-user" class="page-tab-hi px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5">
+        <i data-lucide="smartphone" class="w-4 h-4"></i> 2. user.php (Portal Petugas Mobile)
       </button>
-      <button onclick="showHiModule('admin')" id="tab-hi-admin" class="prog-tab-hi px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> 3. Modul Admin Command Center (admin.php)
+      <button onclick="showHiPage('admin')" id="tab-hi-admin" class="page-tab-hi px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> 3. admin.php (Admin Command Center)
       </button>
-      <button onclick="showAllHiModules()" id="tab-hi-all" class="prog-tab-hi ml-auto px-3.5 py-2 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
-        <i data-lucide="layers" class="w-4 h-4"></i> Lihat Semua Halaman
+      <button onclick="showAllHiPages()" id="tab-hi-all" class="page-tab-hi ml-auto px-3.5 py-2 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+        <i data-lucide="layers" class="w-4 h-4"></i> Tampilkan Semua Halaman
       </button>
     </nav>
   </header>
@@ -161,16 +161,16 @@
   <main class="max-w-7xl mx-auto space-y-12">
 
     <!-- =============================================================== -->
-    <!-- 1. MODUL LOGIN (login.php)                                      -->
+    <!-- 1. HALAMAN LOGIN (login.php)                                    -->
     <!-- =============================================================== -->
-    <section id="hi-mod-section-login" class="prog-hi-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
+    <section id="hi-page-section-login" class="page-hi-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
         <div>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase rounded-full tracking-wider">File: login.php</span>
             <span class="text-xs font-mono text-slate-500">Autentikasi Multi-Role RBAC</span>
           </div>
-          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">1. Halaman Login Sistem SILAP</h2>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">1. Halaman Login Sistem SILAP (login.php)</h2>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="setHiRole('petugas')" id="btn-hi-role-petugas" class="px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1">
@@ -185,10 +185,10 @@
         </div>
       </div>
 
-      <!-- LOGIN HERO CARD CONTAINER -->
+      <!-- LOGIN HERO CARD CONTAINER (Sesuai Desain Asli login.php) -->
       <div class="max-w-5xl mx-auto rounded-3xl overflow-hidden border border-slate-200 shadow-xl grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
         
-        <!-- Left Hero Gradient Banner -->
+        <!-- Left Briefing Art Panel (Sesuai login.php) -->
         <div class="lg:col-span-5 bg-gradient-to-br from-slate-950 via-blue-950 to-blue-900 p-8 text-white flex flex-col justify-between relative overflow-hidden">
           <div class="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
           <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -204,33 +204,46 @@
               </div>
             </div>
 
-            <div class="pt-8">
-              <span class="px-2.5 py-1 bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] font-extrabold uppercase rounded-lg">Aplikasi Pelaporan Resmi</span>
-              <h2 class="text-3xl font-black mt-3 leading-tight">SILAP PEKAYON</h2>
-              <p class="text-xs text-slate-300 mt-2 leading-relaxed">
-                Sistem Informasi Laporan Pekerjaan PPSU berbasis bukti GPS akurat dan verifikasi visual dokumentasi lapangan.
-              </p>
+            <!-- Human-friendly Briefing Checklist Card (Sesuai login.php) -->
+            <div class="mt-6 p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl space-y-2.5 text-xs">
+              <div class="flex items-center gap-1.5 text-orange-300 font-extrabold text-[10px] uppercase">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                <span>PANDUAN LAPORAN REGU</span>
+              </div>
+              <h4 class="font-extrabold text-white text-sm">Hal Penting Sebelum Kirim Laporan</h4>
+              <p class="text-[11px] text-slate-300">Pastikan 5 informasi wajib berikut sudah lengkap agar verifikasi cepat:</p>
+              
+              <div class="space-y-1.5 pt-1 text-[11px] text-slate-200">
+                <div class="flex items-center gap-2">
+                  <span class="w-4 h-4 rounded-full bg-orange-500 text-white font-bold text-[9px] flex items-center justify-center">1</span>
+                  <span><strong>Nomor Tugas:</strong> Tugas 1 - 5 berurutan (Anti-Skip)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-4 h-4 rounded-full bg-orange-500 text-white font-bold text-[9px] flex items-center justify-center">2</span>
+                  <span><strong>Waktu & Tanggal:</strong> Tercatat riil otomatis</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-4 h-4 rounded-full bg-orange-500 text-white font-bold text-[9px] flex items-center justify-center">3</span>
+                  <span><strong>Jenis Pekerjaan:</strong> Sapu jalan, got, taman, pohon</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-4 h-4 rounded-full bg-orange-500 text-white font-bold text-[9px] flex items-center justify-center">4</span>
+                  <span><strong>Lokasi & RT/RW:</strong> RW 01 - 11 & Titik GPS presisi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-4 h-4 rounded-full bg-orange-500 text-white font-bold text-[9px] flex items-center justify-center">5</span>
+                  <span><strong>3 Foto Progres:</strong> 0% Sebelum, 50% Proses, 100% Selesai</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Feature Bullets -->
-          <div class="relative z-10 space-y-2.5 pt-8 border-t border-white/10 text-xs">
-            <div class="flex items-center gap-2 text-slate-200">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-              <span>Watermark GPS Terenkripsi & Anti-Spoof</span>
-            </div>
-            <div class="flex items-center gap-2 text-slate-200">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-              <span>Anti-Skip Tugas Berurutan (Tugas 1 - 5)</span>
-            </div>
-            <div class="flex items-center gap-2 text-slate-200">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-              <span>Pemantauan Spasial GIS Pekayon Real-Time</span>
-            </div>
+          <div class="relative z-10 pt-4 border-t border-white/10 text-[11px] text-slate-400">
+            SILAP PPSU · Sistem Informasi Laporan Pekerjaan Lapangan
           </div>
         </div>
 
-        <!-- Right Login Card -->
+        <!-- Right Login Card (Sesuai login.php) -->
         <div class="lg:col-span-7 bg-white p-8 md:p-10 flex flex-col justify-center">
           <div class="max-w-md mx-auto w-full space-y-6">
             
@@ -240,14 +253,13 @@
                 <span class="text-[10px] font-mono text-slate-400">Versi 2.4.0 Live</span>
               </div>
               <h3 class="text-2xl font-black text-slate-900 mt-1" id="hi-auth-title">Selamat Datang Kembali</h3>
-              <p class="text-xs text-slate-500 mt-1" id="hi-auth-subtitle">Masukkan NIK terdaftar untuk mengakses formulir tugas hari ini.</p>
+              <p class="text-xs text-slate-500 mt-1" id="hi-auth-subtitle">Masukkan NIK atau nomor telepon terdaftar untuk lapor tugas hari ini.</p>
             </div>
 
-            <form onsubmit="event.preventDefault(); alert('Login Berhasil! Mengalihkan ke antarmuka...');" class="space-y-4">
-              <!-- Field Username / NIK -->
+            <form onsubmit="event.preventDefault(); alert('Login Berhasil! Mengalihkan ke user.php...');" class="space-y-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5" id="hi-lbl-user">
-                  Nomor Induk Kependudukan (NIK) *
+                  Username / Nomor Telepon / NIK *
                 </label>
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -257,7 +269,6 @@
                 </div>
               </div>
 
-              <!-- Field Password -->
               <div>
                 <div class="flex items-center justify-between mb-1.5">
                   <label class="block text-xs font-bold text-slate-700 uppercase">Kata Sandi (Password) *</label>
@@ -274,7 +285,6 @@
                 </div>
               </div>
 
-              <!-- Remember Me & Info -->
               <div class="flex items-center justify-between text-xs">
                 <label class="flex items-center gap-2 cursor-pointer select-none text-slate-600">
                   <input type="checkbox" checked class="w-4 h-4 rounded text-blue-900 accent-blue-900 border-slate-300">
@@ -285,7 +295,6 @@
                 </span>
               </div>
 
-              <!-- Submit Button -->
               <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-blue-900 to-indigo-800 hover:from-blue-950 hover:to-indigo-900 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-blue-900/25 transition-all flex items-center justify-center gap-2">
                 <span>Masuk ke Sistem SILAP</span>
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -344,18 +353,18 @@
     </section>
 
     <!-- =============================================================== -->
-    <!-- 2. MODUL USER / PETUGAS MOBILE (user.php)                       -->
+    <!-- 2. HALAMAN USER MOBILE (user.php)                               -->
     <!-- =============================================================== -->
-    <section id="hi-mod-section-user" class="prog-hi-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
+    <section id="hi-page-section-user" class="page-hi-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
         <div>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-extrabold uppercase rounded-full tracking-wider">File: user.php</span>
             <span class="text-xs font-mono text-slate-500">Aplikasi Mobile Petugas Lapangan</span>
           </div>
-          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">2. Portal Petugas Mobile (views/user/form_lapor.php & riwayat.php)</h2>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">2. Portal Petugas Mobile (user.php)</h2>
         </div>
-        <!-- Toggle User Tabs (Form vs Riwayat) -->
+        <!-- Toggle User Tabs (Form Lapor vs Riwayat Log Sesuai views/user/tabs.php) -->
         <div class="flex items-center gap-2">
           <button onclick="switchHiUserTab('form')" id="btn-hi-user-tab-form" class="px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1">
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Tab Input Laporan
@@ -371,21 +380,50 @@
         <div class="iphone-island"></div>
         <div class="iphone-bar"></div>
 
-        <!-- Phone Top Bar -->
+        <!-- Phone Top Bar (Sesuai views/user/header.php) -->
         <div class="pt-10 px-5 pb-3 bg-white flex items-center justify-between border-b border-slate-100">
           <div class="flex items-center gap-2">
             <div class="w-7 h-7 rounded-lg bg-blue-900 text-white flex items-center justify-center font-black text-xs">
               SL
             </div>
             <div>
-              <h4 class="text-xs font-extrabold text-slate-900 leading-none">SILAP Mobile</h4>
-              <span class="text-[9px] text-slate-500 font-mono">Kelurahan Pekayon</span>
+              <h4 class="text-xs font-extrabold text-slate-900 leading-none">SILAP PPSU</h4>
+              <span class="text-[9px] text-slate-500 font-mono">Ahmad Suryadi · Petugas Lapangan</span>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
-            <span class="px-2 py-0.5 bg-blue-50 text-blue-900 text-[10px] font-bold rounded-full border border-blue-200">
-              Regu C (RW 07)
+            <span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 text-[10px] font-bold rounded-full border border-emerald-200 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Online
             </span>
+            <button class="text-slate-400 hover:text-slate-600 text-[10px] font-bold">Keluar</button>
+          </div>
+        </div>
+
+        <!-- Hero Officer Banner & Dock (Sesuai views/user/header.php) -->
+        <div class="p-3.5 bg-slate-50 border-b border-slate-200 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-500 uppercase">Selamat Bertugas</span>
+            <span class="px-2 py-0.5 bg-blue-900 text-white text-[9px] font-extrabold rounded-md">
+              REGU C • KETUA REGU
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-blue-900 text-white font-black flex items-center justify-center text-sm shadow">
+              AS
+            </div>
+            <div>
+              <h4 class="font-extrabold text-slate-900 text-xs">Ahmad Suryadi</h4>
+              <p class="text-[10px] text-slate-500">0812-8899-0011 · Kel. Pekayon, Jakarta Timur</p>
+            </div>
+          </div>
+
+          <!-- Summary Dock (Sesuai views/user/header.php) -->
+          <div class="grid grid-cols-4 gap-1.5 p-2 bg-white rounded-xl border border-slate-200 text-[10px] text-center shadow-sm">
+            <div><span class="text-slate-400 block text-[9px]">Regu</span><strong class="text-slate-800">Regu C</strong></div>
+            <div><span class="text-slate-400 block text-[9px]">Wilayah</span><strong class="text-slate-800">RW 07</strong></div>
+            <div><span class="text-slate-400 block text-[9px]">GPS</span><strong class="text-emerald-600">● Aktif</strong></div>
+            <div><span class="text-slate-400 block text-[9px]">Waktu</span><strong class="text-slate-800">09:49 WIB</strong></div>
           </div>
         </div>
 
@@ -400,9 +438,9 @@
         </div>
 
         <!-- Scrollable Mobile Content -->
-        <div class="p-4 space-y-4 max-h-[620px] overflow-y-auto custom-scroll pb-16 text-xs">
+        <div class="p-4 space-y-4 max-h-[580px] overflow-y-auto custom-scroll pb-16 text-xs">
 
-          <!-- ==================== VIEW 1: FORM INPUT LAPORAN ==================== -->
+          <!-- ==================== VIEW 1: FORM INPUT LAPORAN (views/user/form_lapor.php) ==================== -->
           <div id="hi-user-view-form" class="space-y-4">
             
             <!-- Stepper Header (Tahap 1 Info & Lokasi vs Tahap 2 Progres & Foto) -->
@@ -741,18 +779,18 @@
     </section>
 
     <!-- =============================================================== -->
-    <!-- 3. MODUL ADMIN COMMAND CENTER (admin.php)                       -->
+    <!-- 3. HALAMAN ADMIN COMMAND CENTER (admin.php)                     -->
     <!-- =============================================================== -->
-    <section id="hi-mod-section-admin" class="prog-hi-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
+    <section id="hi-page-section-admin" class="page-hi-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
         <div>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase rounded-full tracking-wider">File: admin.php</span>
             <span class="text-xs font-mono text-slate-500">Pusat Kendali Pengawasan Kelurahan</span>
           </div>
-          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">3. Admin Command Center (7 Menu Sidebar Program)</h2>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">3. Admin Command Center (admin.php)</h2>
         </div>
-        <!-- Toggle Admin Sub-Views Sesuai Sidebar Program -->
+        <!-- Toggle Admin Sub-Views Sesuai Sidebar Program admin.php -->
         <div class="flex flex-wrap items-center gap-1.5">
           <button onclick="switchHiAdminSub('dashboard')" id="btn-hi-adm-dash" class="px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1">
             <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> Dashboard & GIS
@@ -1144,40 +1182,40 @@
   </main>
 
   <footer class="max-w-7xl mx-auto mt-12 py-6 text-center text-xs font-mono text-slate-500 border-t border-slate-200">
-    <span>SILAP High-Fidelity Showcase · Sesuai Struktur File Program (login.php · user.php · admin.php) · Kelurahan Pekayon</span>
+    <span>SILAP High-Fidelity Showcase · Sesuai Struktur File Program Asli (login.php · user.php · admin.php) · Kelurahan Pekayon</span>
   </footer>
 
   <!-- SCRIPT LOGIKA & MAP INITIALIZATION -->
   <script>
     lucide.createIcons();
 
-    let isAllModules = false;
+    let isAllPages = false;
     let miniMap = null;
     let adminMap = null;
 
-    function showHiModule(mod) {
-      isAllModules = false;
-      document.querySelectorAll('.prog-tab-hi').forEach(tab => {
-        tab.className = 'prog-tab-hi px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5';
+    function showHiPage(page) {
+      isAllPages = false;
+      document.querySelectorAll('.page-tab-hi').forEach(tab => {
+        tab.className = 'page-tab-hi px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5';
       });
-      const activeTab = document.getElementById(`tab-hi-${mod}`);
+      const activeTab = document.getElementById(`tab-hi-${page}`);
       if (activeTab) {
-        activeTab.className = 'prog-tab-hi active px-4 py-2 bg-blue-900 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-blue-950/20 transition-all flex items-center gap-1.5';
+        activeTab.className = 'page-tab-hi active px-4 py-2 bg-blue-900 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-blue-950/20 transition-all flex items-center gap-1.5';
       }
 
-      document.querySelectorAll('.prog-hi-section').forEach(sec => sec.classList.add('hidden'));
-      const activeSection = document.getElementById(`hi-mod-section-${mod}`);
+      document.querySelectorAll('.page-hi-section').forEach(sec => sec.classList.add('hidden'));
+      const activeSection = document.getElementById(`hi-page-section-${page}`);
       if (activeSection) activeSection.classList.remove('hidden');
 
       setTimeout(() => {
-        if (mod === 'user' && miniMap) miniMap.invalidateSize();
-        if (mod === 'admin' && adminMap) adminMap.invalidateSize();
+        if (page === 'user' && miniMap) miniMap.invalidateSize();
+        if (page === 'admin' && adminMap) adminMap.invalidateSize();
       }, 200);
     }
 
-    function showAllHiModules() {
-      isAllModules = true;
-      document.querySelectorAll('.prog-hi-section').forEach(sec => sec.classList.remove('hidden'));
+    function showAllHiPages() {
+      isAllPages = true;
+      document.querySelectorAll('.page-hi-section').forEach(sec => sec.classList.remove('hidden'));
       setTimeout(() => {
         if (miniMap) miniMap.invalidateSize();
         if (adminMap) adminMap.invalidateSize();
@@ -1201,7 +1239,7 @@
       }
     });
 
-    // SPRINT 1 ROLE
+    // LOGIN ROLE
     function setHiRole(role) {
       const btnPetugas = document.getElementById('btn-hi-role-petugas');
       const btnAdmin = document.getElementById('btn-hi-role-admin');
@@ -1216,8 +1254,8 @@
         btnAdmin.className = 'px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1';
         badge.innerText = 'PORTAL PETUGAS LAPANGAN';
         title.innerText = 'Selamat Datang Kembali';
-        subtitle.innerText = 'Masukkan NIK terdaftar untuk mengakses formulir tugas hari ini.';
-        lblUser.innerText = 'Nomor Induk Kependudukan (NIK) *';
+        subtitle.innerText = 'Masukkan NIK atau nomor telepon terdaftar untuk lapor tugas hari ini.';
+        lblUser.innerText = 'Username / Nomor Telepon / NIK *';
         inputUser.value = '3175080101900001';
       } else {
         btnAdmin.className = 'px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1';
@@ -1373,7 +1411,7 @@
         console.warn('Admin map init:', err);
       }
 
-      showHiModule('login');
+      showHiPage('login');
     });
   </script>
 </body>

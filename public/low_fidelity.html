@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SILAP - Low-Fidelity Wireframes (Program Aplikasi SILAP)</title>
+  <title>SILAP - Low-Fidelity Wireframes (login.php · user.php · admin.php)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@
     .wf-cross::after {
       background: linear-gradient(to bottom right, transparent calc(50% - 1px), #888888 50%, transparent calc(50% + 1px));
     }
-    /* Mobile frame */
+    /* Mobile frame mockup */
     .mobile-frame {
       width: 390px;
       min-height: 844px;
@@ -89,16 +89,16 @@
 </head>
 <body class="p-3 md:p-6 antialiased">
 
-  <!-- TOP BAR CONTROL & PROGRAM MODULE SELECTOR -->
+  <!-- TOP BAR CONTROL & PROGRAM PAGE SELECTOR -->
   <header class="max-w-7xl mx-auto mb-6 bg-white wf-border p-4 rounded-xl shadow-[4px_4px_0px_#111]">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 wf-border-b">
       <div>
         <div class="flex items-center gap-2">
           <span class="px-2 py-0.5 bg-black text-white text-xs font-mono font-bold uppercase rounded">Low-Fidelity Wireframe</span>
-          <span class="text-xs font-mono text-gray-500">B&W · Monokrom · Sesuai Alur Program SILAP</span>
+          <span class="text-xs font-mono text-gray-500">Hitam Putih · Lorem Ipsum · Sesuai File Program PHP</span>
         </div>
         <h1 class="text-2xl font-bold tracking-tight mt-1">Wireframe Program Aplikasi SILAP (Kelurahan Pekayon)</h1>
-        <p class="text-xs text-gray-600 font-mono">Modul: login.php (Autentikasi) · user.php (Mobile Petugas) · admin.php (Command Center)</p>
+        <p class="text-xs text-gray-600 font-mono">Arsitektur Halaman: login.php (Autentikasi) · user.php (Mobile Petugas) · admin.php (Command Center)</p>
       </div>
 
       <!-- Quick Action Buttons -->
@@ -112,16 +112,16 @@
       </div>
     </div>
 
-    <!-- PROGRAM NAVIGATION TABS (Sesuai Struktur Aplikasi Anda) -->
+    <!-- PROGRAM NAVIGATION TABS (Sesuai File Program PHP) -->
     <nav class="flex flex-wrap items-center gap-2 pt-3" id="program-nav">
-      <button onclick="showModule('login')" id="tab-mod-login" class="prog-tab active px-4 py-2 bg-black text-white wf-border rounded-lg text-xs md:text-sm font-bold shadow-[2px_2px_0px_#111] transition-all">
-        1. Modul Login (login.php)
+      <button onclick="showPage('login')" id="tab-page-login" class="page-tab active px-4 py-2 bg-black text-white wf-border rounded-lg text-xs md:text-sm font-bold shadow-[2px_2px_0px_#111] transition-all">
+        📄 1. login.php (Halaman Login & Registrasi)
       </button>
-      <button onclick="showModule('user')" id="tab-mod-user" class="prog-tab px-4 py-2 bg-white text-black hover:bg-gray-100 wf-border rounded-lg text-xs md:text-sm font-bold shadow-[2px_2px_0px_#111] transition-all">
-        2. Modul Petugas Mobile (user.php)
+      <button onclick="showPage('user')" id="tab-page-user" class="page-tab px-4 py-2 bg-white text-black hover:bg-gray-100 wf-border rounded-lg text-xs md:text-sm font-bold shadow-[2px_2px_0px_#111] transition-all">
+        📱 2. user.php (Portal Petugas Lapangan Mobile)
       </button>
-      <button onclick="showModule('admin')" id="tab-mod-admin" class="prog-tab px-4 py-2 bg-white text-black hover:bg-gray-100 wf-border rounded-lg text-xs md:text-sm font-bold shadow-[2px_2px_0px_#111] transition-all">
-        3. Modul Admin Command Center (admin.php)
+      <button onclick="showPage('admin')" id="tab-page-admin" class="page-tab px-4 py-2 bg-white text-black hover:bg-gray-100 wf-border rounded-lg text-xs md:text-sm font-bold shadow-[2px_2px_0px_#111] transition-all">
+        💻 3. admin.php (Admin Command Center Desktop)
       </button>
     </nav>
   </header>
@@ -130,20 +130,20 @@
   <main class="max-w-7xl mx-auto space-y-12">
 
     <!-- =============================================================== -->
-    <!-- 1. MODUL LOGIN (login.php)                                      -->
+    <!-- HALAMAN 1: login.php (Autentikasi & Registrasi Akun)             -->
     <!-- =============================================================== -->
-    <section id="mod-section-login" class="prog-section bg-white wf-border p-6 rounded-2xl shadow-[6px_6px_0px_#111]">
+    <section id="page-section-login" class="page-section bg-white wf-border p-6 rounded-2xl shadow-[6px_6px_0px_#111]">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 wf-border-b gap-3">
         <div>
-          <span class="text-xs font-mono font-bold uppercase text-gray-500">File Halaman: login.php</span>
-          <h2 class="text-xl font-bold">1. Halaman Login & Multi-Role RBAC</h2>
+          <span class="text-xs font-mono font-bold uppercase text-gray-500">File Program: login.php</span>
+          <h2 class="text-xl font-bold">1. Halaman Autentikasi Dinamis (login.php)</h2>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="setAuthRole('petugas')" id="btn-wf-role-petugas" class="px-3 py-1 bg-black text-white text-xs font-bold rounded wf-border">
             Role Petugas PPSU
           </button>
           <button onclick="setAuthRole('admin')" id="btn-wf-role-admin" class="px-3 py-1 bg-white text-black text-xs font-bold rounded wf-border">
-            Role Admin Kelurahan
+            Role Administrator
           </button>
           <button onclick="toggleRegisterModal(true)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-xs font-bold rounded wf-border">
             + Form Registrasi
@@ -152,52 +152,75 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-5xl mx-auto py-6">
-        <!-- Hero Wireframe Card (Left) -->
+        <!-- Briefing Panel (Left Side Sesuai login.php) -->
         <div class="lg:col-span-5 space-y-4">
-          <div class="w-20 h-20 bg-gray-100 wf-border wf-cross rounded-xl flex items-center justify-center relative">
-            <span class="bg-white px-2 py-0.5 text-[10px] font-mono font-bold wf-border z-10">[LOGO SILAP]</span>
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 bg-gray-100 wf-border wf-cross rounded-xl flex items-center justify-center relative">
+              <span class="bg-white px-1.5 text-[8px] font-mono font-bold wf-border z-10">[LOGO]</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-black uppercase tracking-tight">SILAP PPSU</h3>
+              <p class="text-xs font-mono text-gray-500">Sistem Laporan PPSU • Pekayon</p>
+            </div>
           </div>
 
-          <div>
-            <h3 class="text-2xl font-black uppercase tracking-tight">SILAP - PEKAYON</h3>
-            <p class="text-xs font-mono text-gray-500 uppercase mt-0.5">Sistem Informasi Laporan Pekerjaan PPSU</p>
-          </div>
-
-          <div class="p-4 bg-gray-50 wf-border rounded-xl space-y-2 text-xs font-mono text-gray-700">
-            <p><strong>[FITUR HALAMAN LOGIN]</strong></p>
-            <p>• <strong>Petugas Lapangan:</strong> Masuk menggunakan NIK 16 digit terdaftar menuju <code>user.php</code>.</p>
-            <p>• <strong>Administrator:</strong> Masuk menggunakan Username / NIP menuju <code>admin.php</code>.</p>
-            <p>• Validasi keamanan sesi login, opsi 'Ingat Sesi', dan pemulihan kata sandi.</p>
+          <!-- Human-friendly Briefing Checklist Box Sesuai login.php -->
+          <div class="p-4 bg-gray-50 wf-border rounded-xl space-y-3 text-xs font-mono text-gray-800">
+            <div class="flex items-center gap-1.5 pb-2 border-b border-gray-200">
+              <span class="px-2 py-0.5 bg-black text-white text-[9px] font-bold rounded">PANDUAN LAPORAN REGU</span>
+            </div>
+            <p class="font-bold">Hal Penting Sebelum Kirim Laporan:</p>
+            <div class="space-y-1.5 text-[11px] text-gray-700">
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-black text-white text-[9px] flex items-center justify-center shrink-0">1</span>
+                <div><strong>Nomor Pekerjaan:</strong> Tugas 1 s/d 5 berurutan</div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-black text-white text-[9px] flex items-center justify-center shrink-0">2</span>
+                <div><strong>Waktu & Tanggal:</strong> Otomatis tercatat riil</div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-black text-white text-[9px] flex items-center justify-center shrink-0">3</span>
+                <div><strong>Jenis Pekerjaan:</strong> Sapu jalan, got, taman, pohon</div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-black text-white text-[9px] flex items-center justify-center shrink-0">4</span>
+                <div><strong>Lokasi RT/RW:</strong> RW 01 - 11 Pekayon & titik GPS</div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-black text-white text-[9px] flex items-center justify-center shrink-0">5</span>
+                <div><strong>3 Foto Progres:</strong> 0% Sebelum, 50% Proses, 100% Selesai</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Form Login Wireframe Card (Right) -->
+        <!-- Form Login Card (Right Side Sesuai login.php) -->
         <div class="lg:col-span-7 bg-white wf-border p-6 sm:p-8 rounded-2xl shadow-[4px_4px_0px_#111]">
           <div class="flex items-center justify-between mb-6 pb-3 wf-border-b">
             <div>
               <span class="text-[11px] font-mono font-bold uppercase text-gray-500" id="wf-auth-subtitle">Masuk Portal Petugas Lapangan</span>
-              <h4 class="text-lg font-bold" id="wf-auth-title">Autentikasi Pengguna</h4>
+              <h4 class="text-lg font-bold" id="wf-auth-title">Autentikasi Akun</h4>
             </div>
             <div class="px-2 py-1 bg-gray-100 wf-border text-[10px] font-mono font-bold rounded" id="wf-badge-role">
-              ROLE: PETUGAS PPSU
+              ROLE: PETUGAS
             </div>
           </div>
 
-          <form onsubmit="event.preventDefault(); alert('[Low-Fi Wireframe] Simulasi berhasil masuk ke sistem!');" class="space-y-4">
+          <form onsubmit="event.preventDefault(); alert('[Wireframe] Simulasi berhasil masuk!');" class="space-y-4">
             <div>
               <label class="block text-xs font-bold uppercase font-mono mb-1" id="wf-lbl-user">
-                Lorem NIK Petugas (16 Digit) *
+                Username / Nomor Telepon / NIK *
               </label>
               <div class="relative">
-                <input type="text" id="wf-input-user" value="3175080101900001" placeholder="Masukkan NIK petugas..." class="w-full px-3 py-2.5 bg-gray-50 wf-border rounded-lg text-sm font-mono focus:outline-none focus:bg-white">
+                <input type="text" id="wf-input-user" value="3175080101900001" placeholder="Masukkan NIK atau No HP..." class="w-full px-3 py-2.5 bg-gray-50 wf-border rounded-lg text-sm font-mono focus:outline-none focus:bg-white">
                 <span class="absolute right-3 top-2.5 text-xs text-gray-400 font-mono">[ID]</span>
               </div>
-              <p class="text-[10px] text-gray-500 font-mono mt-1">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
             </div>
 
             <div>
               <label class="block text-xs font-bold uppercase font-mono mb-1">
-                Lorem Kata Sandi (Password) *
+                Kata Sandi (Password) *
               </label>
               <div class="relative">
                 <input type="password" value="secret123" placeholder="••••••••••••" class="w-full px-3 py-2.5 bg-gray-50 wf-border rounded-lg text-sm font-mono focus:outline-none focus:bg-white">
@@ -208,7 +231,7 @@
             <div class="flex items-center justify-between text-xs font-mono pt-1">
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked class="w-4 h-4 accent-black">
-                <span>Lorem ingat sesi saya</span>
+                <span>Ingat sesi saya di perangkat ini</span>
               </label>
               <a href="#" class="underline text-gray-600 hover:text-black">Lupa sandi?</a>
             </div>
@@ -219,7 +242,7 @@
 
             <div class="text-center pt-2 text-xs font-mono text-gray-500">
               <span>Belum memiliki akun regu? </span>
-              <a href="javascript:void(0)" onclick="toggleRegisterModal(true)" class="underline font-bold text-black">Daftar Akun Petugas</a>
+              <a href="javascript:void(0)" onclick="toggleRegisterModal(true)" class="underline font-bold text-black">Daftar Akun Baru</a>
             </div>
           </form>
         </div>
@@ -230,15 +253,15 @@
         <div class="bg-white wf-border rounded-2xl max-w-lg w-full p-6 shadow-[8px_8px_0px_#111]">
           <div class="flex items-center justify-between pb-3 mb-4 wf-border-b">
             <div>
-              <span class="text-[10px] font-mono uppercase text-gray-500">[FORM WIREFRAME]</span>
-              <h4 class="text-base font-bold">Registrasi Personel Petugas Baru</h4>
+              <span class="text-[10px] font-mono uppercase text-gray-500">[FORM REGISTRASI]</span>
+              <h4 class="text-base font-bold">Pendaftaran Personel Petugas Baru</h4>
             </div>
             <button onclick="toggleRegisterModal(false)" class="w-7 h-7 bg-gray-100 hover:bg-gray-200 wf-border rounded font-bold text-xs">✕</button>
           </div>
           <div class="space-y-3 text-xs font-mono">
             <div>
               <label class="block font-bold mb-1">Nama Lengkap Petugas *</label>
-              <input type="text" placeholder="Lorem ipsum nama lengkap..." class="w-full p-2 bg-gray-50 wf-border rounded">
+              <input type="text" placeholder="Contoh: Ahmad Suryadi" class="w-full p-2 bg-gray-50 wf-border rounded">
             </div>
             <div>
               <label class="block font-bold mb-1">NIK Petugas (16 Digit) *</label>
@@ -247,7 +270,6 @@
             <div>
               <label class="block font-bold mb-1">Penempatan Regu / Sektor *</label>
               <select class="w-full p-2 bg-gray-50 wf-border rounded">
-                <option>-- Pilih Regu PPSU --</option>
                 <option>Regu A - Sektor Kalisari / RW 01 - RW 03</option>
                 <option>Regu B - Sektor Tipar / RW 04 - RW 06</option>
                 <option selected>Regu C - Sektor Madrasah / RW 07 - RW 09</option>
@@ -256,7 +278,7 @@
             </div>
             <div>
               <label class="block font-bold mb-1">Nomor WhatsApp Aktif *</label>
-              <input type="text" placeholder="08xxxxxxxxxx" class="w-full p-2 bg-gray-50 wf-border rounded">
+              <input type="text" placeholder="081288990011" class="w-full p-2 bg-gray-50 wf-border rounded">
             </div>
             <div class="pt-2 flex items-center justify-end gap-2">
               <button onclick="toggleRegisterModal(false)" class="px-4 py-2 bg-white wf-border rounded font-bold">Batal</button>
@@ -268,15 +290,15 @@
     </section>
 
     <!-- =============================================================== -->
-    <!-- 2. MODUL USER / PETUGAS MOBILE (user.php)                       -->
+    <!-- HALAMAN 2: user.php (Portal Petugas Lapangan Mobile)             -->
     <!-- =============================================================== -->
-    <section id="mod-section-user" class="prog-section bg-white wf-border p-6 rounded-2xl shadow-[6px_6px_0px_#111]">
+    <section id="page-section-user" class="page-section bg-white wf-border p-6 rounded-2xl shadow-[6px_6px_0px_#111]">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 wf-border-b gap-3">
         <div>
-          <span class="text-xs font-mono font-bold uppercase text-gray-500">File Halaman: user.php (views/user/form_lapor.php & riwayat.php)</span>
-          <h2 class="text-xl font-bold">2. Portal Petugas Lapangan Mobile (PPSU)</h2>
+          <span class="text-xs font-mono font-bold uppercase text-gray-500">File Program: user.php (views/user/form_lapor.php & riwayat.php)</span>
+          <h2 class="text-xl font-bold">2. Portal Petugas Lapangan Mobile (user.php)</h2>
         </div>
-        <!-- Toggle User Tabs (Form vs Riwayat) -->
+        <!-- Toggle User Tabs (Form Lapor vs Riwayat Log) -->
         <div class="flex items-center gap-2">
           <button onclick="switchUserMobileTab('form')" id="btn-wf-user-tab-form" class="px-3 py-1 bg-black text-white text-xs font-bold rounded wf-border">
             Tab Input Laporan
@@ -308,111 +330,134 @@
         <div class="notch"></div>
         <div class="home-indicator"></div>
 
-        <!-- Phone Top Bar -->
-        <div class="pt-8 px-4 pb-3 bg-white wf-border-b flex items-center justify-between">
+        <!-- Phone Top Bar (Sesuai views/user/header.php) -->
+        <div class="pt-8 px-4 pb-2 bg-white wf-border-b flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-6 h-6 bg-gray-100 wf-border wf-cross rounded"></div>
             <div>
-              <h5 class="text-xs font-bold uppercase leading-none">SILAP Mobile</h5>
-              <span class="text-[9px] font-mono text-gray-500">Regu C · RW 07 Pekayon</span>
+              <h5 class="text-xs font-bold uppercase leading-none">SILAP PPSU</h5>
+              <span class="text-[9px] font-mono text-gray-500">Ahmad Suryadi · Petugas Lapangan</span>
             </div>
           </div>
-          <div class="text-[10px] font-mono font-bold bg-gray-100 px-2 py-0.5 rounded wf-border">
-            09:49 WIB
+          <div class="flex items-center gap-1">
+            <span class="text-[9px] font-mono font-bold bg-gray-100 px-1.5 py-0.5 rounded wf-border">● Online</span>
+            <span class="text-[9px] font-mono text-gray-500">[Keluar]</span>
+          </div>
+        </div>
+
+        <!-- Hero Officer Banner & Dock (Sesuai views/user/header.php) -->
+        <div class="p-3 bg-gray-50 wf-border-b space-y-2 text-xs font-mono">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-gray-600">Selamat Bertugas</span>
+            <span class="px-2 py-0.5 bg-black text-white text-[9px] font-bold rounded">REGU C • KETUA REGU</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-black text-white font-bold flex items-center justify-center text-xs">AS</div>
+            <div>
+              <div class="font-bold text-[11px]">Ahmad Suryadi</div>
+              <div class="text-[9px] text-gray-500">0812-8899-0011 • Kel. Pekayon, Jakarta Timur</div>
+            </div>
+          </div>
+          <!-- Clean White Shift Summary Dock -->
+          <div class="grid grid-cols-4 gap-1 p-1.5 bg-white wf-border rounded text-[9px] text-center">
+            <div><span class="text-gray-400 block">Regu</span><strong>Regu C</strong></div>
+            <div><span class="text-gray-400 block">Wilayah</span><strong>RW 07</strong></div>
+            <div><span class="text-gray-400 block">GPS</span><strong>● Aktif</strong></div>
+            <div><span class="text-gray-400 block">Waktu</span><strong>09:49 WIB</strong></div>
           </div>
         </div>
 
         <!-- USER SEGMENTED TABS (Sesuai views/user/tabs.php) -->
-        <div class="p-2.5 bg-gray-100 wf-border-b flex gap-2">
-          <button onclick="switchUserMobileTab('form')" id="pill-user-tab-form" class="flex-1 py-1.5 bg-black text-white text-[11px] font-bold rounded wf-border text-center">
+        <div class="p-2 bg-gray-100 wf-border-b flex gap-1.5">
+          <button onclick="switchUserMobileTab('form')" id="pill-user-tab-form" class="flex-1 py-1 bg-black text-white text-[10px] font-bold rounded wf-border text-center">
             ✍️ Input Laporan
           </button>
-          <button onclick="switchUserMobileTab('history')" id="pill-user-tab-hist" class="flex-1 py-1.5 bg-white text-black text-[11px] font-bold rounded wf-border text-center">
+          <button onclick="switchUserMobileTab('history')" id="pill-user-tab-hist" class="flex-1 py-1 bg-white text-black text-[10px] font-bold rounded wf-border text-center">
             📋 Riwayat Log (3)
           </button>
         </div>
 
         <!-- SCROLLABLE MOBILE BODY -->
-        <div class="p-4 space-y-4 text-xs font-mono max-h-[620px] overflow-y-auto pb-16">
+        <div class="p-4 space-y-4 text-xs font-mono max-h-[580px] overflow-y-auto pb-16">
 
-          <!-- ==================== VIEW 1: FORM LAPOR ==================== -->
+          <!-- ==================== VIEW 1: FORM INPUT LAPORAN (views/user/form_lapor.php) ==================== -->
           <div id="wf-user-view-form" class="space-y-4">
             
             <!-- STEPPER INDICATOR (Tahap 1 Info & Lokasi vs Tahap 2 Progres & Foto) -->
-            <div class="p-2.5 bg-gray-50 wf-border rounded-lg flex items-center justify-between">
-              <div class="flex items-center gap-1.5 cursor-pointer" onclick="setWfStep(1)">
-                <span class="w-5 h-5 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center" id="wf-num-step-1">1</span>
-                <span class="font-bold text-[11px]" id="wf-txt-step-1">Info & Lokasi</span>
+            <div class="p-2 bg-gray-50 wf-border rounded-lg flex items-center justify-between">
+              <div class="flex items-center gap-1 cursor-pointer" onclick="setWfStep(1)">
+                <span class="w-4 h-4 rounded-full bg-black text-white text-[9px] font-bold flex items-center justify-center" id="wf-num-step-1">1</span>
+                <span class="font-bold text-[10px]" id="wf-txt-step-1">Info & Lokasi</span>
               </div>
               <div class="flex-1 mx-2 h-0.5 bg-gray-300" id="wf-step-divider"></div>
-              <div class="flex items-center gap-1.5 cursor-pointer" onclick="setWfStep(2)">
-                <span class="w-5 h-5 rounded-full bg-gray-200 text-gray-700 text-[10px] font-bold flex items-center justify-center wf-border" id="wf-num-step-2">2</span>
-                <span class="text-gray-500 text-[11px]" id="wf-txt-step-2">Progres & Foto</span>
+              <div class="flex items-center gap-1 cursor-pointer" onclick="setWfStep(2)">
+                <span class="w-4 h-4 rounded-full bg-gray-200 text-gray-700 text-[9px] font-bold flex items-center justify-center wf-border" id="wf-num-step-2">2</span>
+                <span class="text-gray-500 text-[10px]" id="wf-txt-step-2">Progres & Foto</span>
               </div>
             </div>
 
             <!-- SUB-STEP 1: INFO & LOKASI -->
-            <div id="wf-sub-step-1" class="space-y-4">
+            <div id="wf-sub-step-1" class="space-y-3">
               <!-- Tanggal Kerja -->
-              <div class="p-2.5 bg-gray-50 wf-border rounded-lg flex items-center justify-between">
+              <div class="p-2 bg-gray-50 wf-border rounded-lg flex items-center justify-between">
                 <div>
-                  <span class="text-[9px] uppercase text-gray-500 block">Jadwal Tugas Hari Ini</span>
-                  <span class="font-bold text-[11px]">Selasa, 17 November 2026</span>
+                  <span class="text-[8px] uppercase text-gray-500 block">Jadwal Tugas Hari Ini</span>
+                  <span class="font-bold text-[10px]">Selasa, 17 November 2026</span>
                 </div>
-                <span class="px-2 py-0.5 bg-white wf-border text-[9px] font-bold rounded">Otomatis</span>
+                <span class="px-1.5 py-0.5 bg-white wf-border text-[8px] font-bold rounded">Otomatis</span>
               </div>
 
               <!-- Target Penugasan 5 Tugas (Fitur Anti-Skip) -->
               <div>
-                <div class="flex items-center justify-between mb-1.5">
-                  <span class="font-bold text-[10px] uppercase">Target Penugasan Harian</span>
-                  <span class="text-[9px] text-gray-500">Tugas 3 dari 5</span>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-bold text-[9px] uppercase">Target Tugas Harian</span>
+                  <span class="text-[8px] text-gray-500">Tugas 3 dari 5</span>
                 </div>
-                <div class="grid grid-cols-5 gap-1 text-[10px] text-center">
-                  <div class="p-1.5 bg-gray-200 wf-border rounded font-bold">✓ T1</div>
-                  <div class="p-1.5 bg-gray-200 wf-border rounded font-bold">✓ T2</div>
-                  <div class="p-1.5 bg-black text-white wf-border rounded font-bold">● T3</div>
-                  <div class="p-1.5 bg-gray-100 text-gray-400 wf-border rounded">🔒 T4</div>
-                  <div class="p-1.5 bg-gray-100 text-gray-400 wf-border rounded">🔒 T5</div>
+                <div class="grid grid-cols-5 gap-1 text-[9px] text-center">
+                  <div class="p-1 bg-gray-200 wf-border rounded font-bold">✓ T1</div>
+                  <div class="p-1 bg-gray-200 wf-border rounded font-bold">✓ T2</div>
+                  <div class="p-1 bg-black text-white wf-border rounded font-bold">● T3</div>
+                  <div class="p-1 bg-gray-100 text-gray-400 wf-border rounded">🔒 T4</div>
+                  <div class="p-1 bg-gray-100 text-gray-400 wf-border rounded">🔒 T5</div>
                 </div>
               </div>
 
               <!-- Jenis Pekerjaan Lapangan (5 Kategori) -->
-              <div class="space-y-1.5">
-                <span class="font-bold text-[10px] uppercase block">Jenis Pekerjaan Lapangan *</span>
+              <div class="space-y-1">
+                <span class="font-bold text-[9px] uppercase block">Jenis Pekerjaan Lapangan *</span>
                 
-                <label class="p-2 bg-gray-50 wf-border rounded flex items-center justify-between cursor-pointer">
-                  <div class="flex items-center gap-2">
-                    <span class="w-3.5 h-3.5 rounded-full bg-black flex items-center justify-center text-white text-[8px]">●</span>
-                    <span class="font-bold text-[11px]">Pembersihan Jalan & Trotoar</span>
+                <label class="p-1.5 bg-gray-50 wf-border rounded flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-full bg-black flex items-center justify-center text-white text-[7px]">●</span>
+                    <span class="font-bold text-[10px]">Pembersihan Jalan & Trotoar</span>
                   </div>
-                  <span class="text-[9px] text-gray-500">[ICON]</span>
+                  <span class="text-[8px] text-gray-500">[ICON]</span>
                 </label>
 
-                <label class="p-2 bg-white wf-border rounded flex items-center justify-between cursor-pointer text-gray-600">
-                  <div class="flex items-center gap-2">
-                    <span class="w-3.5 h-3.5 rounded-full border border-gray-400"></span>
-                    <span class="text-[11px]">Pembersihan Saluran Air & Got</span>
+                <label class="p-1.5 bg-white wf-border rounded flex items-center justify-between cursor-pointer text-gray-600">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-full border border-gray-400"></span>
+                    <span class="text-[10px]">Pembersihan Saluran Air & Got</span>
                   </div>
-                  <span class="text-[9px] text-gray-400">[ICON]</span>
+                  <span class="text-[8px] text-gray-400">[ICON]</span>
                 </label>
 
-                <label class="p-2 bg-white wf-border rounded flex items-center justify-between cursor-pointer text-gray-600">
-                  <div class="flex items-center gap-2">
-                    <span class="w-3.5 h-3.5 rounded-full border border-gray-400"></span>
-                    <span class="text-[11px]">Perawatan Taman & Jalur Hijau</span>
+                <label class="p-1.5 bg-white wf-border rounded flex items-center justify-between cursor-pointer text-gray-600">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-full border border-gray-400"></span>
+                    <span class="text-[10px]">Perawatan Taman & Jalur Hijau</span>
                   </div>
-                  <span class="text-[9px] text-gray-400">[ICON]</span>
+                  <span class="text-[8px] text-gray-400">[ICON]</span>
                 </label>
               </div>
 
               <!-- Lokasi Pengerjaan (Manual Input) -->
-              <div class="space-y-2 pt-1">
-                <span class="font-bold text-[10px] uppercase block">Lokasi & Titik Lapangan (Input Manual)</span>
+              <div class="space-y-1.5 pt-1">
+                <span class="font-bold text-[9px] uppercase block">Lokasi & Titik Lapangan (Input Manual)</span>
 
                 <div>
-                  <label class="text-[10px] text-gray-600 block mb-0.5">Wilayah RW (Pekayon) *</label>
-                  <select class="w-full p-2 bg-gray-50 wf-border rounded text-[11px]">
+                  <label class="text-[9px] text-gray-600 block">Wilayah RW (Pekayon) *</label>
+                  <select class="w-full p-1.5 bg-gray-50 wf-border rounded text-[10px]">
                     <option selected>RW 07 - Madrasah</option>
                     <option>RW 01 - Gandaria / Kalisari</option>
                     <option>RW 02 - Tipar</option>
@@ -420,67 +465,61 @@
                 </div>
 
                 <div>
-                  <label class="text-[10px] text-gray-600 block mb-0.5">Nama Jalan / Lokasi *</label>
-                  <input type="text" value="Jl. Madrasah No. 5" class="w-full p-2 bg-gray-50 wf-border rounded text-[11px]">
+                  <label class="text-[9px] text-gray-600 block">Nama Jalan / Lokasi *</label>
+                  <input type="text" value="Jl. Madrasah No. 5" class="w-full p-1.5 bg-gray-50 wf-border rounded text-[10px]">
                 </div>
 
                 <div>
-                  <label class="text-[10px] text-gray-600 block mb-0.5">Patokan Lokasi *</label>
-                  <input type="text" value="Trotoar samping pos kamling RW 07" class="w-full p-2 bg-gray-50 wf-border rounded text-[11px]">
+                  <label class="text-[9px] text-gray-600 block">Patokan Lokasi *</label>
+                  <input type="text" value="Trotoar samping pos kamling RW 07" class="w-full p-1.5 bg-gray-50 wf-border rounded text-[10px]">
                 </div>
               </div>
 
               <!-- Profil Pelapor (Auto-fill dari sesi) -->
-              <div class="p-2.5 bg-gray-50 wf-border rounded-lg space-y-1.5">
-                <span class="text-[10px] font-bold uppercase block text-gray-600">Personel & Penanggung Jawab (Otomatis)</span>
-                <div class="grid grid-cols-2 gap-2 text-[10px]">
-                  <div>
-                    <span class="text-gray-500 block">Pelapor / Ketua</span>
-                    <span class="font-bold">Ahmad Suryadi</span>
-                  </div>
-                  <div>
-                    <span class="text-gray-500 block">No. WhatsApp</span>
-                    <span class="font-bold">0812-8899-0011</span>
-                  </div>
+              <div class="p-2 bg-gray-50 wf-border rounded-lg space-y-1">
+                <span class="text-[9px] font-bold uppercase block text-gray-600">Personel & Kontak (Otomatis dari Sesi)</span>
+                <div class="grid grid-cols-2 gap-1 text-[9px]">
+                  <div><span class="text-gray-500 block">Pelapor / Ketua:</span><strong>Ahmad Suryadi</strong></div>
+                  <div><span class="text-gray-500 block">No. WhatsApp:</span><strong>0812-8899-0011</strong></div>
                 </div>
-                <div class="pt-1 text-[10px] text-gray-500 border-t border-gray-200">
-                  <span>Absensi Regu: <strong>4 Orang Hadir</strong> (Budi, Ahmad, Andi, Dedi)</span>
+                <div class="pt-1 text-[9px] text-gray-500 border-t border-gray-200">
+                  <span>Absensi: <strong>4 Orang Hadir</strong> (Budi, Ahmad, Andi, Dedi)</span>
                 </div>
               </div>
 
               <!-- Mini-Map GPS Lapangan -->
               <div class="space-y-1">
-                <div class="flex items-center justify-between text-[10px]">
+                <div class="flex items-center justify-between text-[9px]">
                   <span class="font-bold uppercase">Koordinat GPS Titik Kerja</span>
                   <span class="text-gray-500">Akurat ±6m</span>
                 </div>
-                <div class="h-28 bg-gray-100 wf-border wf-cross rounded-lg flex flex-col items-center justify-center p-2 relative">
-                  <span class="bg-white px-2 py-0.5 text-[9px] font-mono font-bold wf-border z-10">[X - MINI MAP GPS LEAFLET]</span>
-                  <span class="bg-white/90 px-1 text-[8px] font-mono z-10 mt-1">Lat: -6.360678, Long: +106.875347</span>
+                <div class="h-24 bg-gray-100 wf-border wf-cross rounded-lg flex flex-col items-center justify-center p-2 relative">
+                  <span class="bg-white px-2 py-0.5 text-[8px] font-mono font-bold wf-border z-10">[X - MINI MAP GPS LEAFLET]</span>
+                  <span class="bg-white/90 px-1 text-[7px] font-mono z-10 mt-1">Lat: -6.360678, Long: +106.875347</span>
                 </div>
                 <div class="text-center">
-                  <span class="text-[9px] bg-gray-100 px-2 py-0.5 rounded wf-border">🔒 Pin GPS terkunci otomatis</span>
+                  <span class="text-[8px] bg-gray-100 px-2 py-0.5 rounded wf-border">🔒 Pin GPS terkunci otomatis</span>
                 </div>
               </div>
 
               <!-- Lanjut ke Tahap 2 -->
-              <button onclick="setWfStep(2)" class="w-full py-2.5 bg-black hover:bg-gray-800 text-white font-bold text-xs uppercase rounded-xl wf-border shadow-[2px_2px_0px_#666]">
+              <button onclick="setWfStep(2)" class="w-full py-2 bg-black hover:bg-gray-800 text-white font-bold text-xs uppercase rounded-xl wf-border shadow-[2px_2px_0px_#666]">
                 [ Lanjut ke Foto Dokumentasi (Tahap 2) ➔ ]
               </button>
             </div>
 
             <!-- SUB-STEP 2: PROGRES & FOTO DOKUMENTASI -->
-            <div id="wf-sub-step-2" class="hidden space-y-4">
+            <div id="wf-sub-step-2" class="hidden space-y-3">
               <!-- Slider Progres -->
-              <div class="p-3 bg-gray-50 wf-border rounded-xl space-y-2">
+              <div class="p-2.5 bg-gray-50 wf-border rounded-xl space-y-1.5">
                 <div class="flex items-center justify-between">
-                  <span class="font-bold text-[10px] uppercase">Persentase Penyelesaian</span>
-                  <span class="px-2 py-0.5 bg-black text-white rounded text-[10px] font-bold" id="wf-progres-badge">50% Proses</span>
+                  <span class="font-bold text-[9px] uppercase">Persentase Penyelesaian</span>
+                  <span class="px-1.5 py-0.5 bg-black text-white rounded text-[9px] font-bold" id="wf-progres-badge">50% Proses</span>
                 </div>
-                <div class="relative w-full h-3 bg-gray-200 wf-border rounded-full overflow-hidden">
+                <div class="relative w-full h-2.5 bg-gray-200 wf-border rounded-full overflow-hidden">
                   <div class="h-full bg-black w-1/2" id="wf-progres-bar"></div>
                 </div>
-                <div class="flex justify-between text-[9px] text-gray-500 font-mono">
+                <div class="flex justify-between text-[8px] text-gray-500 font-mono">
                   <span>0% Mulai</span>
                   <span>50% Proses</span>
                   <span>100% Selesai</span>
@@ -488,51 +527,51 @@
               </div>
 
               <!-- 3 Slot Foto Dokumentasi Bertahap -->
-              <div class="space-y-1.5">
-                <span class="font-bold text-[10px] uppercase block">Dokumentasi Foto Lapangan (Stempel GPS)</span>
+              <div class="space-y-1">
+                <span class="font-bold text-[9px] uppercase block">Dokumentasi Foto Lapangan (Stempel GPS)</span>
                 
-                <div class="grid grid-cols-3 gap-2">
-                  <!-- Foto 0% (Selesai diambil) -->
-                  <div class="bg-gray-50 wf-border rounded-lg p-1.5 text-center flex flex-col justify-between h-32 relative">
-                    <div class="h-16 bg-gray-200 wf-border wf-cross rounded flex items-center justify-center relative">
+                <div class="grid grid-cols-3 gap-1.5">
+                  <!-- Foto 0% -->
+                  <div class="bg-gray-50 wf-border rounded-lg p-1 text-center flex flex-col justify-between h-28 relative">
+                    <div class="h-14 bg-gray-200 wf-border wf-cross rounded flex items-center justify-center relative">
                       <span class="bg-black text-white text-[7px] font-bold px-1 z-10">0% OK</span>
                     </div>
-                    <div class="text-[8px] font-bold mt-1">1. Sebelum (0%)</div>
-                    <span class="text-[7px] text-gray-500">17 Nov, 08:16</span>
+                    <div class="text-[8px] font-bold mt-0.5">1. Sebelum</div>
+                    <span class="text-[7px] text-gray-500">08:16 WIB</span>
                   </div>
 
-                  <!-- Foto 50% (Sedang aktif) -->
-                  <div class="bg-white wf-border-dashed rounded-lg p-1.5 text-center flex flex-col justify-between h-32 relative">
-                    <div class="h-16 bg-gray-100 wf-border wf-cross rounded flex items-center justify-center relative">
+                  <!-- Foto 50% -->
+                  <div class="bg-white wf-border-dashed rounded-lg p-1 text-center flex flex-col justify-between h-28 relative">
+                    <div class="h-14 bg-gray-100 wf-border wf-cross rounded flex items-center justify-center relative">
                       <span class="bg-white text-black wf-border text-[7px] font-bold px-1 z-10">[KAMERA]</span>
                     </div>
-                    <div class="text-[8px] font-bold mt-1">2. Proses (50%)</div>
+                    <div class="text-[8px] font-bold mt-0.5">2. Proses</div>
                     <span class="text-[7px] text-black font-bold">Siap Diambil</span>
                   </div>
 
-                  <!-- Foto 100% (Terkunci) -->
-                  <div class="bg-gray-100 wf-border rounded-lg p-1.5 text-center flex flex-col justify-between h-32 opacity-60">
-                    <div class="h-16 bg-gray-200 rounded flex items-center justify-center">
-                      <span class="text-base">🔒</span>
+                  <!-- Foto 100% -->
+                  <div class="bg-gray-100 wf-border rounded-lg p-1 text-center flex flex-col justify-between h-28 opacity-60">
+                    <div class="h-14 bg-gray-200 rounded flex items-center justify-center">
+                      <span class="text-xs">🔒</span>
                     </div>
-                    <div class="text-[8px] font-bold mt-1">3. Sesudah (100%)</div>
-                    <span class="text-[7px] text-gray-500">Terkunci (Kirim 50%)</span>
+                    <div class="text-[8px] font-bold mt-0.5">3. Sesudah</div>
+                    <span class="text-[7px] text-gray-500">Terkunci</span>
                   </div>
                 </div>
               </div>
 
               <!-- Catatan atau Kendala -->
               <div>
-                <label class="text-[10px] font-bold uppercase block mb-1">Catatan / Kendala Lapangan</label>
-                <textarea rows="3" class="w-full p-2 bg-gray-50 wf-border rounded text-[11px]" placeholder="Lorem ipsum kendala lapangan...">Pembersihan sampah kering dan pengangkutan dedaunan sedang berlangsung.</textarea>
+                <label class="text-[9px] font-bold uppercase block mb-0.5">Catatan / Kendala Lapangan</label>
+                <textarea rows="2" class="w-full p-1.5 bg-gray-50 wf-border rounded text-[10px]" placeholder="Lorem ipsum kendala lapangan...">Pembersihan sampah kering dan pengangkutan dedaunan sedang berlangsung.</textarea>
               </div>
 
               <!-- Action Buttons -->
-              <div class="space-y-2 pt-2">
-                <button onclick="alert('[Wireframe] Progres 50% berhasil dikirim! Slot 100% terbuka.');" class="w-full py-2.5 bg-black hover:bg-gray-800 text-white font-bold text-xs uppercase rounded-xl wf-border shadow-[2px_2px_0px_#666]">
+              <div class="space-y-1.5 pt-1">
+                <button onclick="alert('[Wireframe] Progres 50% berhasil dikirim! Slot 100% terbuka.');" class="w-full py-2 bg-black hover:bg-gray-800 text-white font-bold text-xs uppercase rounded-xl wf-border shadow-[2px_2px_0px_#666]">
                   [ Kirim Progres Lapangan (Progres 50%) ]
                 </button>
-                <button onclick="setWfStep(1)" class="w-full py-2 bg-white hover:bg-gray-100 text-black font-bold text-xs uppercase rounded-xl wf-border">
+                <button onclick="setWfStep(1)" class="w-full py-1.5 bg-white hover:bg-gray-100 text-black font-bold text-xs uppercase rounded-xl wf-border">
                   [ ⮌ Kembali ke Info & Lokasi ]
                 </button>
               </div>
@@ -540,47 +579,47 @@
 
           </div>
 
-          <!-- ==================== VIEW 2: RIWAYAT LAPORAN (views/user/riwayat.php) ==================== -->
+          <!-- ==================== VIEW 2: RIWAYAT LOG LAPORAN (views/user/riwayat.php) ==================== -->
           <div id="wf-user-view-history" class="hidden space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-gray-200">
-              <span class="font-bold text-[11px] uppercase">Riwayat Tugas Hari Ini</span>
-              <span class="text-[10px] text-gray-500">Total: 3 Tugas</span>
+              <span class="font-bold text-[10px] uppercase">Riwayat Tugas Hari Ini</span>
+              <span class="text-[9px] text-gray-500">Total: 3 Tugas</span>
             </div>
 
             <!-- Item Riwayat 1 -->
-            <div class="p-3 bg-gray-50 wf-border rounded-xl space-y-2">
+            <div class="p-2.5 bg-gray-50 wf-border rounded-xl space-y-1.5">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-[11px]">Tugas 1: Sapu Jalan Raya</span>
-                <span class="px-2 py-0.5 bg-black text-white text-[9px] rounded font-bold">100% DISETUJUI</span>
+                <span class="font-bold text-[10px]">Tugas 1: Sapu Jalan Raya</span>
+                <span class="px-1.5 py-0.5 bg-black text-white text-[8px] rounded font-bold">100% DISETUJUI</span>
               </div>
-              <p class="text-[10px] text-gray-600">Jl. Raya Kalisari No. 12 (RW 01) · 08:16 WIB</p>
-              <div class="flex items-center justify-between pt-1 border-t border-gray-200 text-[10px]">
+              <p class="text-[9px] text-gray-600">Jl. Raya Kalisari No. 12 (RW 01) · 08:16 WIB</p>
+              <div class="flex items-center justify-between pt-1 border-t border-gray-200 text-[9px]">
                 <span>3 Foto Lengkap (0%, 50%, 100%)</span>
                 <button onclick="alert('[Wireframe] Modal Detail Laporan Tugas 1');" class="underline font-bold">Lihat Detail</button>
               </div>
             </div>
 
             <!-- Item Riwayat 2 -->
-            <div class="p-3 bg-gray-50 wf-border rounded-xl space-y-2">
+            <div class="p-2.5 bg-gray-50 wf-border rounded-xl space-y-1.5">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-[11px]">Tugas 2: Bersih Saluran Got</span>
-                <span class="px-2 py-0.5 bg-black text-white text-[9px] rounded font-bold">100% DISETUJUI</span>
+                <span class="font-bold text-[10px]">Tugas 2: Bersih Saluran Got</span>
+                <span class="px-1.5 py-0.5 bg-black text-white text-[8px] rounded font-bold">100% DISETUJUI</span>
               </div>
-              <p class="text-[10px] text-gray-600">Jl. Belly No. 4 (RW 03) · 09:05 WIB</p>
-              <div class="flex items-center justify-between pt-1 border-t border-gray-200 text-[10px]">
+              <p class="text-[9px] text-gray-600">Jl. Belly No. 4 (RW 03) · 09:05 WIB</p>
+              <div class="flex items-center justify-between pt-1 border-t border-gray-200 text-[9px]">
                 <span>3 Foto Lengkap (0%, 50%, 100%)</span>
                 <button onclick="alert('[Wireframe] Modal Detail Laporan Tugas 2');" class="underline font-bold">Lihat Detail</button>
               </div>
             </div>
 
             <!-- Item Riwayat 3 (Aktif) -->
-            <div class="p-3 bg-white wf-border rounded-xl space-y-2 shadow-[2px_2px_0px_#111]">
+            <div class="p-2.5 bg-white wf-border rounded-xl space-y-1.5 shadow-[2px_2px_0px_#111]">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-[11px]">Tugas 3: Trotoar Madrasah</span>
-                <span class="px-2 py-0.5 bg-gray-200 text-black text-[9px] rounded font-bold">50% PROSES</span>
+                <span class="font-bold text-[10px]">Tugas 3: Trotoar Madrasah</span>
+                <span class="px-1.5 py-0.5 bg-gray-200 text-black text-[8px] rounded font-bold">50% PROSES</span>
               </div>
-              <p class="text-[10px] text-gray-600">Jl. Madrasah No. 5 (RW 07) · 09:49 WIB</p>
-              <div class="flex items-center justify-between pt-1 border-t border-gray-200 text-[10px]">
+              <p class="text-[9px] text-gray-600">Jl. Madrasah No. 5 (RW 07) · 09:49 WIB</p>
+              <div class="flex items-center justify-between pt-1 border-t border-gray-200 text-[9px]">
                 <span>Foto 0% & 50% Tersimpan</span>
                 <button onclick="switchUserMobileTab('form'); setWfStep(2);" class="underline font-bold">Lanjutkan</button>
               </div>
@@ -592,15 +631,15 @@
     </section>
 
     <!-- =============================================================== -->
-    <!-- 3. MODUL ADMIN COMMAND CENTER (admin.php)                       -->
+    <!-- HALAMAN 3: admin.php (Admin Command Center Desktop)             -->
     <!-- =============================================================== -->
-    <section id="mod-section-admin" class="prog-section bg-white wf-border p-6 rounded-2xl shadow-[6px_6px_0px_#111]">
+    <section id="page-section-admin" class="page-section bg-white wf-border p-6 rounded-2xl shadow-[6px_6px_0px_#111]">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 wf-border-b gap-3">
         <div>
-          <span class="text-xs font-mono font-bold uppercase text-gray-500">File Halaman: admin.php (7 Menu Sidebar Program)</span>
-          <h2 class="text-xl font-bold">3. Admin Command Center (Desktop Web)</h2>
+          <span class="text-xs font-mono font-bold uppercase text-gray-500">File Program: admin.php (7 Menu Sidebar SILAP)</span>
+          <h2 class="text-xl font-bold">3. Admin Command Center (admin.php)</h2>
         </div>
-        <!-- Toggle Admin Sub-Views Sesuai Sidebar Program -->
+        <!-- Toggle Admin Sub-Views Sesuai 7 Menu Sidebar admin.php -->
         <div class="flex flex-wrap items-center gap-1.5">
           <button onclick="switchAdminSubView('dashboard')" id="btn-wf-adm-dash" class="px-3 py-1 bg-black text-white text-xs font-bold rounded wf-border">
             1. Dashboard & GIS
@@ -640,7 +679,7 @@
           </div>
         </div>
 
-        <!-- ==================== SUB-VIEW A: DASHBOARD & GIS ==================== -->
+        <!-- ==================== SUB-VIEW A: DASHBOARD & GIS (views/admin/dashboard.php) ==================== -->
         <div id="wf-adm-view-dashboard" class="space-y-6">
           <!-- 4 KPI Metrics Wireframe -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -923,29 +962,29 @@
   </main>
 
   <footer class="max-w-7xl mx-auto mt-12 py-6 text-center text-xs font-mono text-gray-500 wf-border-t">
-    <span>SILAP Low-Fidelity Wireframes · Sesuai Struktur File Program (login.php · user.php · admin.php) · Kelurahan Pekayon</span>
+    <span>SILAP Low-Fidelity Wireframes · Sesuai Struktur File Program Asli (login.php · user.php · admin.php) · Kelurahan Pekayon</span>
   </footer>
 
   <!-- SCRIPT LOGIKA WIREFRAME -->
   <script>
     let isAllView = false;
 
-    function showModule(mod) {
+    function showPage(page) {
       isAllView = false;
       document.getElementById('btn-toggle-all').innerHTML = '<span>📑</span> Tampilkan Semua Halaman Program';
       
-      document.querySelectorAll('.prog-tab').forEach(tab => {
+      document.querySelectorAll('.page-tab').forEach(tab => {
         tab.classList.remove('bg-black', 'text-white');
         tab.classList.add('bg-white', 'text-black');
       });
-      const activeTab = document.getElementById(`tab-mod-${mod}`);
+      const activeTab = document.getElementById(`tab-page-${page}`);
       if (activeTab) {
         activeTab.classList.remove('bg-white', 'text-black');
         activeTab.classList.add('bg-black', 'text-white');
       }
 
-      document.querySelectorAll('.prog-section').forEach(sec => sec.classList.add('hidden'));
-      const activeSec = document.getElementById(`mod-section-${mod}`);
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+      const activeSec = document.getElementById(`page-section-${page}`);
       if (activeSec) activeSec.classList.remove('hidden');
     }
 
@@ -953,10 +992,10 @@
       isAllView = !isAllView;
       const btn = document.getElementById('btn-toggle-all');
       if (isAllView) {
-        document.querySelectorAll('.prog-section').forEach(sec => sec.classList.remove('hidden'));
+        document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('hidden'));
         btn.innerHTML = '<span>📌</span> Tampilkan Per Halaman Modul Saja';
       } else {
-        showModule('login');
+        showPage('login');
       }
     }
 
@@ -974,14 +1013,14 @@
         btnAdmin.className = 'px-3 py-1 bg-white text-black text-xs font-bold rounded wf-border';
         subtitle.innerText = 'Masuk Portal Petugas Lapangan';
         badge.innerText = 'ROLE: PETUGAS PPSU';
-        lblUser.innerText = 'Lorem NIK Petugas (16 Digit) *';
+        lblUser.innerText = 'Username / Nomor Telepon / NIK *';
         inputUser.value = '3175080101900001';
       } else {
         btnAdmin.className = 'px-3 py-1 bg-black text-white text-xs font-bold rounded wf-border';
         btnPetugas.className = 'px-3 py-1 bg-white text-black text-xs font-bold rounded wf-border';
         subtitle.innerText = 'Masuk Admin Command Center';
         badge.innerText = 'ROLE: ADMINISTRATOR';
-        lblUser.innerText = 'Lorem NIP / Username Administrator *';
+        lblUser.innerText = 'NIP / Username Administrator *';
         inputUser.value = 'admin.pekayon';
       }
     }
@@ -1006,15 +1045,15 @@
         viewHist.classList.add('hidden');
         btnForm.className = 'px-3 py-1 bg-black text-white text-xs font-bold rounded wf-border';
         btnHist.className = 'px-3 py-1 bg-white text-black text-xs font-bold rounded wf-border';
-        pillForm.className = 'flex-1 py-1.5 bg-black text-white text-[11px] font-bold rounded wf-border text-center';
-        pillHist.className = 'flex-1 py-1.5 bg-white text-black text-[11px] font-bold rounded wf-border text-center';
+        pillForm.className = 'flex-1 py-1 bg-black text-white text-[10px] font-bold rounded wf-border text-center';
+        pillHist.className = 'flex-1 py-1 bg-white text-black text-[10px] font-bold rounded wf-border text-center';
       } else {
         viewForm.classList.add('hidden');
         viewHist.classList.remove('hidden');
         btnHist.className = 'px-3 py-1 bg-black text-white text-xs font-bold rounded wf-border';
         btnForm.className = 'px-3 py-1 bg-white text-black text-xs font-bold rounded wf-border';
-        pillHist.className = 'flex-1 py-1.5 bg-black text-white text-[11px] font-bold rounded wf-border text-center';
-        pillForm.className = 'flex-1 py-1.5 bg-white text-black text-[11px] font-bold rounded wf-border text-center';
+        pillHist.className = 'flex-1 py-1 bg-black text-white text-[10px] font-bold rounded wf-border text-center';
+        pillForm.className = 'flex-1 py-1 bg-white text-black text-[10px] font-bold rounded wf-border text-center';
       }
     }
 
@@ -1030,18 +1069,18 @@
       if (step === 1) {
         step1.classList.remove('hidden');
         step2.classList.add('hidden');
-        num1.className = 'w-5 h-5 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center';
-        txt1.className = 'font-bold text-[11px] text-black';
-        num2.className = 'w-5 h-5 rounded-full bg-gray-200 text-gray-700 text-[10px] font-bold flex items-center justify-center wf-border';
-        txt2.className = 'text-gray-500 text-[11px]';
+        num1.className = 'w-4 h-4 rounded-full bg-black text-white text-[9px] font-bold flex items-center justify-center';
+        txt1.className = 'font-bold text-[10px] text-black';
+        num2.className = 'w-4 h-4 rounded-full bg-gray-200 text-gray-700 text-[9px] font-bold flex items-center justify-center wf-border';
+        txt2.className = 'text-gray-500 text-[10px]';
         divider.className = 'flex-1 mx-2 h-0.5 bg-gray-300';
       } else {
         step1.classList.add('hidden');
         step2.classList.remove('hidden');
-        num1.className = 'w-5 h-5 rounded-full bg-gray-200 text-gray-700 text-[10px] font-bold flex items-center justify-center wf-border';
-        txt1.className = 'text-gray-500 text-[11px]';
-        num2.className = 'w-5 h-5 rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center';
-        txt2.className = 'font-bold text-[11px] text-black';
+        num1.className = 'w-4 h-4 rounded-full bg-gray-200 text-gray-700 text-[9px] font-bold flex items-center justify-center wf-border';
+        txt1.className = 'text-gray-500 text-[10px]';
+        num2.className = 'w-4 h-4 rounded-full bg-black text-white text-[9px] font-bold flex items-center justify-center';
+        txt2.className = 'font-bold text-[10px] text-black';
         divider.className = 'flex-1 mx-2 h-0.5 bg-black';
       }
     }
@@ -1068,7 +1107,7 @@
       else modal.classList.add('hidden');
     }
 
-    showModule('login');
+    showPage('login');
   </script>
 </body>
 </html>
