@@ -1209,7 +1209,7 @@ async function syncRealtimeFromBackend() {
         } else {
           for (let i = 0; i < data.reports.length; i++) {
             const s = data.reports[i];
-            const l = local.find(x => x.id === s.id);
+            const l = local.find(x => String(x.id) === String(s.id) || (x.noPekerjaan && s.noPekerjaan && String(x.noPekerjaan) === String(s.noPekerjaan)));
             if (!l || l.progres !== s.progres || l.status !== s.status || l.kendala !== s.kendala || l.judul !== s.judul) {
               changed = true;
               break;
@@ -1219,28 +1219,33 @@ async function syncRealtimeFromBackend() {
 
         if (changed) {
           const map = new Map();
-          data.reports.forEach(r => map.set(r.id, r));
+          data.reports.forEach(r => {
+            map.set(String(r.id), r);
+            if (r.noPekerjaan) map.set(String(r.noPekerjaan), r);
+          });
 
           local.forEach(l => {
-            const s = map.get(l.id);
+            const s = map.get(String(l.id)) || (l.noPekerjaan ? map.get(String(l.noPekerjaan)) : null);
             if (!s) {
-              if (Date.now() - _lastLocalSaveTime < 5000) {
-                map.set(l.id, l);
+              if (Date.now() - _lastLocalSaveTime < 15000) {
+                map.set(String(l.id), l);
               }
             } else {
               const mergedFoto = (s.foto || []).map((sf, idx) => {
                 const lf = l.foto && l.foto[idx];
                 return {
                   ...sf,
-                  src: sf.src || (lf ? lf.src : ""),
-                  timestamp: sf.timestamp || (lf ? lf.timestamp : "")
+                  src: (lf && lf.src) ? lf.src : (sf.src || ""),
+                  timestamp: (lf && lf.timestamp) ? lf.timestamp : (sf.timestamp || "")
                 };
               });
 
-              if (Date.now() - _lastLocalSaveTime < 5000 && l.progres > s.progres) {
-                map.set(l.id, { ...s, progres: l.progres, status: l.status, foto: mergedFoto });
+              const lProg = parseInt(l.progres, 10) || 0;
+              const sProg = parseInt(s.progres, 10) || 0;
+              if (Date.now() - _lastLocalSaveTime < 15000 && lProg > sProg) {
+                map.set(String(s.id), { ...s, progres: l.progres, status: l.status, foto: mergedFoto });
               } else {
-                map.set(l.id, { ...l, ...s, foto: mergedFoto });
+                map.set(String(s.id), { ...l, ...s, foto: mergedFoto });
               }
             }
           });

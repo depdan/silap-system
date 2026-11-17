@@ -2179,6 +2179,22 @@ try {
       box-shadow: none !important;
       position: relative;
     }
+    .btn-tugas-pill.tugas-in-progress {
+      background: #FFFBEB !important;
+      border: 1.5px solid #FCD34D !important;
+      color: #B45309 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 2px !important;
+      cursor: pointer !important;
+    }
+    .btn-tugas-pill.tugas-in-progress.active {
+      background: var(--color-blue-700) !important;
+      border-color: var(--color-blue-700) !important;
+      color: #FFFFFF !important;
+    }
     .tugas-done-tag {
       font-size: 0.6rem !important;
       background: #059669 !important;
@@ -3418,6 +3434,15 @@ try {
   let mobileOfficerRole = "Ketua Regu";
   let teamMembers = [];
 
+  function findActiveReport(list, idOrNoPekerjaan) {
+    if (!idOrNoPekerjaan || !Array.isArray(list)) return null;
+    const target = String(idOrNoPekerjaan).trim();
+    return list.find(r => 
+      (r.id !== undefined && String(r.id).trim() === target) ||
+      (r.noPekerjaan && String(r.noPekerjaan).trim() === target)
+    ) || null;
+  }
+
   // Kamera & GPS Live TimeStamp State
   let activeCameraSlot = "sebelum";
   let cameraStream = null;
@@ -3713,6 +3738,7 @@ try {
 
     // Cari laporan milik regu ini pada hari/tanggal yang dipilih
     const completedTasks = new Set();
+    const inProgressTasks = new Map();
     const targetDay = mobileSelectedHari;
     const targetDateStr = currentCalendarDateStr;
 
@@ -3737,7 +3763,14 @@ try {
       }
 
       if (matchDate && r.tugasKe) {
-        completedTasks.add(r.tugasKe);
+        const prog = parseInt(r.progres, 10) || 0;
+        if (r.status === 'selesai' || prog >= 100) {
+          completedTasks.add(r.tugasKe);
+        } else {
+          if (!inProgressTasks.has(r.tugasKe)) {
+            inProgressTasks.set(r.tugasKe, r);
+          }
+        }
       }
     });
 
@@ -3750,16 +3783,28 @@ try {
       if (!btn) continue;
 
       const isCompleted = completedTasks.has(tName);
+      const inProg = inProgressTasks.get(tName);
+
       if (isCompleted) {
         completedCount++;
         btn.disabled = true;
         btn.classList.add("tugas-disabled-done");
-        btn.classList.remove("active");
+        btn.classList.remove("active", "tugas-in-progress");
         btn.title = `${tName} sudah selesai dikerjakan untuk jadwal ini`;
         btn.innerHTML = `<span>✓&nbsp;Tugas&nbsp;${i}</span><span class="tugas-done-tag">Selesai</span>`;
-      } else {
+      } else if (inProg) {
         btn.disabled = false;
         btn.classList.remove("tugas-disabled-done");
+        btn.classList.add("tugas-in-progress");
+        const progVal = parseInt(inProg.progres, 10) || 0;
+        btn.title = `${tName} sedang berjalan (${progVal}%). Klik untuk melanjutkan`;
+        btn.innerHTML = `<span>⏳&nbsp;Tugas&nbsp;${i}</span><span class="tugas-done-tag" style="background:#FEF3C7;color:#D97706;border:1px solid #FDE68A">${progVal}%</span>`;
+        if (!firstAvailableTask) {
+          firstAvailableTask = tName;
+        }
+      } else {
+        btn.disabled = false;
+        btn.classList.remove("tugas-disabled-done", "tugas-in-progress");
         btn.title = `Pilih ${tName}`;
         btn.innerHTML = `<span>Tugas&nbsp;${i}</span>`;
         if (!firstAvailableTask) {
@@ -3790,7 +3835,7 @@ try {
       }
     }
 
-    // Jika tugas yang sedang aktif sudah selesai, alihkan ke tugas berikutnya yang belum selesai
+    // Jika tugas yang sedang aktif sudah selesai 100%, alihkan ke tugas berikutnya yang belum selesai
     if (completedTasks.has(mobileSelectedTugas)) {
       if (firstAvailableTask) {
         selectTugasKe(firstAvailableTask);
@@ -3807,7 +3852,7 @@ try {
     }
   }
 
-  function selectTugasKe(tugas) {
+  function selectTugasKe(tugas, skipAutoResume = false) {
     const btn = Array.from(document.querySelectorAll(".btn-tugas-pill")).find(b => b.dataset.tugas === tugas);
     if (btn && btn.disabled) {
       showToast(`${tugas} sudah diselesaikan untuk hari ini. Silakan pilih target tugas berikutnya.`, "warning");
@@ -3832,6 +3877,50 @@ try {
         b.classList.remove("active");
       }
     });
+
+    if (!skipAutoResume) {
+      const list = getLaporanDB();
+      const targetDay = mobileSelectedHari;
+      const targetDateStr = currentCalendarDateStr;
+      
+      const existingActive = list.find(r => {
+        const matchRegu = (r.regu || "Regu 1").toLowerCase() === (mobileRegu || "Regu 1").toLowerCase();
+        const matchTugas = r.tugasKe === tugas;
+        let matchDate = false;
+        if (r.minggu && r.minggu.indexOf(targetDay) !== -1) matchDate = true;
+        if (r.tanggal && targetDateStr) {
+          const parts = targetDateStr.split("-");
+          if (parts.length === 3) {
+            const dNum = parseInt(parts[2], 10);
+            if (r.tanggal.indexOf(dNum + " ") !== -1 || r.tanggal.indexOf("/" + parts[2] + "/") !== -1) matchDate = true;
+          }
+        }
+        const isNotDone = r.status !== 'selesai' && (parseInt(r.progres, 10) < 100);
+        return matchRegu && matchTugas && matchDate && isNotDone;
+      });
+
+      if (existingActive) {
+        resumeReportFromHistory(existingActive.id || existingActive.noPekerjaan);
+      } else {
+        // Jika tugas baru yang belum dimulai, dan user sebelumnya mengedit tugas yang berbeda
+        const currentLap = activeEditingReportId ? list.find(r => String(r.id) === String(activeEditingReportId) || String(r.noPekerjaan) === String(activeEditingReportId)) : null;
+        if (currentLap && currentLap.tugasKe !== tugas) {
+          activeEditingReportId = null;
+          localStorage.removeItem("silap_active_task_id");
+          mobilePhotoSebelum = null;
+          mobilePhotoProses = null;
+          mobilePhotoSesudah = null;
+          ["sebelum", "proses", "sesudah"].forEach(slot => {
+            const card = document.getElementById("slot-" + slot);
+            if (card) {
+              card.className = "photo-slot-card";
+            }
+          });
+          mobileProgres = 0;
+          updateSesiState();
+        }
+      }
+    }
 
     triggerDraftAutoSave();
   }
@@ -4339,13 +4428,19 @@ try {
   // ==========================================================
   function updateSesiState(forcedReport) {
     const list = getLaporanDB();
-    const activeLap = forcedReport || (activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null);
+    const activeLap = forcedReport || (activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null);
 
     // Status resmi pengiriman bertahap ke sistem:
-    // 1. hasSubmitted0: Laporan Awal (0%) telah berhasil dikirim ke database
-    // 2. hasSubmitted50: Progres Lapangan (50%) telah berhasil dikirim ke database
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+    // 1. hasSubmitted0: Laporan Awal (0%) telah terdaftar di database ATAU Foto Sebelum sudah diambil di form
+    // 2. hasSubmitted50: Progres Lapangan (50%) telah terdaftar di database ATAU (Foto Sebelum & Foto Proses sudah ada di form)
+    const hasSubmitted0 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 0 || activeLap.status === "belum" || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      mobilePhotoSebelum
+    );
+    const hasSubmitted50 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      (mobilePhotoSebelum && mobilePhotoProses)
+    );
 
     const isResume = !!activeEditingReportId;
     const sesiNoticeEl = document.getElementById("sesi-notice-container");
@@ -4359,17 +4454,19 @@ try {
     const btnSubmitText = document.getElementById("btn-submit-text");
 
     // Sinkronkan mobileProgres sesuai status laporan resmi
-    if (!hasSubmitted0) {
-      mobileProgres = 0;
-    } else if (!hasSubmitted50) {
+    if (mobilePhotoSesudah) {
+      mobileProgres = 100;
+    } else if (hasSubmitted50 || mobilePhotoProses) {
+      mobileProgres = 100;
+    } else if (hasSubmitted0 || mobilePhotoSebelum) {
       mobileProgres = 50;
     } else {
-      mobileProgres = 100;
+      mobileProgres = 0;
     }
 
     if (sesiNoticeEl) {
       sesiNoticeEl.className = "sesi-notice-banner initial";
-      const tahapBadge = !hasSubmitted0 ? "Tahap 1: Mulai Bekerja (0%)" : (!hasSubmitted50 ? "Tahap 2: Proses Pengerjaan (50%)" : "Tahap 3: Penyelesaian Tuntas (100%)");
+      const tahapBadge = !hasSubmitted0 ? "Tahap 1: Mulai Bekerja (0%)" : (!hasSubmitted50 && !mobilePhotoProses ? "Tahap 2: Proses Pengerjaan (50%)" : "Tahap 3: Penyelesaian Tuntas (100%)");
       sesiNoticeEl.innerHTML = `
         <div class="sesi-badge-tag">${tahapBadge}</div>
         <div class="sesi-title">Dokumentasi Foto Lapangan Bertahap</div>
@@ -4390,21 +4487,21 @@ try {
       p0.title = "Tahap 0% (Mulai Bekerja)";
     }
     if (p50) {
-      p50.classList.toggle("locked", !hasSubmitted0);
+      p50.classList.toggle("locked", !hasSubmitted0 && !mobilePhotoSebelum);
       p50.classList.toggle("active", mobileProgres === 50);
-      p50.title = hasSubmitted0 ? "Tahap 50% (Sedang Dikerjakan)" : "Terkunci: Kirim 0% Dulu";
+      p50.title = (hasSubmitted0 || mobilePhotoSebelum) ? "Tahap 50% (Sedang Dikerjakan)" : "Terkunci: Ambil Foto 0% Dulu";
     }
     if (p100) {
-      p100.classList.toggle("locked", !hasSubmitted50);
+      p100.classList.toggle("locked", !hasSubmitted50 && !mobilePhotoProses);
       p100.classList.toggle("active", mobileProgres === 100);
-      p100.title = hasSubmitted50 ? "Tahap 100% (Selesai Tuntas)" : "Terkunci: Kirim 50% Dulu";
+      p100.title = (hasSubmitted50 || mobilePhotoProses) ? "Tahap 100% (Selesai Tuntas)" : "Terkunci: Kirim 50% Dulu";
     }
 
     // ==========================================================
     // LOGIKA URUTAN FOTO BERTAHAP (SEKUENSIAL & TERKUNCI)
-    // 1. Foto Sebelum (0%): Terbuka awal (wajib diambil & dikirim)
-    // 2. Foto Proses (50%): Terbuka HANYA SETELAH 0% DIKIRIM (hasSubmitted0)
-    // 3. Foto Sesudah (100%): Terbuka HANYA SETELAH 50% DIKIRIM (hasSubmitted50)
+    // 1. Foto Sebelum (0%): Terbuka awal (wajib diambil)
+    // 2. Foto Proses (50%): Terbuka jika Foto 0% sudah diambil/dikirim
+    // 3. Foto Sesudah (100%): Terbuka jika Foto 50% sudah diambil/dikirim
     // ==========================================================
 
     // Slot 1: Sebelum (0%)
@@ -4432,8 +4529,7 @@ try {
         cardProses.classList.add("has-photo");
         cardProses.classList.remove("locked");
         cardProses.onclick = () => openCameraModal("proses");
-      } else if (hasSubmitted0) {
-        // Terbuka HANYA jika Laporan Awal (0%) SUDAH DIKIRIM
+      } else if (hasSubmitted0 || mobilePhotoSebelum) {
         cardProses.className = "photo-slot-card";
         cardProses.classList.remove("locked", "has-photo");
         cardProses.onclick = () => openCameraModal("proses");
@@ -4444,17 +4540,16 @@ try {
           <span class="photo-stage-pill ready">Siap Diambil</span>
         `;
       } else {
-        // Terkunci sebelum 0% dikirim
         cardProses.className = "photo-slot-card locked";
         cardProses.classList.remove("has-photo");
         cardProses.onclick = () => {
-          showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+          showToast("Ambil Foto 1 (Sebelum 0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
         };
         cardProses.innerHTML = `
           <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           <div class="photo-slot-title">2. Proses Kerja (50%)</div>
           <div class="photo-slot-sub">Saat pengerjaan</div>
-          <span class="photo-stage-pill pending">Terkunci (Kirim 0% Dulu)</span>
+          <span class="photo-stage-pill pending">Terkunci (Ambil 0% Dulu)</span>
         `;
       }
     }
@@ -4465,8 +4560,7 @@ try {
         cardSesudah.classList.add("has-photo");
         cardSesudah.classList.remove("locked");
         cardSesudah.onclick = () => openCameraModal("sesudah");
-      } else if (hasSubmitted50) {
-        // Terbuka HANYA jika Progres Lapangan (50%) SUDAH DIKIRIM
+      } else if (hasSubmitted50 || mobilePhotoProses) {
         cardSesudah.className = "photo-slot-card";
         cardSesudah.classList.remove("locked", "has-photo");
         cardSesudah.onclick = () => openCameraModal("sesudah");
@@ -4477,11 +4571,10 @@ try {
           <span class="photo-stage-pill ready">Siap Diambil</span>
         `;
       } else {
-        // Terkunci sebelum 50% dikirim
-        const lockMsg = !hasSubmitted0 
-          ? "Kirim Laporan Awal (0%) terlebih dahulu!" 
+        const lockMsg = (!hasSubmitted0 && !mobilePhotoSebelum) 
+          ? "Ambil Foto 1 (Sebelum 0%) terlebih dahulu!" 
           : "Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!";
-        const lockPill = !hasSubmitted0 ? "Terkunci (Kirim 0% Dulu)" : "Terkunci (Kirim 50% Dulu)";
+        const lockPill = (!hasSubmitted0 && !mobilePhotoSebelum) ? "Terkunci (Ambil 0% Dulu)" : "Terkunci (Kirim 50% Dulu)";
         cardSesudah.className = "photo-slot-card locked";
         cardSesudah.classList.remove("has-photo");
         cardSesudah.onclick = () => {
@@ -4497,9 +4590,9 @@ try {
     }
 
     if (btnSubmitText) {
-      if (hasSubmitted50) {
+      if (mobilePhotoSesudah || (hasSubmitted50 && mobilePhotoProses)) {
         btnSubmitText.textContent = "Kirim Laporan Tuntas (100% Selesai – 3 Foto Lengkap)";
-      } else if (hasSubmitted0) {
+      } else if (hasSubmitted0 || mobilePhotoSebelum) {
         btnSubmitText.textContent = "Kirim Progres Lapangan (Progres 50% – Foto Proses)";
       } else {
         btnSubmitText.textContent = "Kirim Laporan Awal (Mulai 0% – Foto Sebelum)";
@@ -4513,15 +4606,21 @@ try {
   function setQuickProgres(val) {
     val = parseInt(val, 10);
     const list = getLaporanDB();
-    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+    const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
+    const hasSubmitted0 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 0 || activeLap.status === "belum" || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      mobilePhotoSebelum
+    );
+    const hasSubmitted50 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      (mobilePhotoSebelum && mobilePhotoProses)
+    );
 
-    if (val >= 50 && !hasSubmitted0) {
-      showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+    if (val >= 50 && !hasSubmitted0 && !mobilePhotoSebelum) {
+      showToast("Ambil Foto 1 (Sebelum 0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
       return;
     }
-    if (val >= 100 && !hasSubmitted50) {
+    if (val >= 100 && !hasSubmitted50 && !mobilePhotoProses) {
       showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
       return;
     }
@@ -4537,16 +4636,22 @@ try {
   function handleProgresSlider(val) {
     val = parseInt(val, 10);
     const list = getLaporanDB();
-    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+    const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
+    const hasSubmitted0 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 0 || activeLap.status === "belum" || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      mobilePhotoSebelum
+    );
+    const hasSubmitted50 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      (mobilePhotoSebelum && mobilePhotoProses)
+    );
 
-    if (val >= 50 && !hasSubmitted0) {
-      showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+    if (val >= 50 && !hasSubmitted0 && !mobilePhotoSebelum) {
+      showToast("Ambil Foto 1 (Sebelum 0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
       val = 0;
-    } else if (val >= 100 && !hasSubmitted50) {
+    } else if (val >= 100 && !hasSubmitted50 && !mobilePhotoProses) {
       showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
-      val = hasSubmitted0 ? 50 : 0;
+      val = (hasSubmitted0 || mobilePhotoSebelum) ? 50 : 0;
     }
     mobileProgres = val;
     const slider = document.getElementById("u-progres-range");
@@ -4789,10 +4894,10 @@ try {
     if (!activeId) return false;
 
     const list = getLaporanDB();
-    const target = list.find(r => r.id === activeId && (r.progres < 100 || r.status !== "selesai"));
+    const target = findActiveReport(list, activeId);
 
-    if (target) {
-      resumeReportFromHistory(target.id);
+    if (target && (parseInt(target.progres, 10) < 100 && target.status !== "selesai")) {
+      resumeReportFromHistory(target.id || target.noPekerjaan);
       return true;
     }
     localStorage.removeItem("silap_active_task_id");
@@ -4936,15 +5041,17 @@ try {
   // ==========================================================
   function resumeReportFromHistory(id) {
     const list = getLaporanDB();
-    const lap = list.find(r => r.id === id);
+    const lap = findActiveReport(list, id);
     if (!lap) return;
 
-    activeEditingReportId = lap.id;
+    activeEditingReportId = lap.id || lap.noPekerjaan;
+    localStorage.setItem("silap_active_task_id", activeEditingReportId);
+
     if (lap.regu) {
       selectReguPill(lap.regu);
     }
     if (lap.tugasKe) {
-      selectTugasKe(lap.tugasKe);
+      selectTugasKe(lap.tugasKe, true);
     }
     if (lap.minggu) {
       ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"].forEach(h => {
@@ -4974,20 +5081,22 @@ try {
 
     // Pulihkan foto yang sudah ada
     if (lap.foto && Array.isArray(lap.foto)) {
-      lap.foto.forEach(f => {
+      lap.foto.forEach((f, idx) => {
         if (!f || !f.src || !f.src.trim()) return;
-        if (f.tahap && f.tahap.includes("Sebelum")) {
+        const tahap = (f.tahap || "").toLowerCase();
+        if (idx === 0 || tahap.includes("sebelum") || tahap.includes("0%")) {
           setMobilePhotoSlot("sebelum", f.src, f.timestamp || "Tersimpan");
-        } else if (f.tahap && (f.tahap.includes("Proses") || f.tahap.includes("50%"))) {
+        } else if (idx === 1 || tahap.includes("proses") || tahap.includes("50%")) {
           setMobilePhotoSlot("proses", f.src, f.timestamp || "Tersimpan");
-        } else if (f.tahap && (f.tahap.includes("Sesudah") || f.tahap.includes("100%"))) {
+        } else if (idx === 2 || tahap.includes("sesudah") || tahap.includes("100%")) {
           setMobilePhotoSlot("sesudah", f.src, f.timestamp || "Tersimpan");
         }
       });
     }
 
     // Naikkan target progres (misal dari 0% ke 50%, atau 50% ke 100%)
-    const nextProg = lap.progres < 50 ? 50 : 100;
+    const curProg = parseInt(lap.progres, 10) || 0;
+    const nextProg = curProg < 50 ? 50 : 100;
     setQuickProgres(nextProg);
 
     updateLocationDisplay();
@@ -4995,8 +5104,8 @@ try {
     // Buka tab form di Langkah 2 (Dokumentasi & Progres)
     switchUserTab("form");
     goToStep(2);
-    updateSesiState();
-    if (lap.progres < 50) {
+    updateSesiState(lap);
+    if (curProg < 50) {
       showToast("Sesi Lanjutan aktif: " + getLaporanHumanTitle(lap) + ". Silakan ambil Foto Proses Kerja (50%)!", "info");
     } else {
       showToast("Sesi Lanjutan aktif: " + getLaporanHumanTitle(lap) + ". Silakan ambil Foto Sesudah (100%) untuk menuntaskan laporan!", "info");
@@ -5008,24 +5117,49 @@ try {
   // ==========================================================
   async function openCameraModal(slot) {
     const list = getLaporanDB();
-    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+    const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
+    const hasSubmitted0 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 0 || activeLap.status === "belum" || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      mobilePhotoSebelum
+    );
+    const hasSubmitted50 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      (mobilePhotoSebelum && mobilePhotoProses)
+    );
 
-    if (slot === "proses" && !hasSubmitted0) {
-      showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+    if (slot === "proses" && !hasSubmitted0 && !mobilePhotoSebelum) {
+      showToast("Ambil Foto 1 (Sebelum 0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
       return;
     }
     if (slot === "sesudah") {
-      if (!hasSubmitted0) {
-        showToast("Kirim Laporan Awal (0%) terlebih dahulu!", "warning");
+      if (!hasSubmitted0 && !mobilePhotoSebelum) {
+        showToast("Ambil Foto 1 (Sebelum 0%) terlebih dahulu!", "warning");
         return;
       }
-      if (!hasSubmitted50) {
+      if (!hasSubmitted50 && !mobilePhotoProses) {
         showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
         return;
       }
     }
+    activeCameraSlot = slot;
+    const modal = document.getElementById("camera-modal");
+    const label = document.getElementById("cam-slot-label");
+    const slotTitle = slot === "sebelum" ? "1. Foto Sebelum (0%)" : slot === "proses" ? "2. Foto Selama Proses (0-50%)" : "3. Foto Sesudah (100%)";
+    const tagText = slot === "sebelum" ? "FOTO SEBELUM (0%)" : slot === "proses" ? "PROSES PENGERJAAN" : "FOTO SESUDAH (100%)";
+
+    if (label) label.textContent = slotTitle;
+    const tag = document.getElementById("hud-badge-tag");
+    if (tag) tag.textContent = "PPSU DKI JAKARTA • " + tagText;
+
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+
+    updateLiveHudClock();
+    if (hudTimer) clearInterval(hudTimer);
+    hudTimer = setInterval(updateLiveHudClock, 1000);
+
+    await startCameraStream(currentCameraFacing);
+  }
     activeCameraSlot = slot;
     const modal = document.getElementById("camera-modal");
     const label = document.getElementById("cam-slot-label");
@@ -5730,12 +5864,18 @@ try {
     }
 
     const list = getLaporanDB();
-    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+    const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
+    const hasSubmitted0 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 0 || activeLap.status === "belum" || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      mobilePhotoSebelum
+    );
+    const hasSubmitted50 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      (mobilePhotoSebelum && mobilePhotoProses)
+    );
 
     // 1. TAHAP AWAL (0%): Kirim langsung untuk membuka tahap 50%
-    if (!hasSubmitted0) {
+    if (!hasSubmitted0 && !mobilePhotoProses && !mobilePhotoSesudah) {
       if (!mobilePhotoSebelum) {
         showToast("Wajib mengambil Foto 1 (Sebelum 0%) terlebih dahulu sebelum mengirim laporan awal!", "warning");
         const c1 = document.getElementById("slot-sebelum");
@@ -5747,7 +5887,7 @@ try {
     }
 
     // 2. TAHAP PROGRES (50%): Kirim langsung untuk membuka tahap 100%
-    if (!hasSubmitted50) {
+    if ((!hasSubmitted50 && !mobilePhotoSesudah) || (mobilePhotoProses && !mobilePhotoSesudah)) {
       if (!mobilePhotoProses) {
         showToast("Wajib mengambil Foto 2 (Proses Kerja 50%) terlebih dahulu sebelum mengirim progres lapangan!", "warning");
         const c2 = document.getElementById("slot-proses");
@@ -5836,9 +5976,15 @@ try {
     }
 
     const list = getLaporanDB();
-    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+    const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
+    const hasSubmitted0 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 0 || activeLap.status === "belum" || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      mobilePhotoSebelum
+    );
+    const hasSubmitted50 = !!(
+      (activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai")) ||
+      (mobilePhotoSebelum && mobilePhotoProses)
+    );
 
     const noHp = document.getElementById("u-nohp-inp") ? document.getElementById("u-nohp-inp").value.trim() : "081234567890";
     const jmlPetugas = document.getElementById("u-jml-petugas-inp") ? parseInt(document.getElementById("u-jml-petugas-inp").value, 10) || 4 : 4;
@@ -5856,7 +6002,7 @@ try {
     // -------------------------------------------------------------
     // TAHAP 1: KIRIM LAPORAN AWAL (0%) -> MEMBUKA TAHAP 50%
     // -------------------------------------------------------------
-    if (!hasSubmitted0) {
+    if (!activeEditingReportId && !mobilePhotoProses && !mobilePhotoSesudah) {
       if (!mobilePhotoSebelum) {
         showToast("Wajib mengambil Foto 1 (Sebelum 0%) terlebih dahulu sebelum mengirim!", "warning");
         const c1 = document.getElementById("slot-sebelum");
@@ -5926,37 +6072,71 @@ try {
     // -------------------------------------------------------------
     // TAHAP 2: KIRIM PROGRES LAPANGAN (50%) -> MEMBUKA TAHAP 100%
     // -------------------------------------------------------------
-    if (!hasSubmitted50) {
+    if (!mobilePhotoSesudah) {
       if (!mobilePhotoProses) {
         showToast("Wajib mengambil Foto 2 (Proses Kerja 50%) terlebih dahulu sebelum mengirim!", "warning");
         const c2 = document.getElementById("slot-proses");
         if (c2) c2.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
-      const reportId = activeEditingReportId;
-      const existingIndex = list.findIndex(r => String(r.id) === String(reportId) || String(r.noPekerjaan) === String(reportId));
-      if (existingIndex === -1) {
-        showToast("Laporan aktif tidak ditemukan!", "error");
-        return;
+      let existingIndex = -1;
+      if (activeEditingReportId) {
+        existingIndex = list.findIndex(r => String(r.id) === String(activeEditingReportId) || String(r.noPekerjaan) === String(activeEditingReportId));
       }
-      const oldLap = list[existingIndex];
+      if (existingIndex === -1) {
+        existingIndex = list.findIndex(r => r.tugasKe === (mobileSelectedTugas || "Tugas 1") && r.status !== 'selesai');
+      }
+
+      const reportId = existingIndex !== -1 ? (list[existingIndex].id || list[existingIndex].noPekerjaan) : generateNextJobNumber();
+      const oldLap = existingIndex !== -1 ? list[existingIndex] : {};
+      const presentNames = teamMembers.filter(m => m.present).map(m => m.name).join(", ");
+
       const fotoList = [
-        (oldLap.foto && oldLap.foto[0]) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
+        (oldLap.foto && oldLap.foto[0] && oldLap.foto[0].src) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
         { src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" }
       ];
 
       const updatedReport = {
         ...oldLap,
+        id: oldLap.id || reportId,
+        noPekerjaan: oldLap.noPekerjaan || reportId,
+        minggu: oldLap.minggu || periodeHarian,
+        rw: mobileRw || oldLap.rw || "RW 01",
+        kat: mobileSelectedKat || oldLap.kat || "kebersihan",
+        tugasKe: mobileSelectedTugas || oldLap.tugasKe || "Tugas 1",
+        jenisPekerjaan: mobileSelectedJob || oldLap.jenisPekerjaan,
+        judul: (mobileSelectedTugas || oldLap.tugasKe || "Tugas 1") + ": " + (mobileSelectedJob || oldLap.jenisPekerjaan) + " - " + activeAddr,
+        deskripsi: catatan || oldLap.deskripsi || ("Penanganan " + (mobileSelectedJob || "").toLowerCase() + " di " + activeAddr + "."),
+        alamat: activeAddr,
+        lokasiDetail: patokanVal || oldLap.lokasiDetail || ("Lokasi pengerjaan di area " + mobileRw),
+        petugas: officer,
+        regu: mobileRegu || oldLap.regu || "Regu 1",
+        role: mobileOfficerRole,
+        noHp: noHp,
+        jumlahPetugas: jmlPetugas,
+        anggotaHadir: presentNames || oldLap.anggotaHadir,
+        wilayah: currentUser ? currentUser.wilayah : "jaktim",
+        kelurahan: "Kel. Pekayon",
         status: "proses",
         progres: 50,
+        tanggal: tgl,
+        isoDate: currentCalendarDateStr || (now.toISOString().split("T")[0]),
+        gpsLat: loc.lat,
+        gpsLng: loc.lng,
         kendala: catatan || oldLap.kendala || "Pekerjaan sedang berlangsung di lapangan.",
         foto: fotoList
       };
 
-      list[existingIndex] = updatedReport;
+      if (existingIndex !== -1) {
+        list[existingIndex] = updatedReport;
+      } else {
+        list.unshift(updatedReport);
+      }
       saveLaporanDB(list);
       userReports = list;
 
+      activeEditingReportId = updatedReport.id || updatedReport.noPekerjaan;
+      localStorage.setItem("silap_active_task_id", activeEditingReportId);
       mobileProgres = 100;
 
       showToast("Progres Lapangan (50%) berhasil dikirim! Tahap 100% sekarang terbuka. Silakan ambil Foto Sesudah!", "success");
@@ -5984,28 +6164,60 @@ try {
         if (c3) c3.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
-      const reportId = activeEditingReportId;
-      const existingIndex = list.findIndex(r => String(r.id) === String(reportId) || String(r.noPekerjaan) === String(reportId));
-      if (existingIndex === -1) {
-        showToast("Laporan aktif tidak ditemukan!", "error");
-        return;
+      let existingIndex = -1;
+      if (activeEditingReportId) {
+        existingIndex = list.findIndex(r => String(r.id) === String(activeEditingReportId) || String(r.noPekerjaan) === String(activeEditingReportId));
       }
-      const oldLap = list[existingIndex];
+      if (existingIndex === -1) {
+        existingIndex = list.findIndex(r => r.tugasKe === (mobileSelectedTugas || "Tugas 1") && r.status !== 'selesai');
+      }
+
+      const reportId = existingIndex !== -1 ? (list[existingIndex].id || list[existingIndex].noPekerjaan) : generateNextJobNumber();
+      const oldLap = existingIndex !== -1 ? list[existingIndex] : {};
+      const presentNames = teamMembers.filter(m => m.present).map(m => m.name).join(", ");
+
       const fotoList = [
-        (oldLap.foto && oldLap.foto[0]) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
-        (oldLap.foto && oldLap.foto[1]) ? oldLap.foto[1] : { src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" },
+        (oldLap.foto && oldLap.foto[0] && oldLap.foto[0].src) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
+        (oldLap.foto && oldLap.foto[1] && oldLap.foto[1].src) ? oldLap.foto[1] : { src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" },
         { src: mobilePhotoSesudah, timestamp: tgl, name: "sesudah_" + reportId + ".jpg", tahap: "Sesudah (100%)" }
       ];
 
       const updatedReport = {
         ...oldLap,
+        id: oldLap.id || reportId,
+        noPekerjaan: oldLap.noPekerjaan || reportId,
+        minggu: oldLap.minggu || periodeHarian,
+        rw: mobileRw || oldLap.rw || "RW 01",
+        kat: mobileSelectedKat || oldLap.kat || "kebersihan",
+        tugasKe: mobileSelectedTugas || oldLap.tugasKe || "Tugas 1",
+        jenisPekerjaan: mobileSelectedJob || oldLap.jenisPekerjaan,
+        judul: (mobileSelectedTugas || oldLap.tugasKe || "Tugas 1") + ": " + (mobileSelectedJob || oldLap.jenisPekerjaan) + " - " + activeAddr,
+        deskripsi: catatan || oldLap.deskripsi || ("Penanganan " + (mobileSelectedJob || "").toLowerCase() + " di " + activeAddr + "."),
+        alamat: activeAddr,
+        lokasiDetail: patokanVal || oldLap.lokasiDetail || ("Lokasi pengerjaan di area " + mobileRw),
+        petugas: officer,
+        regu: mobileRegu || oldLap.regu || "Regu 1",
+        role: mobileOfficerRole,
+        noHp: noHp,
+        jumlahPetugas: jmlPetugas,
+        anggotaHadir: presentNames || oldLap.anggotaHadir,
+        wilayah: currentUser ? currentUser.wilayah : "jaktim",
+        kelurahan: "Kel. Pekayon",
         status: "selesai",
         progres: 100,
+        tanggal: tgl,
+        isoDate: currentCalendarDateStr || (now.toISOString().split("T")[0]),
+        gpsLat: loc.lat,
+        gpsLng: loc.lng,
         kendala: catatan || oldLap.kendala || "Pekerjaan tuntas diselesaikan dengan hasil bersih dan rapi.",
         foto: fotoList
       };
 
-      list[existingIndex] = updatedReport;
+      if (existingIndex !== -1) {
+        list[existingIndex] = updatedReport;
+      } else {
+        list.unshift(updatedReport);
+      }
       saveLaporanDB(list);
       userReports = list;
 
@@ -6013,7 +6225,7 @@ try {
       activeEditingReportId = null;
       mobileProgres = 0;
 
-      showToast("Laporan #" + reportId + " (" + (updatedReport.tugasKe || "Tugas 1") + ") berhasil diselesaikan (100% Tuntas)!", "success");
+      showToast("Laporan #" + (updatedReport.noPekerjaan || reportId) + " (" + (updatedReport.tugasKe || "Tugas 1") + ") berhasil diselesaikan (100% Tuntas)!", "success");
       clearFormDraft();
       resetFormFields();
       updateTaskProgressStates();
@@ -6021,6 +6233,7 @@ try {
       goToStep(1);
       switchUserTab("history");
     }
+  }
   }
 
   // ==========================================================
