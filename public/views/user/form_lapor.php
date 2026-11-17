@@ -237,8 +237,7 @@
                 <span class="field-tag-required">Wajib Diisi</span>
               </div>
               <select id="u-rw-select" class="u-input-field" onchange="onRwSelectChange(); this.style.borderColor=''; this.style.boxShadow='';" required>
-                <option value="" disabled selected>-- Pilih Wilayah RW --</option>
-                <option value="RW 01">RW 01 - Gandaria / Kalisari</option>
+                <option value="RW 01" selected>RW 01 - Gandaria / Kalisari</option>
                 <option value="RW 02">RW 02 - Lapan</option>
                 <option value="RW 03">RW 03 - Tipar</option>
                 <option value="RW 04">RW 04 - Belly / Pedati</option>
@@ -258,7 +257,7 @@
                 <span>Nama Jalan / Lokasi&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 <span class="field-tag-required">Wajib Diisi</span>
               </div>
-              <input type="text" id="u-custom-address-inp" class="u-input-field" placeholder="Ketik nama jalan / lokasi pengerjaan (contoh: Jl. Raya Kalisari No. 12)..." value="" oninput="updateLocationDisplay(); triggerDraftAutoSave(); this.style.borderColor=''; this.style.boxShadow='';" required>
+              <input type="text" id="u-custom-address-inp" class="u-input-field" placeholder="Ketik nama jalan / lokasi pengerjaan (contoh: Jl. Raya Kalisari No. 12)..." value="Jl. Raya Kalisari No. 12" oninput="updateLocationDisplay(); triggerDraftAutoSave(); this.style.borderColor=''; this.style.boxShadow='';" required>
             </div>
 
             <!-- Patokan Lokasi (Wajib Diisi Penuh) -->
@@ -267,7 +266,7 @@
                 <span>Patokan Lokasi&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 <span class="field-tag-required">Wajib Diisi</span>
               </div>
-              <input type="text" id="u-patokan-inp" class="u-input-field" placeholder="Ketik patokan detail (contoh: Dekat Kantor Kelurahan / Pos RW 01)..." value="" oninput="triggerDraftAutoSave(); this.style.borderColor=''; this.style.boxShadow='';" required>
+              <input type="text" id="u-patokan-inp" class="u-input-field" placeholder="Ketik patokan detail (contoh: Dekat Kantor Kelurahan / Pos RW 01)..." value="Dekat Kantor Kelurahan / Pos RW 01" oninput="triggerDraftAutoSave(); this.style.borderColor=''; this.style.boxShadow='';" required>
             </div>
 
             <!-- Kontak WhatsApp Regu & Nama Petugas Pelapor -->
@@ -276,13 +275,13 @@
                 <div class="field-label">
                   <span>Pelapor / Ketua&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 </div>
-                <input type="text" id="u-petugas-inp" class="u-input-field" placeholder="Ketik nama petugas pelapor..." value="" oninput="triggerDraftAutoSave();" required>
+                <input type="text" id="u-petugas-inp" class="u-input-field" placeholder="Ketik nama petugas pelapor..." value="<?= htmlspecialchars($userName ?? 'Budi Santoso') ?>" oninput="triggerDraftAutoSave();" required>
               </div>
               <div>
                 <div class="field-label">
                   <span>No. WhatsApp&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 </div>
-                <input type="tel" id="u-nohp-inp" class="u-input-field" inputmode="numeric" pattern="[0-9]*" maxlength="15" placeholder="Contoh: 081234567890" value="" oninput="this.value = this.value.replace(/\D/g, ''); triggerDraftAutoSave();" required>
+                <input type="tel" id="u-nohp-inp" class="u-input-field" inputmode="numeric" pattern="[0-9]*" maxlength="15" placeholder="Contoh: 081234567890" value="<?= htmlspecialchars($userPhone ?? '081234567890') ?>" oninput="this.value = this.value.replace(/\D/g, ''); triggerDraftAutoSave();" required>
               </div>
             </div>
 

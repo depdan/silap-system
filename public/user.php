@@ -3387,14 +3387,15 @@ try {
 <script src="shared.js?v=<?= time() ?>"></script>
 <script>
   const PHP_USER = <?= json_encode([
-    'name'     => $currentUser['nama'],
-    'username' => $currentUser['username'],
-    'role'     => $currentUser['role'],
+    'name'     => $userName,
+    'username' => $currentUser['username'] ?? '',
+    'role'     => $currentUser['role'] ?? 'petugas',
     'official_role' => $userOfficialRole,
     'official_regu' => $userOfficialRegu,
     'official_regu_id' => $userOfficialReguId,
-    'wilayah'  => $currentUser['wilayah'] ?? 'jakpus',
-    'no_hp'    => $currentUser['no_hp'] ?? '081234567890',
+    'official_wilayah' => $userOfficialWilayah,
+    'wilayah'  => $currentUser['wilayah'] ?? 'jaktim',
+    'no_hp'    => $userPhone,
     'is_deleted' => $isAccountDeleted,
   ]) ?>;
 
@@ -4113,27 +4114,37 @@ try {
 
     generateNextJobNumber();
 
-    // Form lokasi dibiarkan kosong secara default agar diisi mandiri oleh petugas
+    // Form lokasi dan identitas petugas (default RW 01 & profil pelapor)
     const rwInp = document.getElementById("u-rw-select");
-    if (rwInp && !activeEditingReportId) {
-      rwInp.value = "";
-      mobileRw = "";
+    if (rwInp && (!rwInp.value || rwInp.value === "" || rwInp.value === "-- Pilih Wilayah RW --")) {
+      rwInp.value = (currentUser && currentUser.official_wilayah && currentUser.official_wilayah.startsWith("RW")) ? currentUser.official_wilayah : "RW 01";
+      mobileRw = rwInp.value;
+    } else if (rwInp && rwInp.value) {
+      mobileRw = rwInp.value;
     }
+
+    const rwPreset = PEKAYON_RW_DATA[mobileRw || "RW 01"] || PEKAYON_RW_DATA["RW 01"];
+
     const alamatInp = document.getElementById("u-custom-address-inp");
-    if (alamatInp && !activeEditingReportId) {
-      alamatInp.value = "";
-      mobileAddress = "";
+    if (alamatInp && (!alamatInp.value || alamatInp.value.trim() === "")) {
+      alamatInp.value = rwPreset.road;
+      mobileAddress = rwPreset.road;
+    } else if (alamatInp) {
+      mobileAddress = alamatInp.value.trim();
     }
+
     const patokanInp = document.getElementById("u-patokan-inp");
-    if (patokanInp && !activeEditingReportId) {
-      patokanInp.value = "";
+    if (patokanInp && (!patokanInp.value || patokanInp.value.trim() === "")) {
+      patokanInp.value = rwPreset.patokan;
     }
+
     const petInp = document.getElementById("u-petugas-inp");
-    if (petInp && (!petInp.value || petInp.value === "")) {
-      petInp.value = (currentUser && currentUser.name) ? currentUser.name : "Budi Santoso";
+    if (petInp && (!petInp.value || petInp.value.trim() === "")) {
+      petInp.value = (currentUser && (currentUser.name || currentUser.nama)) ? (currentUser.name || currentUser.nama) : "Budi Santoso";
     }
+
     const hpInp = document.getElementById("u-nohp-inp");
-    if (hpInp && (!hpInp.value || hpInp.value === "")) {
+    if (hpInp && (!hpInp.value || hpInp.value.trim() === "")) {
       hpInp.value = (currentUser && currentUser.no_hp) ? currentUser.no_hp : "081234567890";
     }
 
@@ -4222,77 +4233,51 @@ try {
     const rwInp = document.getElementById("u-rw-select");
     const alamatInp = document.getElementById("u-custom-address-inp");
     const patokanInp = document.getElementById("u-patokan-inp");
+    const petInp = document.getElementById("u-petugas-inp");
+    const hpInp = document.getElementById("u-nohp-inp");
 
-    const rwVal = rwInp ? rwInp.value.trim() : "";
-    const alamat = alamatInp ? alamatInp.value.trim() : "";
-    const patokan = patokanInp ? patokanInp.value.trim() : "";
+    let rwVal = rwInp ? rwInp.value.trim() : "";
+    if (!rwVal || rwVal === "-- Pilih Wilayah RW --") {
+      rwVal = "RW 01";
+      if (rwInp) rwInp.value = "RW 01";
+    }
+    const rwPreset = PEKAYON_RW_DATA[rwVal] || PEKAYON_RW_DATA["RW 01"];
+
+    let alamat = alamatInp ? alamatInp.value.trim() : "";
+    if (!alamat && rwPreset) {
+      alamat = rwPreset.road;
+      if (alamatInp) alamatInp.value = alamat;
+    }
+
+    let patokan = patokanInp ? patokanInp.value.trim() : "";
+    if (!patokan && rwPreset) {
+      patokan = rwPreset.patokan;
+      if (patokanInp) patokanInp.value = patokan;
+    }
+
+    let petugas = petInp ? petInp.value.trim() : "";
+    if (!petugas) {
+      petugas = (currentUser && (currentUser.name || currentUser.nama)) ? (currentUser.name || currentUser.nama) : "Budi Santoso";
+      if (petInp) petInp.value = petugas;
+    }
+
+    let noHp = hpInp ? hpInp.value.trim() : "";
+    if (!noHp) {
+      noHp = (currentUser && currentUser.no_hp) ? currentUser.no_hp : "081234567890";
+      if (hpInp) hpInp.value = noHp;
+    }
 
     // Reset error styling
-    [rwInp, alamatInp, patokanInp].forEach(el => {
+    [rwInp, alamatInp, patokanInp, petInp, hpInp].forEach(el => {
       if (el) {
         el.style.borderColor = "";
         el.style.boxShadow = "";
       }
     });
 
-    const missingFields = [];
-    let firstInvalid = null;
-
-    if (!rwVal || rwVal === "" || rwVal === "-- Pilih Wilayah RW --") {
-      missingFields.push("Wilayah RW");
-      if (rwInp) {
-        rwInp.style.borderColor = "#EF4444";
-        rwInp.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
-        if (!firstInvalid) firstInvalid = rwInp;
-      }
-    }
-
-    if (!alamat || alamat === "") {
-      missingFields.push("Nama Jalan / Lokasi");
-      if (alamatInp) {
-        alamatInp.style.borderColor = "#EF4444";
-        alamatInp.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
-        if (!firstInvalid) firstInvalid = alamatInp;
-      }
-    }
-
-    if (!patokan || patokan === "") {
-      missingFields.push("Patokan Lokasi");
-      if (patokanInp) {
-        patokanInp.style.borderColor = "#EF4444";
-        patokanInp.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
-        if (!firstInvalid) firstInvalid = patokanInp;
-      }
-    }
-
-    if (missingFields.length > 0) {
-      if (showFeedback) {
-        showToast("Wajib diisi: " + missingFields.join(", ") + " sebelum lanjut ke Dokumentasi Foto!", "warning");
-        if (firstInvalid) {
-          firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
-          setTimeout(() => firstInvalid.focus(), 350);
-        }
-      }
-      return false;
-    }
-
     // Set nilai global setelah validasi lolos
     mobileRw = rwVal;
     mobileAddress = alamat;
-
-    const petugasInp = document.getElementById("u-petugas-inp");
-    let petugas = petugasInp ? petugasInp.value.trim() : "";
-    if (!petugas) {
-      petugas = (currentUser && currentUser.name) ? currentUser.name : "Ahmad Suryadi";
-      if (petugasInp) petugasInp.value = petugas;
-    }
-
-    const noHpInp = document.getElementById("u-nohp-inp");
-    let noHp = noHpInp ? noHpInp.value.trim() : "";
-    if (!noHp) {
-      noHp = (currentUser && currentUser.no_hp) ? currentUser.no_hp : "081234567890";
-      if (noHpInp) noHpInp.value = noHp;
-    }
 
     const jmlInp = document.getElementById("u-jml-petugas-inp");
     let jml = jmlInp ? parseInt(jmlInp.value, 10) : 4;
@@ -5632,24 +5617,27 @@ try {
       rwSel.style.borderColor = "";
       rwSel.style.boxShadow = "";
     }
-    const rw = rwSel ? rwSel.value : "";
+    const rw = rwSel ? rwSel.value : "RW 01";
     if (!rw) return;
     mobileRw = rw;
 
-    const rwPreset = PEKAYON_RW_DATA[rw];
+    const rwPreset = PEKAYON_RW_DATA[rw] || PEKAYON_RW_DATA["RW 01"];
     if (rwPreset) {
       const addrInp = document.getElementById("u-custom-address-inp");
       const patokanInp = document.getElementById("u-patokan-inp");
 
-      // Berikan keterangan/panduan melalui placeholder, input tetap kosong agar diisi mandiri oleh user
-      if (addrInp && !addrInp.value.trim()) {
-        addrInp.placeholder = `Ketik nama jalan di ${rw} (contoh: ${rwPreset.road})...`;
+      if (addrInp) {
+        addrInp.value = rwPreset.road;
+        addrInp.style.borderColor = "";
+        addrInp.style.boxShadow = "";
       }
-      if (patokanInp && !patokanInp.value.trim()) {
-        patokanInp.placeholder = `Ketik patokan di ${rw} (contoh: ${rwPreset.patokan})...`;
+      if (patokanInp) {
+        patokanInp.value = rwPreset.patokan;
+        patokanInp.style.borderColor = "";
+        patokanInp.style.boxShadow = "";
       }
 
-      setMapPosition(rwPreset.lat, rwPreset.lng, `Pusat ${rw} (Kel. Pekayon)`);
+      setMapPosition(rwPreset.lat, rwPreset.lng, `Presisi ${rw} (Kel. Pekayon)`);
     }
 
     updateLocationDisplay();
@@ -5764,12 +5752,20 @@ try {
         },
         err => {
           console.warn("GPS error:", err.message);
+          const rwSel = document.getElementById("u-rw-select");
+          const curRw = rwSel && rwSel.value ? rwSel.value : (mobileRw || "RW 01");
+          const rwData = PEKAYON_RW_DATA[curRw] || PEKAYON_RW_DATA["RW 01"];
+          setMapPosition(rwData.lat, rwData.lng, `Presisi ${curRw} Pekayon`);
+          window.liveGpsAddress = `${rwData.road}, ${curRw}, Kel. Pekayon`;
+          mobileAddress = rwData.road;
+          const disp = document.getElementById("u-display-location");
+          if (disp) disp.textContent = window.liveGpsAddress;
           updateLiveHudClock();
           if (label) label.textContent = "Refresh GPS";
           if (btn) btn.disabled = false;
-          showToast("GPS offline atau izin lokasi belum diaktifkan.", "warning");
+          showToast(`Menggunakan koordinat presisi ${curRw} Pekayon.`, "info");
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
       );
     } else {
       showToast("Browser tidak mendukung geolokasi GPS.", "warning");
@@ -5794,16 +5790,25 @@ try {
           // Fallback ke default RW 01 Pekayon jika GPS tidak tersedia
           console.warn("GPS startup:", err.message);
           const rwSel = document.getElementById("u-rw-select");
-          const curRw = rwSel ? rwSel.value : "RW 01";
+          const curRw = rwSel && rwSel.value ? rwSel.value : (mobileRw || "RW 01");
           const rwData = PEKAYON_RW_DATA[curRw] || PEKAYON_RW_DATA["RW 01"];
-          setMapPosition(rwData.lat, rwData.lng, `Default ${curRw} Pekayon`);
+          setMapPosition(rwData.lat, rwData.lng, `Presisi ${curRw} Pekayon`);
+          window.liveGpsAddress = `${rwData.road}, ${curRw}, Kel. Pekayon`;
+          mobileAddress = rwData.road;
+          const disp = document.getElementById("u-display-location");
+          if (disp) disp.textContent = window.liveGpsAddress;
+          updateLiveHudClock();
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+        { enableHighAccuracy: false, timeout: 6000, maximumAge: 30000 }
       );
     } else {
       // Tanpa GPS: tampilkan pusat RW 01 Pekayon
       const rwData = PEKAYON_RW_DATA["RW 01"];
-      setMapPosition(rwData.lat, rwData.lng, "Default RW 01 Pekayon");
+      setMapPosition(rwData.lat, rwData.lng, "Presisi RW 01 Pekayon");
+      window.liveGpsAddress = `${rwData.road}, RW 01, Kel. Pekayon`;
+      mobileAddress = rwData.road;
+      const disp = document.getElementById("u-display-location");
+      if (disp) disp.textContent = window.liveGpsAddress;
     }
   }
 
