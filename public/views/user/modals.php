@@ -52,22 +52,11 @@
       </div>
     </div>
 
-    <!-- Tombol Aksi Bawah: Shutter Jepret, Galeri & Auto Foto GPS -->
-    <div class="camera-bottom-bar" style="justify-content:center;gap:18px;flex-wrap:wrap;">
-      <input type="file" id="camera-file-input" accept="image/*" style="display:none;" onchange="handleFileSelect(event)">
+    <!-- Tombol Aksi Bawah: Hanya Shutter Jepret Kamera Lapangan -->
+    <div class="camera-bottom-bar" style="justify-content:center;">
       <input type="file" id="camera-native-input" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelect(event)">
-      <button type="button" class="cam-btn-secondary" onclick="document.getElementById('camera-file-input').click()" title="Unggah Foto dari Galeri / File Perangkat">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span>Galeri</span>
-      </button>
-
       <button type="button" class="cam-shutter-btn" id="cam-shutter-btn" onclick="captureLivePhoto()" title="Jepret Foto Kamera Lapangan">
         <div class="shutter-inner"></div>
-      </button>
-
-      <button type="button" class="cam-btn-secondary" onclick="generateSimulatedCurrentPhoto()" title="Buat Foto Otomatis Bertanda Air GPS (Tanpa Kamera)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <span>Auto Foto</span>
       </button>
     </div>
   </div>

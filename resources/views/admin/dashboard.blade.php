@@ -878,31 +878,33 @@ try {
       const cnt = counts[c.key];
       const pct = Math.round((cnt / total) * 100);
       return `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #F8FAFC;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:8px;height:8px;border-radius:50%;background:${c.color};display:inline-block;flex-shrink:0;"></span>
-            <span style="font-size:0.8rem;font-weight:600;color:#1E293B;">${c.label}</span>
+        <div class="dash-legend-row">
+          <div class="dash-legend-left">
+            <span class="dash-legend-dot" style="background:${c.color};"></span>
+            <span class="dash-legend-name" title="${c.label}">${c.label}</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:0.8rem;font-weight:700;color:#0F172A;">${cnt}</span>
-            <span style="font-size:0.72rem;font-weight:600;color:#64748B;min-width:28px;text-align:right;">${pct}%</span>
+          <div class="dash-legend-right">
+            <span class="dash-legend-cnt">${cnt}</span>
+            <span class="dash-legend-pct">${pct}%</span>
           </div>
         </div>
       `;
     }).join("");
 
     container.innerHTML = `
-      <div style="display:flex;align-items:center;gap:20px;padding:4px 0;">
+      <div class="dash-category-wrap">
         <!-- Donut Chart Bulat -->
-        <div style="width:114px;height:114px;border-radius:50%;background:${conicBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 2px rgba(0,0,0,0.06);transition:transform 0.2s;" title="Total: ${allReports.length} Tugas">
-          <div style="width:72px;height:72px;border-radius:50%;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,23,42,0.08);">
-            <strong style="font-size:1.25rem;font-weight:900;color:#0F172A;line-height:1;">${allReports.length}</strong>
-            <span style="font-size:0.65rem;color:#64748B;font-weight:700;margin-top:2px;">Tugas</span>
+        <div class="dash-donut-box" title="Total: ${allReports.length} Tugas">
+          <div class="dash-donut-conic" style="background:${conicBg};">
+            <div class="dash-donut-center">
+              <strong class="dash-donut-val">${allReports.length}</strong>
+              <span class="dash-donut-label">Tugas</span>
+            </div>
           </div>
         </div>
 
         <!-- Legend Rincian -->
-        <div style="flex:1;display:flex;flex-direction:column;">
+        <div class="dash-legend-box">
           ${rowsHtml}
         </div>
       </div>
@@ -950,20 +952,59 @@ try {
       `;
     }).join("");
 
+    const mobileCardsHtml = allRegu.map(r => {
+      const members = allAnggota.filter(a => a.reguId === r.id || (r.anggotaIds && r.anggotaIds.includes(a.id)));
+      const count = members.length;
+      const initial = (r.nama || 'R').replace(/[^a-zA-Z0-9]/g, '').charAt(0).toUpperCase() || 'R';
+
+      return `
+        <div class="dash-regu-card-mobile" onclick="openPopupPersonelRegu('${r.id}')">
+          <div class="dash-regu-card-head">
+            <div class="dash-regu-card-title-group">
+              <div class="dash-regu-avatar-badge">${initial}</div>
+              <div>
+                <div class="dash-regu-card-name">${r.nama}</div>
+                <div class="dash-regu-card-zone">${r.wilayah || 'Wilayah 10 RW'}</div>
+              </div>
+            </div>
+            <span class="dash-regu-pill-count">${count} Personel</span>
+          </div>
+          <div class="dash-regu-card-footer">
+            <div class="dash-regu-pj-box">
+              <span class="dash-regu-pj-label">Penanggung Jawab</span>
+              <span class="dash-regu-pj-val">${r.ketua && r.ketua !== '-' ? r.ketua : '-'}${r.noHp && r.noHp !== '-' ? ` <span class="dash-regu-pj-phone">(${r.noHp})</span>` : ''}</span>
+            </div>
+            <span class="dash-regu-card-link-btn">
+              <span>Lihat</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </span>
+          </div>
+        </div>
+      `;
+    }).join("");
+
     container.innerHTML = `
-      <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-        <thead>
-          <tr style="border-bottom:1.5px solid #E2E8F0;color:#64748B;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;">
-            <th style="padding:0 8px 8px;text-align:left;font-weight:700;">Regu</th>
-            <th style="padding:0 8px 8px;text-align:left;font-weight:700;">Penanggung Jawab</th>
-            <th style="padding:0 8px 8px;text-align:center;font-weight:700;">Kekuatan</th>
-            <th style="padding:0 8px 8px;text-align:right;font-weight:700;">Anggota</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rowsHtml}
-        </tbody>
-      </table>
+      <!-- Desktop Roster Table -->
+      <div class="desktop-only-table">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+          <thead>
+            <tr style="border-bottom:1.5px solid #E2E8F0;color:#64748B;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;">
+              <th style="padding:0 8px 8px;text-align:left;font-weight:700;">Regu</th>
+              <th style="padding:0 8px 8px;text-align:left;font-weight:700;">Penanggung Jawab</th>
+              <th style="padding:0 8px 8px;text-align:center;font-weight:700;">Kekuatan</th>
+              <th style="padding:0 8px 8px;text-align:right;font-weight:700;">Anggota</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Touch Cards Stack -->
+      <div class="mobile-only-cards dash-regu-cards-wrap">
+        ${mobileCardsHtml}
+      </div>
     `;
   }
 

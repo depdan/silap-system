@@ -6,10 +6,6 @@
         <div style="font-size:0.75rem;color:#64748B;margin-top:2px;">Laporan terpisah per-regu &amp; periode penugasan</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-        <button type="button" class="btn-export-excel-user" id="btn-user-export-excel" onclick="downloadUserLaporanExcel()" title="Download rekap laporan ke format file Excel (.xlsx)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span id="btn-user-excel-label">Export Excel</span>
-        </button>
         <button type="button" class="user-pill-btn primary" onclick="switchUserTab('form')">+ Buat Laporan</button>
       </div>
     </div>

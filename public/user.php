@@ -339,7 +339,7 @@ try {
     .user-topbar-brand-text {
       min-width: 0;
       flex: 1 1 auto;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .user-topbar-logo {
@@ -357,18 +357,16 @@ try {
       letter-spacing: -0.02em;
       line-height: 1.2;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .user-topbar-sub {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--color-slate-500);
-      line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--color-slate-600);
+      line-height: 1.25;
+      white-space: normal;
+      overflow: visible;
+      word-break: break-word;
     }
 
     .user-topbar-actions {
@@ -1553,6 +1551,35 @@ try {
       transform: scale(0.98) !important;
     }
 
+    .btn-step-draft {
+      background: #FFFBEB !important;
+      border: 1.5px solid #FDE68A !important;
+      color: #B45309 !important;
+      border-radius: var(--radius-lg) !important;
+      padding: 13px 18px !important;
+      font-family: inherit !important;
+      font-size: 0.9rem !important;
+      font-weight: 800 !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      transition: all 0.15s ease !important;
+      white-space: nowrap !important;
+      min-height: 50px !important;
+    }
+
+    .btn-step-draft:hover {
+      background: #FEF3C7 !important;
+      color: #92400E !important;
+      border-color: #F59E0B !important;
+    }
+
+    .btn-step-draft:active {
+      transform: scale(0.98) !important;
+    }
+
     .btn-kirim-laporan {
       flex: 1 !important;
       min-height: 50px !important;
@@ -2607,6 +2634,7 @@ try {
     .badge-time-chip.past {
       background: #FEF3C7;
       color: #92400E;
+    }
     /* ==========================================================
        COMPREHENSIVE MULTI-TIER MOBILE RESPONSIVE ENGINE
        Seamless Layout Optimization for 320px - 540px Devices
@@ -2626,48 +2654,68 @@ try {
 
       .user-portal-topbar {
         display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        padding: 10px 12px !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 8px 10px !important;
         border-radius: 14px !important;
         margin-bottom: 9px !important;
         gap: 8px !important;
       }
       .user-topbar-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
         min-width: 0 !important;
-        width: 100% !important;
-        flex: none !important;
-        gap: 10px !important;
+        flex: 1 1 auto !important;
+      }
+      .user-topbar-logo {
+        width: 32px !important;
+        height: 32px !important;
+        flex-shrink: 0 !important;
       }
       .user-topbar-brand-text {
         min-width: 0 !important;
         flex: 1 1 auto !important;
-        overflow: hidden !important;
+        overflow: visible !important;
       }
-      .user-topbar-title { font-size: 0.94rem !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-      .user-topbar-sub { font-size: 0.74rem !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+      .user-topbar-title {
+        font-size: 0.92rem !important;
+        font-weight: 800 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        line-height: 1.15 !important;
+      }
+      .user-topbar-sub {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        line-height: 1.2 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        word-break: break-word !important;
+      }
       .user-topbar-actions {
         display: flex !important;
         align-items: center !important;
         justify-content: flex-end !important;
-        width: 100% !important;
-        gap: 6px !important;
-        padding-top: 8px !important;
-        border-top: 1px solid #F1F5F9 !important;
+        gap: 4px !important;
         flex-shrink: 0 !important;
+        border-top: none !important;
+        padding-top: 0 !important;
       }
       .topbar-live-status {
-        margin-right: auto !important;
-        padding: 4px 9px !important;
-        font-size: 0.72rem !important;
-        gap: 5px !important;
+        padding: 3px 6px !important;
+        font-size: 0.68rem !important;
+        gap: 4px !important;
         flex-shrink: 0 !important;
       }
       .user-pill-btn {
-        padding: 6px 11px !important;
-        font-size: 0.76rem !important;
-        gap: 5px !important;
-        min-height: 32px !important;
+        padding: 4px 8px !important;
+        font-size: 0.72rem !important;
+        gap: 4px !important;
+        min-height: 28px !important;
         flex-shrink: 0 !important;
       }
 
@@ -4079,52 +4127,92 @@ try {
 
   // ==========================================================
   // VALIDASI LANGKAH 1 (LOKASI & PERSONEL)
+  // Wajib Diisi: Wilayah RW, Nama Jalan, dan Patokan Lokasi
   // ==========================================================
-  function validateStep1() {
-    const regu = mobileRegu || (document.getElementById("u-regu-inp") ? document.getElementById("u-regu-inp").value.trim() : "Regu 1");
-    const job = mobileSelectedJob || "Pembersihan Jalan & Trotoar";
+  function validateStep1(showFeedback = true) {
+    const rwInp = document.getElementById("u-rw-select");
+    const alamatInp = document.getElementById("u-custom-address-inp");
+    const patokanInp = document.getElementById("u-patokan-inp");
+
+    const rwVal = rwInp ? rwInp.value.trim() : "";
+    const alamat = alamatInp ? alamatInp.value.trim() : "";
+    const patokan = patokanInp ? patokanInp.value.trim() : "";
+
+    // Reset error styling
+    [rwInp, alamatInp, patokanInp].forEach(el => {
+      if (el) {
+        el.style.borderColor = "";
+        el.style.boxShadow = "";
+      }
+    });
+
+    const missingFields = [];
+    let firstInvalid = null;
+
+    if (!rwVal || rwVal === "" || rwVal === "-- Pilih Wilayah RW --") {
+      missingFields.push("Wilayah RW");
+      if (rwInp) {
+        rwInp.style.borderColor = "#EF4444";
+        rwInp.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
+        if (!firstInvalid) firstInvalid = rwInp;
+      }
+    }
+
+    if (!alamat || alamat === "") {
+      missingFields.push("Nama Jalan / Lokasi");
+      if (alamatInp) {
+        alamatInp.style.borderColor = "#EF4444";
+        alamatInp.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
+        if (!firstInvalid) firstInvalid = alamatInp;
+      }
+    }
+
+    if (!patokan || patokan === "") {
+      missingFields.push("Patokan Lokasi");
+      if (patokanInp) {
+        patokanInp.style.borderColor = "#EF4444";
+        patokanInp.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
+        if (!firstInvalid) firstInvalid = patokanInp;
+      }
+    }
+
+    if (missingFields.length > 0) {
+      if (showFeedback) {
+        showToast("Wajib diisi: " + missingFields.join(", ") + " sebelum lanjut ke Dokumentasi Foto!", "warning");
+        if (firstInvalid) {
+          firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(() => firstInvalid.focus(), 350);
+        }
+      }
+      return false;
+    }
+
+    // Set nilai global setelah validasi lolos
+    mobileRw = rwVal;
+    mobileAddress = alamat;
+
     const petugasInp = document.getElementById("u-petugas-inp");
     let petugas = petugasInp ? petugasInp.value.trim() : "";
-    const noHpInp = document.getElementById("u-nohp-inp");
-    let noHp = noHpInp ? noHpInp.value.trim() : "";
-    const jmlInp = document.getElementById("u-jml-petugas-inp");
-    let jml = jmlInp ? parseInt(jmlInp.value, 10) : 4;
-    const alamatInp = document.getElementById("u-custom-address-inp");
-    let alamat = alamatInp ? alamatInp.value.trim() : "";
-    const patokanInp = document.getElementById("u-patokan-inp");
-    let patokan = patokanInp ? patokanInp.value.trim() : "";
-    const rwInp = document.getElementById("u-rw-select");
-    let rwVal = rwInp ? rwInp.value.trim() : "";
-
-    // Validasi isian wajib diisi secara mandiri oleh petugas
-    if (!rwVal) {
-      showToast("Silakan pilih Wilayah RW terlebih dahulu.", "warning");
-      if (rwInp) rwInp.focus();
-      return false;
-    }
-    if (!alamat) {
-      showToast("Nama jalan / lokasi pengerjaan wajib diisi.", "warning");
-      if (alamatInp) alamatInp.focus();
-      return false;
-    }
-    if (!patokan) {
-      showToast("Patokan detail lokasi pengerjaan wajib diisi.", "warning");
-      if (patokanInp) patokanInp.focus();
-      return false;
-    }
     if (!petugas) {
-      petugas = currentUser?.name || "Budi Santoso";
+      petugas = (currentUser && currentUser.name) ? currentUser.name : "Ahmad Suryadi";
       if (petugasInp) petugasInp.value = petugas;
     }
+
+    const noHpInp = document.getElementById("u-nohp-inp");
+    let noHp = noHpInp ? noHpInp.value.trim() : "";
     if (!noHp) {
-      noHp = currentUser?.no_hp || "081234567890";
+      noHp = (currentUser && currentUser.no_hp) ? currentUser.no_hp : "081234567890";
       if (noHpInp) noHpInp.value = noHp;
     }
+
+    const jmlInp = document.getElementById("u-jml-petugas-inp");
+    let jml = jmlInp ? parseInt(jmlInp.value, 10) : 4;
     if (!jml || jml < 1) {
       jml = 4;
       if (jmlInp) jmlInp.value = 4;
     }
 
+    updateLocationDisplay();
     return true;
   }
 
@@ -4250,6 +4338,15 @@ try {
   // Memungkinkan petugas memilih 0%, 50%, atau 100% dan membuka semua slot foto
   // ==========================================================
   function updateSesiState(forcedReport) {
+    const list = getLaporanDB();
+    const activeLap = forcedReport || (activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null);
+
+    // Status resmi pengiriman bertahap ke sistem:
+    // 1. hasSubmitted0: Laporan Awal (0%) telah berhasil dikirim ke database
+    // 2. hasSubmitted50: Progres Lapangan (50%) telah berhasil dikirim ke database
+    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
+    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+
     const isResume = !!activeEditingReportId;
     const sesiNoticeEl = document.getElementById("sesi-notice-container");
     const p0 = document.getElementById("pill-prog-0");
@@ -4261,12 +4358,22 @@ try {
     const cardSesudah = document.getElementById("slot-sesudah");
     const btnSubmitText = document.getElementById("btn-submit-text");
 
+    // Sinkronkan mobileProgres sesuai status laporan resmi
+    if (!hasSubmitted0) {
+      mobileProgres = 0;
+    } else if (!hasSubmitted50) {
+      mobileProgres = 50;
+    } else {
+      mobileProgres = 100;
+    }
+
     if (sesiNoticeEl) {
       sesiNoticeEl.className = "sesi-notice-banner initial";
+      const tahapBadge = !hasSubmitted0 ? "Tahap 1: Mulai Bekerja (0%)" : (!hasSubmitted50 ? "Tahap 2: Proses Pengerjaan (50%)" : "Tahap 3: Penyelesaian Tuntas (100%)");
       sesiNoticeEl.innerHTML = `
-        <div class="sesi-badge-tag">${isResume ? 'Pembaruan Laporan' : 'Pengisian Lapangan'} (${mobileProgres}%)</div>
-        <div class="sesi-title">Dokumentasi Foto Lapangan &amp; Kemajuan Tugas</div>
-        <div class="sesi-desc">Pilih persentase kemajuan (0%, 50%, atau 100%) dan lengkapi foto dokumentasi bertanda air GPS resmi.</div>
+        <div class="sesi-badge-tag">${tahapBadge}</div>
+        <div class="sesi-title">Dokumentasi Foto Lapangan Bertahap</div>
+        <div class="sesi-desc">Foto 0% lalu Kirim untuk membuka 50%. Foto 50% lalu Kirim untuk membuka 100%. Peringatan konfirmasi muncul saat pengiriman final 100%.</div>
       `;
     }
 
@@ -4278,57 +4385,124 @@ try {
     if (badge) badge.textContent = mobileProgres + "%";
 
     if (p0) {
-      p0.classList.remove("locked");
+      p0.classList.toggle("locked", false);
       p0.classList.toggle("active", mobileProgres === 0);
-      p0.title = "Pilih 0% (Mulai Bekerja)";
+      p0.title = "Tahap 0% (Mulai Bekerja)";
     }
     if (p50) {
-      p50.classList.remove("locked");
-      p50.classList.toggle("active", mobileProgres > 0 && mobileProgres < 100);
-      p50.title = "Pilih 50% (Sedang Dikerjakan)";
+      p50.classList.toggle("locked", !hasSubmitted0);
+      p50.classList.toggle("active", mobileProgres === 50);
+      p50.title = hasSubmitted0 ? "Tahap 50% (Sedang Dikerjakan)" : "Terkunci: Kirim 0% Dulu";
     }
     if (p100) {
-      p100.classList.remove("locked");
+      p100.classList.toggle("locked", !hasSubmitted50);
       p100.classList.toggle("active", mobileProgres === 100);
-      p100.title = "Pilih 100% (Selesai Tuntas)";
+      p100.title = hasSubmitted50 ? "Tahap 100% (Selesai Tuntas)" : "Terkunci: Kirim 50% Dulu";
     }
 
-    // Seluruh slot foto aktif dan dapat diklik bebas
-    if (cardSebelum && !mobilePhotoSebelum) {
-      cardSebelum.className = "photo-slot-card";
-      cardSebelum.classList.remove("locked");
-      cardSebelum.onclick = () => openCameraModal("sebelum");
+    // ==========================================================
+    // LOGIKA URUTAN FOTO BERTAHAP (SEKUENSIAL & TERKUNCI)
+    // 1. Foto Sebelum (0%): Terbuka awal (wajib diambil & dikirim)
+    // 2. Foto Proses (50%): Terbuka HANYA SETELAH 0% DIKIRIM (hasSubmitted0)
+    // 3. Foto Sesudah (100%): Terbuka HANYA SETELAH 50% DIKIRIM (hasSubmitted50)
+    // ==========================================================
+
+    // Slot 1: Sebelum (0%)
+    if (cardSebelum) {
+      if (mobilePhotoSebelum) {
+        cardSebelum.classList.add("has-photo");
+        cardSebelum.classList.remove("locked");
+        cardSebelum.onclick = () => openCameraModal("sebelum");
+      } else {
+        cardSebelum.className = "photo-slot-card";
+        cardSebelum.classList.remove("locked", "has-photo");
+        cardSebelum.onclick = () => openCameraModal("sebelum");
+        cardSebelum.innerHTML = `
+          <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <div class="photo-slot-title">1. Sebelum (0%)</div>
+          <div class="photo-slot-sub">Kondisi awal lokasi</div>
+          <span class="photo-stage-pill ready">Wajib Awal</span>
+        `;
+      }
     }
-    if (cardProses && !mobilePhotoProses) {
-      cardProses.className = "photo-slot-card";
-      cardProses.classList.remove("locked");
-      cardProses.onclick = () => openCameraModal("proses");
-      cardProses.innerHTML = `
-        <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-        <div class="photo-slot-title">2. Proses Kerja (50%)</div>
-        <div class="photo-slot-sub">Saat pengerjaan</div>
-        <span class="photo-stage-pill ready">Siap Diambil</span>
-      `;
+
+    // Slot 2: Proses Kerja (50%)
+    if (cardProses) {
+      if (mobilePhotoProses) {
+        cardProses.classList.add("has-photo");
+        cardProses.classList.remove("locked");
+        cardProses.onclick = () => openCameraModal("proses");
+      } else if (hasSubmitted0) {
+        // Terbuka HANYA jika Laporan Awal (0%) SUDAH DIKIRIM
+        cardProses.className = "photo-slot-card";
+        cardProses.classList.remove("locked", "has-photo");
+        cardProses.onclick = () => openCameraModal("proses");
+        cardProses.innerHTML = `
+          <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <div class="photo-slot-title">2. Proses Kerja (50%)</div>
+          <div class="photo-slot-sub">Saat pengerjaan</div>
+          <span class="photo-stage-pill ready">Siap Diambil</span>
+        `;
+      } else {
+        // Terkunci sebelum 0% dikirim
+        cardProses.className = "photo-slot-card locked";
+        cardProses.classList.remove("has-photo");
+        cardProses.onclick = () => {
+          showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+        };
+        cardProses.innerHTML = `
+          <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <div class="photo-slot-title">2. Proses Kerja (50%)</div>
+          <div class="photo-slot-sub">Saat pengerjaan</div>
+          <span class="photo-stage-pill pending">Terkunci (Kirim 0% Dulu)</span>
+        `;
+      }
     }
-    if (cardSesudah && !mobilePhotoSesudah) {
-      cardSesudah.className = "photo-slot-card";
-      cardSesudah.classList.remove("locked");
-      cardSesudah.onclick = () => openCameraModal("sesudah");
-      cardSesudah.innerHTML = `
-        <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-        <div class="photo-slot-title">3. Sesudah (100%)</div>
-        <div class="photo-slot-sub">Hasil akhir tuntas</div>
-        <span class="photo-stage-pill ready">Siap Diambil</span>
-      `;
+
+    // Slot 3: Sesudah (100%)
+    if (cardSesudah) {
+      if (mobilePhotoSesudah) {
+        cardSesudah.classList.add("has-photo");
+        cardSesudah.classList.remove("locked");
+        cardSesudah.onclick = () => openCameraModal("sesudah");
+      } else if (hasSubmitted50) {
+        // Terbuka HANYA jika Progres Lapangan (50%) SUDAH DIKIRIM
+        cardSesudah.className = "photo-slot-card";
+        cardSesudah.classList.remove("locked", "has-photo");
+        cardSesudah.onclick = () => openCameraModal("sesudah");
+        cardSesudah.innerHTML = `
+          <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <div class="photo-slot-title">3. Sesudah (100%)</div>
+          <div class="photo-slot-sub">Hasil akhir tuntas</div>
+          <span class="photo-stage-pill ready">Siap Diambil</span>
+        `;
+      } else {
+        // Terkunci sebelum 50% dikirim
+        const lockMsg = !hasSubmitted0 
+          ? "Kirim Laporan Awal (0%) terlebih dahulu!" 
+          : "Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!";
+        const lockPill = !hasSubmitted0 ? "Terkunci (Kirim 0% Dulu)" : "Terkunci (Kirim 50% Dulu)";
+        cardSesudah.className = "photo-slot-card locked";
+        cardSesudah.classList.remove("has-photo");
+        cardSesudah.onclick = () => {
+          showToast(lockMsg, "warning");
+        };
+        cardSesudah.innerHTML = `
+          <svg class="photo-camera-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <div class="photo-slot-title">3. Sesudah (100%)</div>
+          <div class="photo-slot-sub">Hasil akhir tuntas</div>
+          <span class="photo-stage-pill pending">${lockPill}</span>
+        `;
+      }
     }
 
     if (btnSubmitText) {
-      if (mobileProgres === 100) {
-        btnSubmitText.textContent = "Kirim Laporan Tuntas (100% Selesai)";
-      } else if (mobileProgres >= 50) {
-        btnSubmitText.textContent = "Kirim Progres Lapangan (" + mobileProgres + "%)";
+      if (hasSubmitted50) {
+        btnSubmitText.textContent = "Kirim Laporan Tuntas (100% Selesai – 3 Foto Lengkap)";
+      } else if (hasSubmitted0) {
+        btnSubmitText.textContent = "Kirim Progres Lapangan (Progres 50% – Foto Proses)";
       } else {
-        btnSubmitText.textContent = "Kirim Laporan Awal (0% Mulai)";
+        btnSubmitText.textContent = "Kirim Laporan Awal (Mulai 0% – Foto Sebelum)";
       }
     }
   }
@@ -4338,6 +4512,19 @@ try {
   // ==========================================================
   function setQuickProgres(val) {
     val = parseInt(val, 10);
+    const list = getLaporanDB();
+    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
+    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
+    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+
+    if (val >= 50 && !hasSubmitted0) {
+      showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+      return;
+    }
+    if (val >= 100 && !hasSubmitted50) {
+      showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
+      return;
+    }
     mobileProgres = val;
     const slider = document.getElementById("u-progres-range");
     if (slider) {
@@ -4348,7 +4535,20 @@ try {
   }
 
   function handleProgresSlider(val) {
-    mobileProgres = parseInt(val, 10);
+    val = parseInt(val, 10);
+    const list = getLaporanDB();
+    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
+    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
+    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+
+    if (val >= 50 && !hasSubmitted0) {
+      showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+      val = 0;
+    } else if (val >= 100 && !hasSubmitted50) {
+      showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
+      val = hasSubmitted0 ? 50 : 0;
+    }
+    mobileProgres = val;
     const slider = document.getElementById("u-progres-range");
     if (slider) slider.value = mobileProgres;
 
@@ -4370,12 +4570,12 @@ try {
 
     const btnText = document.getElementById("btn-submit-text");
     if (btnText) {
-      if (mobileProgres >= 100) {
-        btnText.textContent = "Kirim Laporan Tuntas (100% Selesai)";
-      } else if (mobileProgres >= 50) {
-        btnText.textContent = `Kirim Progres Lapangan (${mobileProgres}%)`;
+      if (hasSubmitted50) {
+        btnText.textContent = "Kirim Laporan Tuntas (100% Selesai – 3 Foto Lengkap)";
+      } else if (hasSubmitted0) {
+        btnText.textContent = "Kirim Progres Lapangan (Progres 50% – Foto Proses)";
       } else {
-        btnText.textContent = "Kirim Laporan Awal (0% Mulai)";
+        btnText.textContent = "Kirim Laporan Awal (Mulai 0% – Foto Sebelum)";
       }
     }
 
@@ -4481,35 +4681,72 @@ try {
     return "PKJ-" + nextNum;
   }
 
-  function updateLocationDisplay() {
+  // Helper: Dapatkan lokasi dan koordinat efektif yang sinkron dengan form pengerjaan
+  function getEffectiveLocation() {
     const rwSel = document.getElementById("u-rw-select");
     const addrInp = document.getElementById("u-custom-address-inp");
-    mobileRw = rwSel && rwSel.value ? rwSel.value : "";
+    const rw = rwSel && rwSel.value ? rwSel.value : mobileRw;
     const jalan = addrInp && addrInp.value.trim() ? addrInp.value.trim() : "";
 
-    // Gunakan live geocoded GPS jika tersedia, fallback ke formulir
-    const detected = typeof detectGpsLocationName === "function" ? detectGpsLocationName(liveCoords.lat, liveCoords.lng) : null;
-    const formLoc = [jalan, mobileRw, "Kel. Pekayon, Jakarta Timur"].filter(Boolean).join(", ");
-    const activeAddr = window.liveGpsAddress || detected || (jalan || mobileRw ? formLoc : "Pilih RW & ketik lokasi pengerjaan...");
-    mobileAddress = activeAddr;
+    let fullAddress = "";
+    let line1 = "";
+    let line2 = "";
+
+    if (jalan && rw) {
+      fullAddress = `${jalan}, ${rw}, Kel. Pekayon, Jakarta Timur`;
+      line1 = `${jalan},`;
+      line2 = `${rw}, Kel. Pekayon, Jakarta Timur`;
+    } else if (jalan) {
+      fullAddress = `${jalan}, Kel. Pekayon, Jakarta Timur`;
+      line1 = `${jalan},`;
+      line2 = "Kel. Pekayon, Jakarta Timur";
+    } else if (rw) {
+      fullAddress = `${rw}, Kel. Pekayon, Jakarta Timur`;
+      line1 = `${rw},`;
+      line2 = "Kel. Pekayon, Jakarta Timur";
+    } else if (mobileAddress && mobileAddress !== "Pilih RW & ketik lokasi pengerjaan...") {
+      fullAddress = mobileAddress;
+      const parts = mobileAddress.split(",");
+      line1 = (parts[0] ? parts[0].trim() : mobileAddress) + ",";
+      line2 = parts.length > 1 ? parts.slice(1).join(", ").trim() : "Kel. Pekayon, Jakarta Timur";
+    } else {
+      const detected = typeof detectGpsLocationName === "function" ? detectGpsLocationName(liveCoords.lat, liveCoords.lng) : null;
+      fullAddress = window.liveGpsAddress || detected || "Jl. Raya Kalisari No. 12, RW 01, Kel. Pekayon, Jakarta Timur";
+      const parts = fullAddress.split(",");
+      line1 = (parts[0] ? parts[0].trim() : fullAddress) + ",";
+      line2 = parts.length > 1 ? parts.slice(1).join(", ").trim() : "Kel. Pekayon, Jakarta Timur";
+    }
+
+    const lat = (liveCoords && liveCoords.lat !== undefined) ? liveCoords.lat : -6.335500;
+    const lng = (liveCoords && liveCoords.lng !== undefined) ? liveCoords.lng : 106.864200;
+    const accuracy = (liveCoords && liveCoords.accuracy !== undefined) ? liveCoords.accuracy : 5;
+
+    return { fullAddress, line1, line2, lat, lng, accuracy };
+  }
+
+  function updateLocationDisplay() {
+    const loc = getEffectiveLocation();
+    mobileAddress = loc.fullAddress;
 
     const disp = document.getElementById("u-display-location");
-    if (disp) disp.textContent = activeAddr;
+    if (disp) disp.textContent = loc.fullAddress;
 
     const coordsTextEl = document.getElementById("u-coords-text");
     if (coordsTextEl) {
-      const latStr = (liveCoords.lat >= 0 ? "+" : "") + liveCoords.lat.toFixed(6);
-      const lngStr = (liveCoords.lng >= 0 ? "+" : "") + liveCoords.lng.toFixed(6);
-      coordsTextEl.textContent = `Lat ${latStr}, Long ${lngStr} (Akurat ±${liveCoords.accuracy || 5}m)`;
+      const latStr = (loc.lat >= 0 ? "+" : "") + loc.lat.toFixed(6);
+      const lngStr = (loc.lng >= 0 ? "+" : "") + loc.lng.toFixed(6);
+      coordsTextEl.textContent = `Lat ${latStr}, Long ${lngStr} (Akurat ±${loc.accuracy}m)`;
     }
 
     const mapBtn = document.getElementById("btn-view-map");
     if (mapBtn) {
-      mapBtn.href = `https://www.google.com/maps?q=${liveCoords.lat},${liveCoords.lng}`;
+      mapBtn.href = `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
     }
 
+    const rwSel = document.getElementById("u-rw-select");
+    mobileRw = rwSel && rwSel.value ? rwSel.value : mobileRw;
     const badge = document.getElementById("u-header-badge");
-    if (badge) badge.textContent = (currentUser && currentUser.role === "admin" ? "Admin" : mobileRw);
+    if (badge) badge.textContent = (currentUser && currentUser.role === "admin" ? "Admin" : (mobileRw || "RW 01"));
 
     updateLiveHudClock();
   }
@@ -4595,10 +4832,22 @@ try {
         patokan: document.getElementById("u-patokan-inp") ? document.getElementById("u-patokan-inp").value : "",
         progres: mobileProgres,
         catatan: document.getElementById("u-catatan-inp") ? document.getElementById("u-catatan-inp").value : "",
-        photoSebelum: mobilePhotoSebelum || ""
+        photoSebelum: mobilePhotoSebelum || "",
+        photoProses: mobilePhotoProses || "",
+        photoSesudah: mobilePhotoSesudah || ""
       };
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
     } catch(e) {}
+  }
+
+  function manualSaveDraftClick() {
+    saveFormDraft();
+    const stPill = document.getElementById("draft-pill-status");
+    if (stPill) {
+      stPill.style.opacity = "1";
+      stPill.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Draf Tersimpan';
+    }
+    showToast("Draf laporan & foto berhasil disimpan! Anda dapat melanjutkannya kapan saja.", "success");
   }
 
   function loadFormDraft() {
@@ -4653,6 +4902,12 @@ try {
 
       if (d.photoSebelum) {
         setMobilePhotoSlot("sebelum", d.photoSebelum, "Draft");
+      }
+      if (d.photoProses) {
+        setMobilePhotoSlot("proses", d.photoProses, "Draft");
+      }
+      if (d.photoSesudah) {
+        setMobilePhotoSlot("sesudah", d.photoSesudah, "Draft");
       }
 
       if (d.progres !== undefined) setQuickProgres(d.progres);
@@ -4752,6 +5007,25 @@ try {
   // MODUL KAMERA GPS BERTANDA AIR (LIVE VIEWFINDER - 3 SLOT)
   // ==========================================================
   async function openCameraModal(slot) {
+    const list = getLaporanDB();
+    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
+    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
+    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+
+    if (slot === "proses" && !hasSubmitted0) {
+      showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
+      return;
+    }
+    if (slot === "sesudah") {
+      if (!hasSubmitted0) {
+        showToast("Kirim Laporan Awal (0%) terlebih dahulu!", "warning");
+        return;
+      }
+      if (!hasSubmitted50) {
+        showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
+        return;
+      }
+    }
     activeCameraSlot = slot;
     const modal = document.getElementById("camera-modal");
     const label = document.getElementById("cam-slot-label");
@@ -4872,29 +5146,36 @@ try {
     const timeStr = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
 
     const stageTag = activeCameraSlot === "sebelum" ? "FOTO SEBELUM (0%)" : activeCameraSlot === "proses" ? "PROSES PENGERJAAN" : "FOTO SESUDAH (100%)";
-    const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-    const activeAddr = window.liveGpsAddress || detected || mobileAddress;
-    const officer = (currentUser ? currentUser.name : "Budi Santoso") + " (PPSU Pekayon)";
+    const loc = getEffectiveLocation();
+    const officer = ((currentUser && currentUser.name) ? currentUser.name : "Ahmad Suryadi") + " (PPSU Pekayon)";
     const katInfo = KATEGORI_INFO[mobileSelectedKat] || { label: mobileSelectedJob };
 
     let photoDataUrl;
-    if (video && video.videoWidth > 0) {
-      photoDataUrl = applyWatermarkToImage(video, {
-        now: now,
-        time: timeStr,
-        date: dateStr,
-        day: dayStr,
-        lat: liveCoords.lat,
-        lng: liveCoords.lng,
-        accuracy: liveCoords.accuracy,
-        alamat: activeAddr,
-        badge: "PPSU DKI JAKARTA • " + stageTag,
-        officer: officer,
-        flipHorizontal: isCameraMirrored
-      });
+    if (video && video.videoWidth > 0 && typeof applyWatermarkToImage === "function") {
+      try {
+        photoDataUrl = applyWatermarkToImage(video, {
+          now: now,
+          time: timeStr,
+          date: dateStr,
+          day: dayStr,
+          lat: loc.lat,
+          lng: loc.lng,
+          accuracy: loc.accuracy,
+          alamat: loc.fullAddress,
+          addressLine1: loc.line1,
+          addressLine2: loc.line2,
+          badge: "PPSU DKI JAKARTA • " + stageTag,
+          officer: officer,
+          flipHorizontal: isCameraMirrored
+        });
+      } catch (err) {
+        console.warn("Watermark video error, fallback ke canvas:", err);
+        const progressVal = activeCameraSlot === "sebelum" ? 0 : activeCameraSlot === "proses" ? 50 : 100;
+        photoDataUrl = generateFieldPhoto(progressVal, katInfo.label, loc.fullAddress, loc.lat, loc.lng, officer);
+      }
     } else {
       const progressVal = activeCameraSlot === "sebelum" ? 0 : activeCameraSlot === "proses" ? 50 : 100;
-      photoDataUrl = generateFieldPhoto(progressVal, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
+      photoDataUrl = generateFieldPhoto(progressVal, katInfo.label, loc.fullAddress, loc.lat, loc.lng, officer);
     }
 
     if (navigator.vibrate) {
@@ -4908,67 +5189,102 @@ try {
   }
 
   function pickFromGallery() {
-    const fileInp = document.getElementById("camera-file-input");
-    if (fileInp) {
-      fileInp.click();
-    } else {
-      generateSimulatedCurrentPhoto();
-    }
+    showToast("Unggah foto dari galeri dinonaktifkan demi integritas pelaporan. Petugas wajib mengambil foto kamera langsung di lapangan!", "warning");
   }
 
   function handleFileSelect(event, type) {
     const targetType = type || activeCameraSlot || "sebelum";
-    const file = event && event.target && event.target.files ? event.target.files[0] : null;
+    const inputEl = event && event.target ? event.target : null;
+    const file = inputEl && inputEl.files ? inputEl.files[0] : null;
     if (!file) return;
 
+    // Tampilkan loading notice di viewfinder modal
+    const loading = document.getElementById("camera-loading-notice");
+    if (loading) {
+      loading.classList.remove("hidden");
+      loading.innerHTML = '<div class="cam-spinner"></div><span style="color:#FFF;font-weight:700;">Memproses foto &amp; stempel watermark GPS...</span>';
+    }
+
     const reader = new FileReader();
+    reader.onerror = function(err) {
+      console.error("FileReader error:", err);
+      if (loading) loading.classList.add("hidden");
+      showToast("Gagal membaca file foto dari galeri!", "error");
+      if (inputEl) inputEl.value = "";
+    };
+
     reader.onload = function(e) {
       const img = new Image();
-      img.onload = function() {
-        const now = new Date();
-        const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-        const dayStr = DAYS_ID[now.getDay()];
-        const dateStr = String(now.getDate()).padStart(2, "0") + "/" + String(now.getMonth() + 1).padStart(2, "0") + "/" + now.getFullYear();
-        const timeStr = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
-        const stageTag = targetType === "sebelum" ? "FOTO SEBELUM (0%)" : targetType === "proses" ? "PROSES PENGERJAAN" : "FOTO SESUDAH (100%)";
-        const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-        const activeAddr = window.liveGpsAddress || detected || mobileAddress;
-        const officer = (currentUser ? currentUser.name : "Budi Santoso") + " (PPSU Pekayon)";
-
-        const photoDataUrl = applyWatermarkToImage(img, {
-          now: now,
-          time: timeStr,
-          date: dateStr,
-          day: dayStr,
-          lat: liveCoords.lat,
-          lng: liveCoords.lng,
-          accuracy: liveCoords.accuracy,
-          alamat: activeAddr,
-          badge: "PPSU DKI JAKARTA • " + stageTag,
-          officer: officer,
-          flipHorizontal: false
-        });
-
-        setMobilePhotoSlot(targetType, photoDataUrl, timeStr);
-        closeCameraModal();
-        showToast("Foto galeri berhasil diunggah dengan watermark GPS!", "success");
+      img.onerror = function(err) {
+        console.error("Image load error:", err);
+        if (loading) loading.classList.add("hidden");
+        showToast("Format gambar tidak didukung atau file rusak!", "error");
+        if (inputEl) inputEl.value = "";
       };
+
+      img.onload = function() {
+        try {
+          const now = new Date();
+          const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+          const dayStr = DAYS_ID[now.getDay()];
+          const dateStr = String(now.getDate()).padStart(2, "0") + "/" + String(now.getMonth() + 1).padStart(2, "0") + "/" + now.getFullYear();
+          const timeStr = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+          const stageTag = targetType === "sebelum" ? "FOTO SEBELUM (0%)" : targetType === "proses" ? "PROSES PENGERJAAN" : "FOTO SESUDAH (100%)";
+          
+          const loc = getEffectiveLocation();
+          const officer = ((currentUser && currentUser.name) ? currentUser.name : "Ahmad Suryadi") + " (PPSU Pekayon)";
+
+          let photoDataUrl;
+          if (typeof applyWatermarkToImage === "function") {
+            photoDataUrl = applyWatermarkToImage(img, {
+              now: now,
+              time: timeStr,
+              date: dateStr,
+              day: dayStr,
+              lat: loc.lat,
+              lng: loc.lng,
+              accuracy: loc.accuracy,
+              alamat: loc.fullAddress,
+              addressLine1: loc.line1,
+              addressLine2: loc.line2,
+              badge: "PPSU DKI JAKARTA • " + stageTag,
+              officer: officer,
+              flipHorizontal: false
+            });
+          } else {
+            photoDataUrl = e.target.result;
+          }
+
+          setMobilePhotoSlot(targetType, photoDataUrl, timeStr);
+          closeCameraModal();
+          showToast("Foto kamera bertanda air GPS berhasil disimpan!", "success");
+        } catch (procErr) {
+          console.error("Gagal memproses watermark foto:", procErr);
+          const timeFallback = String(new Date().getHours()).padStart(2, "0") + ":" + String(new Date().getMinutes()).padStart(2, "0");
+          setMobilePhotoSlot(targetType, e.target.result, timeFallback);
+          closeCameraModal();
+          showToast("Foto tersimpan (mode kompatibilitas)", "info");
+        } finally {
+          if (loading) loading.classList.add("hidden");
+          if (inputEl) inputEl.value = "";
+        }
+      };
+
       img.src = e.target.result;
     };
+
     reader.readAsDataURL(file);
-    if (event && event.target) event.target.value = "";
   }
 
   function generateSimulatedCurrentPhoto() {
     const slot = activeCameraSlot || "sebelum";
     const now = new Date();
     const ts = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-    const officer = (currentUser ? currentUser.name : "Budi Santoso") + " (PPSU Pekayon)";
+    const officer = ((currentUser && currentUser.name) ? currentUser.name : "Ahmad Suryadi") + " (PPSU Pekayon)";
     const katInfo = KATEGORI_INFO[mobileSelectedKat] || { label: mobileSelectedJob };
-    const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-    const activeAddr = window.liveGpsAddress || detected || mobileAddress;
+    const loc = getEffectiveLocation();
     const progressVal = slot === "sebelum" ? 0 : slot === "proses" ? 50 : 100;
-    const photo = generateFieldPhoto(progressVal, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
+    const photo = generateFieldPhoto(progressVal, katInfo.label, loc.fullAddress, loc.lat, loc.lng, officer);
     setMobilePhotoSlot(slot, photo, ts);
     closeCameraModal();
     showToast("Foto simulasi GPS berhasil dibuat!", "success");
@@ -4976,12 +5292,26 @@ try {
   }
 
   function setMobilePhotoSlot(type, src, ts) {
-    if (type === "sebelum") mobilePhotoSebelum = src;
-    else if (type === "proses") mobilePhotoProses = src;
-    else mobilePhotoSesudah = src;
+    if (type === "sebelum") {
+      mobilePhotoSebelum = src;
+    } else if (type === "proses") {
+      mobilePhotoProses = src;
+      if (mobileProgres < 50) {
+        mobileProgres = 50;
+        const slider = document.getElementById("u-progres-range");
+        if (slider) slider.value = 50;
+        handleProgresSlider(50);
+      }
+    } else if (type === "sesudah") {
+      mobilePhotoSesudah = src;
+      mobileProgres = 100;
+      const slider = document.getElementById("u-progres-range");
+      if (slider) slider.value = 100;
+      handleProgresSlider(100);
+    }
 
     const card = document.getElementById("slot-" + type);
-    const labelTitle = type === "sebelum" ? "Sebelum (0%)" : type === "proses" ? "Proses Kerja" : "Sesudah (100%)";
+    const labelTitle = type === "sebelum" ? "Sebelum (0%)" : type === "proses" ? "Proses Kerja (50%)" : "Sesudah (100%)";
     if (card) {
       card.classList.add("has-photo");
       card.classList.remove("locked");
@@ -4989,6 +5319,7 @@ try {
       card.innerHTML = '<img src="' + src + '" class="photo-slot-img" alt="Foto ' + type + '">' +
                        '<div class="photo-slot-badge">' + labelTitle + ' • ' + ts + '</div>';
     }
+    updateSesiState();
     triggerDraftAutoSave();
   }
 
@@ -5027,16 +5358,15 @@ try {
     if (elDate) elDate.textContent = dateStr;
     if (elDay) elDay.textContent = dayStr;
 
-    const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-    const activeAddr = window.liveGpsAddress || detected || mobileAddress;
-    const parts = activeAddr.split(",");
-    if (elAddr1) elAddr1.textContent = (parts[0] ? parts[0].trim() : activeAddr) + ",";
-    if (elAddr2) elAddr2.textContent = parts.length > 1 ? parts.slice(1).join(", ").trim() : "Kel. Pekayon, Jakarta Timur";
+    // Sinkronkan alamat dan koordinat live dengan form & GPS
+    const loc = getEffectiveLocation();
+    if (elAddr1) elAddr1.textContent = loc.line1;
+    if (elAddr2) elAddr2.textContent = loc.line2;
 
     if (elCoords) {
-      const latStr = (liveCoords.lat >= 0 ? "+" : "") + liveCoords.lat.toFixed(6);
-      const lngStr = (liveCoords.lng >= 0 ? "+" : "") + liveCoords.lng.toFixed(6);
-      elCoords.textContent = `GPS: Lat ${latStr}, Long ${lngStr} (±${liveCoords.accuracy}m)`;
+      const latStr = (loc.lat >= 0 ? "+" : "") + loc.lat.toFixed(6);
+      const lngStr = (loc.lng >= 0 ? "+" : "") + loc.lng.toFixed(6);
+      elCoords.textContent = `GPS: Lat ${latStr}, Long ${lngStr} (±${loc.accuracy}m)`;
 
       const briefGps = document.getElementById("brief-gps-coords");
       if (briefGps) {
@@ -5164,6 +5494,10 @@ try {
 
   function onRwSelectChange() {
     const rwSel = document.getElementById("u-rw-select");
+    if (rwSel) {
+      rwSel.style.borderColor = "";
+      rwSel.style.boxShadow = "";
+    }
     const rw = rwSel ? rwSel.value : "";
     if (!rw) return;
     mobileRw = rw;
@@ -5345,8 +5679,8 @@ try {
     const officer = (currentUser ? currentUser.name : "Budi Santoso") + " (PPSU Pekayon)";
     const katInfo = KATEGORI_INFO[mobileSelectedKat] || { label: mobileSelectedJob };
 
-    const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-    const activeAddr = window.liveGpsAddress || detected || mobileAddress;
+    const loc = getEffectiveLocation();
+    const activeAddr = loc.fullAddress;
 
     const pSebelum = generateFieldPhoto(0, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
     setMobilePhotoSlot("sebelum", pSebelum, ts);
@@ -5355,13 +5689,17 @@ try {
   }
 
   function generateSimulatedProsesSesudah() {
+    if (!mobilePhotoSebelum) {
+      showToast("Ambil Foto 1 (Sebelum 0%) terlebih dahulu!", "warning");
+      return;
+    }
     const now = new Date();
     const ts = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
     const officer = (currentUser ? currentUser.name : "Budi Santoso") + " (PPSU Pekayon)";
     const katInfo = KATEGORI_INFO[mobileSelectedKat] || { label: mobileSelectedJob };
 
-    const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-    const activeAddr = window.liveGpsAddress || detected || mobileAddress;
+    const loc = getEffectiveLocation();
+    const activeAddr = loc.fullAddress;
 
     const pProses = generateFieldPhoto(50, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
     const pSesudah = generateFieldPhoto(100, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
@@ -5378,39 +5716,12 @@ try {
   }
 
   // ==========================================================
+  // 5. POP-UP KONFIRMASI PENGIRIMAN & SUBMIT BERTAHAP
+  // Logika Progressive:
+  // - Foto 0% -> Kirim untuk membuka 50%
+  // - Foto 50% -> Kirim untuk membuka 100%
+  // - Foto 100% -> Baru muncul peringatan konfirmasi sebelum kirim final
   // ==========================================================
-  // 5. POP-UP KONFIRMASI PENGIRIMAN (FINAL & TIDAK BISA DIEDIT)
-  // ==========================================================
-  function validateCurrentStagePhoto() {
-    const officer = (currentUser ? currentUser.name : "Budi Santoso") + " (PPSU Pekayon)";
-    const katInfo = KATEGORI_INFO[mobileSelectedKat] || { label: mobileSelectedJob };
-    const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-    const activeAddr = window.liveGpsAddress || detected || mobileAddress;
-    const now = new Date();
-    const ts = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-
-    // Auto-lengkapi foto GPS jika petugas belum sempat jepret agar fungsi tidak pernah macet
-    if (!mobilePhotoSebelum) {
-      mobilePhotoSebelum = generateFieldPhoto(0, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
-      setMobilePhotoSlot("sebelum", mobilePhotoSebelum, ts);
-      showToast("Foto Sebelum (0%) otomatis dibuat dengan watermark GPS!", "info");
-    }
-
-    if (mobileProgres >= 50 && !mobilePhotoProses) {
-      mobilePhotoProses = generateFieldPhoto(50, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
-      setMobilePhotoSlot("proses", mobilePhotoProses, ts);
-      showToast("Foto Proses Kerja (50%) otomatis dilengkapi!", "info");
-    }
-
-    if (mobileProgres >= 100 && !mobilePhotoSesudah) {
-      mobilePhotoSesudah = generateFieldPhoto(100, katInfo.label, activeAddr, liveCoords.lat, liveCoords.lng, officer);
-      setMobilePhotoSlot("sesudah", mobilePhotoSesudah, ts);
-      showToast("Foto Sesudah (100%) otomatis dilengkapi!", "info");
-    }
-
-    return true;
-  }
-
   function requestSubmitConfirmation() {
     // Validasi Langkah 1
     if (!validateStep1()) {
@@ -5418,8 +5729,40 @@ try {
       return;
     }
 
-    // Validasi Foto Tahap Berjalan (Foto wajib diisi!)
-    if (!validateCurrentStagePhoto()) {
+    const list = getLaporanDB();
+    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
+    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
+    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
+
+    // 1. TAHAP AWAL (0%): Kirim langsung untuk membuka tahap 50%
+    if (!hasSubmitted0) {
+      if (!mobilePhotoSebelum) {
+        showToast("Wajib mengambil Foto 1 (Sebelum 0%) terlebih dahulu sebelum mengirim laporan awal!", "warning");
+        const c1 = document.getElementById("slot-sebelum");
+        if (c1) c1.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      submitMobileLaporan();
+      return;
+    }
+
+    // 2. TAHAP PROGRES (50%): Kirim langsung untuk membuka tahap 100%
+    if (!hasSubmitted50) {
+      if (!mobilePhotoProses) {
+        showToast("Wajib mengambil Foto 2 (Proses Kerja 50%) terlebih dahulu sebelum mengirim progres lapangan!", "warning");
+        const c2 = document.getElementById("slot-proses");
+        if (c2) c2.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      submitMobileLaporan();
+      return;
+    }
+
+    // 3. TAHAP TUNTAS (100%): Munculkan peringatan konfirmasi bahwa 3 foto lengkap & sesuai
+    if (!mobilePhotoSesudah) {
+      showToast("Wajib mengambil Foto 3 (Sesudah 100%) terlebih dahulu untuk menyelesaikan laporan!", "warning");
+      const c3 = document.getElementById("slot-sesudah");
+      if (c3) c3.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -5429,18 +5772,7 @@ try {
       return;
     }
 
-    // Ambil data terkini untuk rangkuman
-    const list = getLaporanDB();
-    const isResume = !!activeEditingReportId;
-    let stageTxt = "Laporan Awal (0% Mulai)";
-    if (isResume) {
-      const curLap = list.find(r => r.id === activeEditingReportId);
-      if (!curLap || curLap.progres < 50) {
-        stageTxt = "Progres Sedang Berjalan (50% Proses)";
-      } else {
-        stageTxt = "Penuntasan Pekerjaan (100% Selesai)";
-      }
-    }
+    // Ambil data terkini untuk rangkuman modal
     const tugasTxt = `${mobileSelectedTugas || 'Tugas 1'} - ${mobileSelectedJob}`;
     const now = new Date();
     const tglTxt = `${mobileSelectedHari}, ${now.getDate()} ${ID_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
@@ -5450,9 +5782,8 @@ try {
     const presentCount = (document.getElementById("u-jml-petugas-inp") ? document.getElementById("u-jml-petugas-inp").value : "4");
     const presentList = teamMembers.filter(m => m.present).map(m => m.name).join(", ");
 
-    // Isi ke dalam elemen modal
     const sEl = document.getElementById("modal-recap-stage");
-    if (sEl) sEl.textContent = stageTxt;
+    if (sEl) sEl.textContent = "Penuntasan Pekerjaan (100% Selesai - 3 Foto Lengkap)";
 
     const tEl = document.getElementById("modal-recap-tugas");
     if (tEl) tEl.textContent = tugasTxt;
@@ -5475,7 +5806,7 @@ try {
     const chk = document.getElementById("chk-confirm-agree");
     if (chk) chk.checked = true;
 
-    // Tampilkan modal
+    // Tampilkan modal peringatan konfirmasi
     modal.style.display = "flex";
   }
 
@@ -5487,7 +5818,7 @@ try {
   function executeSubmitConfirmed() {
     const chk = document.getElementById("chk-confirm-agree");
     if (chk && !chk.checked) {
-      showToast("Harap centang pernyataan konfirmasi bahwa data sudah benar & sesuai!", "warning");
+      showToast("Harap centang konfirmasi bahwa seluruh data dan 3 foto sudah sesuai!", "warning");
       return;
     }
     closeConfirmModal();
@@ -5504,41 +5835,41 @@ try {
       return;
     }
 
-    // Validasi Foto Tahap Berjalan (Foto otomatis dilengkapi jika belum ada)
-    if (!validateCurrentStagePhoto()) {
-      return;
-    }
+    const list = getLaporanDB();
+    const activeLap = activeEditingReportId ? list.find(r => r.id === activeEditingReportId || r.noPekerjaan === activeEditingReportId) : null;
+    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
+    const hasSubmitted50 = !!(activeEditingReportId && activeLap && activeLap.progres >= 50 && activeLap.foto && activeLap.foto.length >= 2);
 
     const noHp = document.getElementById("u-nohp-inp") ? document.getElementById("u-nohp-inp").value.trim() : "081234567890";
     const jmlPetugas = document.getElementById("u-jml-petugas-inp") ? parseInt(document.getElementById("u-jml-petugas-inp").value, 10) || 4 : 4;
     const patokanVal = document.getElementById("u-patokan-inp") ? document.getElementById("u-patokan-inp").value.trim() : "";
     const catatan = document.getElementById("u-catatan-inp") ? document.getElementById("u-catatan-inp").value.trim() : "";
 
-    const list = getLaporanDB();
     const now = new Date();
     const tgl = now.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) + ", " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
     const officer = (document.getElementById("u-petugas-inp") && document.getElementById("u-petugas-inp").value.trim()) ? document.getElementById("u-petugas-inp").value.trim() : (currentUser ? currentUser.name : "Budi Santoso");
     const periodeHarian = `Laporan ${mobileSelectedHari} (${tgl.split(",")[0]}) • ${mobileSelectedTugas || 'Tugas 1'}`;
 
-    const detected = detectGpsLocationName(liveCoords.lat, liveCoords.lng);
-    const activeAddr = window.liveGpsAddress || detected || mobileAddress;
-    const targetProgres = parseInt(mobileProgres, 10) || 0;
+    const loc = getEffectiveLocation();
+    const activeAddr = loc.fullAddress;
 
-    if (!activeEditingReportId) {
+    // -------------------------------------------------------------
+    // TAHAP 1: KIRIM LAPORAN AWAL (0%) -> MEMBUKA TAHAP 50%
+    // -------------------------------------------------------------
+    if (!hasSubmitted0) {
+      if (!mobilePhotoSebelum) {
+        showToast("Wajib mengambil Foto 1 (Sebelum 0%) terlebih dahulu sebelum mengirim!", "warning");
+        const c1 = document.getElementById("slot-sebelum");
+        if (c1) c1.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       const reportId = generateNextJobNumber();
       const presentNames = teamMembers.filter(m => m.present).map(m => m.name).join(", ");
       
       const fotoList = [
         { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" }
       ];
-      if (targetProgres >= 50 && mobilePhotoProses) {
-        fotoList.push({ src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" });
-      }
-      if (targetProgres >= 100 && mobilePhotoSesudah) {
-        fotoList.push({ src: mobilePhotoSesudah, timestamp: tgl, name: "sesudah_" + reportId + ".jpg", tahap: "Sesudah (100%)" });
-      }
 
-      const isComplete = targetProgres >= 100;
       const reportData = {
         id: reportId,
         noPekerjaan: reportId,
@@ -5551,7 +5882,7 @@ try {
         deskripsi: catatan || ("Penanganan " + mobileSelectedJob.toLowerCase() + " di " + activeAddr + "."),
         alamat: activeAddr,
         lokasiDetail: patokanVal || ("Lokasi pengerjaan di area " + mobileRw),
-        kendala: catatan || (isComplete ? "Pekerjaan tuntas diselesaikan dengan hasil bersih dan rapi." : "Pekerjaan dimulai di lapangan."),
+        kendala: catatan || "Pekerjaan awal dimulai di lapangan.",
         petugas: officer,
         regu: mobileRegu || (document.getElementById("u-regu-inp") ? document.getElementById("u-regu-inp").value.trim() : "Regu 1"),
         role: mobileOfficerRole,
@@ -5560,12 +5891,12 @@ try {
         anggotaHadir: presentNames,
         wilayah: currentUser ? currentUser.wilayah : "jaktim",
         kelurahan: "Kel. Pekayon",
-        status: isComplete ? "selesai" : (targetProgres >= 50 ? "proses" : "belum"),
-        progres: targetProgres,
+        status: "belum",
+        progres: 0,
         tanggal: tgl,
         isoDate: currentCalendarDateStr || (now.toISOString().split("T")[0]),
-        gpsLat: liveCoords.lat,
-        gpsLng: liveCoords.lng,
+        gpsLat: loc.lat,
+        gpsLng: loc.lng,
         foto: fotoList
       };
 
@@ -5573,51 +5904,52 @@ try {
       saveLaporanDB(list);
       userReports = list;
 
-      if (isComplete) {
-        localStorage.removeItem("silap_active_task_id");
-        activeEditingReportId = null;
-        showToast("Laporan #" + reportId + " (" + (reportData.tugasKe || "Tugas 1") + ") berhasil diselesaikan (100% Tuntas)!", "success");
-        clearFormDraft();
-        resetFormFields();
-        updateTaskProgressStates();
-        renderUserHistory();
-        goToStep(1);
-        switchUserTab("history");
-      } else {
-        localStorage.setItem("silap_active_task_id", reportId);
-        activeEditingReportId = reportId;
-        showToast("Laporan #" + reportId + " (" + targetProgres + "%) berhasil disimpan!", "success");
-        updateTaskProgressStates();
-        renderUserHistory();
-        resumeReportFromHistory(reportId);
-      }
+      localStorage.setItem("silap_active_task_id", reportId);
+      activeEditingReportId = reportId;
+      mobileProgres = 50;
 
-    } else {
+      showToast("Laporan Awal (0%) berhasil dikirim! Tahap 50% sekarang terbuka. Silakan ambil Foto Proses Kerja!", "success");
+      updateTaskProgressStates();
+      renderUserHistory();
+
+      // Langsung bertahan di Langkah 2 (Formulir Progres & Foto)
+      switchUserTab("form");
+      goToStep(2);
+      updateSesiState(reportData);
+      setTimeout(() => {
+        const c2 = document.getElementById("slot-proses");
+        if (c2) c2.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+      return;
+    }
+
+    // -------------------------------------------------------------
+    // TAHAP 2: KIRIM PROGRES LAPANGAN (50%) -> MEMBUKA TAHAP 100%
+    // -------------------------------------------------------------
+    if (!hasSubmitted50) {
+      if (!mobilePhotoProses) {
+        showToast("Wajib mengambil Foto 2 (Proses Kerja 50%) terlebih dahulu sebelum mengirim!", "warning");
+        const c2 = document.getElementById("slot-proses");
+        if (c2) c2.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       const reportId = activeEditingReportId;
       const existingIndex = list.findIndex(r => String(r.id) === String(reportId) || String(r.noPekerjaan) === String(reportId));
       if (existingIndex === -1) {
-        showToast("Laporan tidak ditemukan!", "error");
+        showToast("Laporan aktif tidak ditemukan!", "error");
         return;
       }
       const oldLap = list[existingIndex];
-      const isComplete = targetProgres >= 100;
-
       const fotoList = [
-        { src: mobilePhotoSebelum || (oldLap.foto && oldLap.foto[0] ? oldLap.foto[0].src : ""), timestamp: (oldLap.foto && oldLap.foto[0] ? oldLap.foto[0].timestamp : tgl), name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" }
+        (oldLap.foto && oldLap.foto[0]) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
+        { src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" }
       ];
-      if (mobilePhotoProses || (oldLap.foto && oldLap.foto[1])) {
-        fotoList.push({ src: mobilePhotoProses || (oldLap.foto && oldLap.foto[1] ? oldLap.foto[1].src : ""), timestamp: (oldLap.foto && oldLap.foto[1] ? oldLap.foto[1].timestamp : tgl), name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" });
-      }
-      if (isComplete && (mobilePhotoSesudah || (oldLap.foto && oldLap.foto[2]))) {
-        fotoList.push({ src: mobilePhotoSesudah || (oldLap.foto && oldLap.foto[2] ? oldLap.foto[2].src : ""), timestamp: (oldLap.foto && oldLap.foto[2] ? oldLap.foto[2].timestamp : tgl), name: "sesudah_" + reportId + ".jpg", tahap: "Sesudah (100%)" });
-      }
 
       const updatedReport = {
         ...oldLap,
-        status: isComplete ? "selesai" : (targetProgres >= 50 ? "proses" : "belum"),
-        progres: targetProgres,
-        tugasKe: mobileSelectedTugas || oldLap.tugasKe || "Tugas 1",
-        kendala: catatan || oldLap.kendala || (isComplete ? "Pekerjaan tuntas diselesaikan dengan hasil bersih dan rapi." : "Pekerjaan sedang berlangsung."),
+        status: "proses",
+        progres: 50,
+        kendala: catatan || oldLap.kendala || "Pekerjaan sedang berlangsung di lapangan.",
         foto: fotoList
       };
 
@@ -5625,23 +5957,69 @@ try {
       saveLaporanDB(list);
       userReports = list;
 
-      if (isComplete) {
-        localStorage.removeItem("silap_active_task_id");
-        activeEditingReportId = null;
-        showToast("Pekerjaan #" + reportId + " (" + (updatedReport.tugasKe || "Tugas 1") + ") berhasil diselesaikan (100% Tuntas)!", "success");
-        clearFormDraft();
-        resetFormFields();
-        updateTaskProgressStates();
-        renderUserHistory();
-        goToStep(1);
-        switchUserTab("history");
-      } else {
-        localStorage.setItem("silap_active_task_id", reportId);
-        showToast("Pembaruan Laporan #" + reportId + " (" + targetProgres + "%) berhasil disimpan!", "success");
-        updateTaskProgressStates();
-        renderUserHistory();
-        updateSesiState(updatedReport);
+      mobileProgres = 100;
+
+      showToast("Progres Lapangan (50%) berhasil dikirim! Tahap 100% sekarang terbuka. Silakan ambil Foto Sesudah!", "success");
+      updateTaskProgressStates();
+      renderUserHistory();
+
+      // Langsung bertahan di Langkah 2
+      switchUserTab("form");
+      goToStep(2);
+      updateSesiState(updatedReport);
+      setTimeout(() => {
+        const c3 = document.getElementById("slot-sesudah");
+        if (c3) c3.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+      return;
+    }
+
+    // -------------------------------------------------------------
+    // TAHAP 3: KIRIM LAPORAN TUNTAS (100% SELESAI)
+    // -------------------------------------------------------------
+    {
+      if (!mobilePhotoSesudah) {
+        showToast("Wajib mengambil Foto 3 (Sesudah 100%) terlebih dahulu untuk menyelesaikan laporan!", "warning");
+        const c3 = document.getElementById("slot-sesudah");
+        if (c3) c3.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
       }
+      const reportId = activeEditingReportId;
+      const existingIndex = list.findIndex(r => String(r.id) === String(reportId) || String(r.noPekerjaan) === String(reportId));
+      if (existingIndex === -1) {
+        showToast("Laporan aktif tidak ditemukan!", "error");
+        return;
+      }
+      const oldLap = list[existingIndex];
+      const fotoList = [
+        (oldLap.foto && oldLap.foto[0]) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
+        (oldLap.foto && oldLap.foto[1]) ? oldLap.foto[1] : { src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" },
+        { src: mobilePhotoSesudah, timestamp: tgl, name: "sesudah_" + reportId + ".jpg", tahap: "Sesudah (100%)" }
+      ];
+
+      const updatedReport = {
+        ...oldLap,
+        status: "selesai",
+        progres: 100,
+        kendala: catatan || oldLap.kendala || "Pekerjaan tuntas diselesaikan dengan hasil bersih dan rapi.",
+        foto: fotoList
+      };
+
+      list[existingIndex] = updatedReport;
+      saveLaporanDB(list);
+      userReports = list;
+
+      localStorage.removeItem("silap_active_task_id");
+      activeEditingReportId = null;
+      mobileProgres = 0;
+
+      showToast("Laporan #" + reportId + " (" + (updatedReport.tugasKe || "Tugas 1") + ") berhasil diselesaikan (100% Tuntas)!", "success");
+      clearFormDraft();
+      resetFormFields();
+      updateTaskProgressStates();
+      renderUserHistory();
+      goToStep(1);
+      switchUserTab("history");
     }
   }
 

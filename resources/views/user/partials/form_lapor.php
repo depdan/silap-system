@@ -236,7 +236,7 @@
                 <span>Wilayah RW (Pekayon)&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 <span class="field-tag-required">Wajib Diisi</span>
               </div>
-              <select id="u-rw-select" class="u-input-field" onchange="onRwSelectChange();" required>
+              <select id="u-rw-select" class="u-input-field" onchange="onRwSelectChange(); this.style.borderColor=''; this.style.boxShadow='';" required>
                 <option value="" disabled selected>-- Pilih Wilayah RW --</option>
                 <option value="RW 01">RW 01 - Gandaria / Kalisari</option>
                 <option value="RW 02">RW 02 - Lapan</option>
@@ -258,7 +258,7 @@
                 <span>Nama Jalan / Lokasi&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 <span class="field-tag-required">Wajib Diisi</span>
               </div>
-              <input type="text" id="u-custom-address-inp" class="u-input-field" placeholder="Ketik nama jalan / lokasi pengerjaan (contoh: Jl. Raya Kalisari No. 12)..." value="" oninput="updateLocationDisplay(); triggerDraftAutoSave();" required>
+              <input type="text" id="u-custom-address-inp" class="u-input-field" placeholder="Ketik nama jalan / lokasi pengerjaan (contoh: Jl. Raya Kalisari No. 12)..." value="" oninput="updateLocationDisplay(); triggerDraftAutoSave(); this.style.borderColor=''; this.style.boxShadow='';" required>
             </div>
 
             <!-- Patokan Lokasi (Wajib Diisi Penuh) -->
@@ -267,7 +267,7 @@
                 <span>Patokan Lokasi&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 <span class="field-tag-required">Wajib Diisi</span>
               </div>
-              <input type="text" id="u-patokan-inp" class="u-input-field" placeholder="Ketik patokan detail (contoh: Dekat Kantor Kelurahan / Pos RW 01)..." value="" oninput="triggerDraftAutoSave();" required>
+              <input type="text" id="u-patokan-inp" class="u-input-field" placeholder="Ketik patokan detail (contoh: Dekat Kantor Kelurahan / Pos RW 01)..." value="" oninput="triggerDraftAutoSave(); this.style.borderColor=''; this.style.boxShadow='';" required>
             </div>
 
             <!-- Kontak WhatsApp Regu & Nama Petugas Pelapor -->
@@ -454,9 +454,9 @@
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
-                <div class="photo-slot-title">2. Proses Kerja</div>
+                <div class="photo-slot-title">2. Proses Kerja (50%)</div>
                 <div class="photo-slot-sub">Saat pengerjaan</div>
-                <span class="photo-stage-pill pending">Selesaikan Nanti</span>
+                <span class="photo-stage-pill pending">Terkunci (Kirim 0% Dulu)</span>
               </div>
 
               <!-- 3. Foto Sesudah (100%) -->
@@ -467,16 +467,8 @@
                 </svg>
                 <div class="photo-slot-title">3. Sesudah (100%)</div>
                 <div class="photo-slot-sub">Hasil akhir tuntas</div>
-                <span class="photo-stage-pill pending">Tahap Terakhir</span>
+                <span class="photo-stage-pill pending">Terkunci (Kirim 50% Dulu)</span>
               </div>
-            </div>
-
-            <!-- Tombol Cepat Lengkapi 3 Foto Instan (Simulasi Watermark GPS) -->
-            <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-              <button type="button" class="btn-step-back" onclick="generateSimulated3Photos()" style="padding:7px 14px;background:#FFF7ED;border:1px solid #FFEDD5;color:#EA580C;font-size:0.78rem;font-weight:700;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;" title="Buat 3 foto bertanda air GPS resmi sekaligus dalam 1 klik">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <span>Lengkapi 3 Foto Instan</span>
-              </button>
             </div>
           </div>
 
@@ -502,7 +494,7 @@
             </button>
             <button type="button" class="btn-kirim-laporan" id="btn-submit-mobile-lapor" onclick="requestSubmitConfirmation()">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              <span id="btn-submit-text">Kirim Laporan Awal (0%)</span>
+              <span id="btn-submit-text">Kirim Laporan Awal (Mulai 0% – Foto Sebelum)</span>
             </button>
           </div>
         </div>

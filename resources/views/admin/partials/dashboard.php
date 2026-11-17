@@ -77,9 +77,9 @@
             </div>
             <div class="kpi-body">
               <div class="kpi-label">Petugas Lapangan</div>
-              <div class="kpi-value" id="ds-petugas-cnt" style="display:flex;flex-direction:column;line-height:1.1;">
+              <div class="kpi-value" id="ds-petugas-cnt" style="display:inline-flex;align-items:baseline;gap:4px;">
                 <span id="ds-petugas-num">10</span>
-                <span id="ds-petugas-text" style="font-size:0.92rem;font-weight:700;color:#0F172A;margin-top:1px;">Personel</span>
+                <span id="ds-petugas-text" style="font-size:0.8rem;font-weight:700;color:#64748B;">Personel</span>
               </div>
               <div class="kpi-meta">2 regu aktif bertugas</div>
             </div>
@@ -90,13 +90,13 @@
         <div class="admin-dash-two-col">
           
           <!-- KOLOM 1: SEBARAN BIDANG TUGAS (DESAIN DATA-DRIVEN BERSIH) -->
-          <div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(15,23,42,0.03);">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+          <div class="admin-dash-card">
+            <div class="admin-dash-card-header">
               <div>
-                <h3 style="font-size:0.95rem;font-weight:800;color:#0F172A;margin:0;">Sebaran Bidang Pekerjaan</h3>
-                <p style="font-size:0.75rem;color:#64748B;margin:2px 0 0;">Distribusi 10 penanganan tugas aktif</p>
+                <h3 class="admin-dash-card-title">Sebaran Bidang Pekerjaan</h3>
+                <p class="admin-dash-card-sub">Distribusi 10 penanganan tugas aktif</p>
               </div>
-              <a href="javascript:void(0)" onclick="switchAdminTab('rekap')" style="font-size:0.78rem;color:#FF5416;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:3px;padding-top:2px;">
+              <a href="javascript:void(0)" onclick="switchAdminTab('rekap')" class="admin-dash-card-link">
                 <span>Rekap Lengkap</span>
                 <span>&rarr;</span>
               </a>
@@ -107,20 +107,20 @@
             </div>
           </div>
 
-          <!-- KOLOM 2: REGU LAPANGAN (TABEL ROSTER PROFESIONAL) -->
-          <div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(15,23,42,0.03);">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+          <!-- KOLOM 2: REGU LAPANGAN (TABEL ROSTER PROFESIONAL & MOBILE CARDS) -->
+          <div class="admin-dash-card">
+            <div class="admin-dash-card-header">
               <div>
-                <h3 style="font-size:0.95rem;font-weight:800;color:#0F172A;margin:0;">Regu Lapangan Aktif</h3>
-                <p style="font-size:0.75rem;color:#64748B;margin:2px 0 0;">Penanggung jawab & kekuatan personel wilayah</p>
+                <h3 class="admin-dash-card-title">Regu Lapangan Aktif</h3>
+                <p class="admin-dash-card-sub">Penanggung jawab & kekuatan personel wilayah</p>
               </div>
-              <a href="javascript:void(0)" onclick="switchAdminTab('regu')" style="font-size:0.78rem;color:#FF5416;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:3px;padding-top:2px;">
+              <a href="javascript:void(0)" onclick="switchAdminTab('regu')" class="admin-dash-card-link">
                 <span>Kelola Regu</span>
                 <span>&rarr;</span>
               </a>
             </div>
 
-            <!-- CONTAINER LIST REGU (ROSTER TABLE) -->
+            <!-- CONTAINER LIST REGU (ROSTER TABLE / MOBILE CARDS) -->
             <div id="dash-regu-cards-container" style="flex:1;display:flex;flex-direction:column;justify-content:center;">
               <!-- Dynamic Content -->
             </div>

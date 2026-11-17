@@ -31,22 +31,24 @@ $connection_attempts = [
         'user' => 'root',
         'pass' => 'root',
         'desc' => 'MySQL Port 3306 (pass root)'
-    ],
-    // 3. MAMP via Port 8889 (Default MAMP Mac)
-    [
+    ]
+];
+
+// Tambahkan opsi MAMP hanya jika dijalankan di macOS
+if (PHP_OS_FAMILY === 'Darwin') {
+    $connection_attempts[] = [
         'dsn'  => "mysql:host=127.0.0.1;port=8889;dbname={$db_name};charset=utf8mb4",
         'user' => 'root',
         'pass' => 'root',
         'desc' => 'MAMP Port 8889'
-    ],
-    // 4. MAMP via Unix Socket
-    [
+    ];
+    $connection_attempts[] = [
         'dsn'  => "mysql:unix_socket=/Applications/MAMP/tmp/mysql/mysql.sock;dbname={$db_name};charset=utf8mb4",
         'user' => 'root',
         'pass' => 'root',
         'desc' => 'MAMP Unix Socket'
-    ]
-];
+    ];
+}
 
 // Coba hubungkan ke MySQL MAMP
 foreach ($connection_attempts as $attempt) {
