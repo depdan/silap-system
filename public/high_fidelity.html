@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SILAP - High-Fidelity Interactive Showcase (Sprint 1 - 4)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS & JS for Real Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              800: '#1e40af',
+              900: '#0f2757',
+            },
+            dki: {
+              orange: '#FF5416',
+              darkorange: '#E04207',
+              navy: '#0E2042',
+              blue: '#1E3A8A',
+              emerald: '#10B981',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F1F5F9;
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    /* Mobile Phone Shell */
+    .iphone-shell {
+      width: 390px;
+      min-height: 844px;
+      border: 8px solid #1E293B;
+      border-radius: 46px;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(0,0,0,0.05);
+      background: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    .iphone-island {
+      width: 120px;
+      height: 28px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+    }
+    .iphone-island::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #1e293b;
+    }
+    .iphone-bar {
+      width: 135px;
+      height: 4px;
+      background: #0F172A;
+      border-radius: 9999px;
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+    }
+    /* Watermark Badge */
+    .watermark-badge {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="p-3 md:p-6 antialiased">
+
+  <!-- TOP HEADER & SPRINT CONTROLLER -->
+  <header id="main-header" class="max-w-7xl mx-auto mb-6 bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm transition-all">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-900 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-900/20 font-black text-xl tracking-wider">
+          SL
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-md uppercase">High-Fidelity UI</span>
+            <span class="text-xs font-mono text-slate-500">Live Production Design System</span>
+          </div>
+          <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">SILAP Showcase UI (Sprint 1 - 4)</h1>
+          <p class="text-xs text-slate-600">Sistem Informasi Laporan Pekerjaan PPSU · Kelurahan Pekayon, Pasar Rebo, Jakarta Timur</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="window.print()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors">
+          <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Simpan PDF
+        </button>
+        <button onclick="toggleHideChrome()" id="btn-toggle-chrome" class="px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shadow-sm">
+          <i data-lucide="camera" class="w-4 h-4"></i> Mode Siap Screenshot
+        </button>
+      </div>
+    </div>
+
+    <!-- SPRINT NAVIGATION TABS -->
+    <nav class="flex flex-wrap items-center gap-2 pt-3" id="sprint-nav">
+      <button onclick="showSprint(1)" id="tab-hi-1" class="sprint-tab active px-4 py-2 bg-blue-900 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-blue-950/20 transition-all flex items-center gap-1.5">
+        <i data-lucide="shield-check" class="w-4 h-4"></i> Sprint 1: Autentikasi & RBAC
+      </button>
+      <button onclick="showSprint(2)" id="tab-hi-2" class="sprint-tab px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5">
+        <i data-lucide="smartphone" class="w-4 h-4"></i> Sprint 2: Portal Lapor Mobile (PPSU)
+      </button>
+      <button onclick="showSprint(3)" id="tab-hi-3" class="sprint-tab px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Sprint 3: Admin Command Center
+      </button>
+      <button onclick="showSprint(4)" id="tab-hi-4" class="sprint-tab px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5">
+        <i data-lucide="users" class="w-4 h-4"></i> Sprint 4: Master Regu & Rekapitulasi
+      </button>
+      <button onclick="showAllSprints()" id="tab-hi-all" class="sprint-tab ml-auto px-3.5 py-2 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+        <i data-lucide="layers" class="w-4 h-4"></i> Lihat Semua Sprint
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN SHOWCASE WRAPPER -->
+  <main class="max-w-7xl mx-auto space-y-12">
+
+    <!-- =============================================================== -->
+    <!-- SPRINT 1: HIGH-FIDELITY LOGIN & RBAC                            -->
+    <!-- =============================================================== -->
+    <section id="sprint-hi-1" class="sprint-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase rounded-full tracking-wider">Sprint 1</span>
+            <span class="text-xs font-mono text-slate-500">RBAC Authentication Portal</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">High-Fidelity: Antarmuka Autentikasi & Multi-Role</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="setHiRole('petugas')" id="btn-hi-role-petugas" class="px-3 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1">
+            <i data-lucide="hard-hat" class="w-3.5 h-3.5"></i> Petugas Lapangan
+          </button>
+          <button onclick="setHiRole('admin')" id="btn-hi-role-admin" class="px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1">
+            <i data-lucide="building-2" class="w-3.5 h-3.5"></i> Admin Kelurahan
+          </button>
+          <button onclick="toggleRegisterModalHi(true)" class="px-3 py-1.5 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 text-xs font-bold rounded-xl transition-all">
+            + Form Registrasi
+          </button>
+        </div>
+      </div>
+
+      <!-- LOGIN HERO CARD CONTAINER -->
+      <div class="max-w-5xl mx-auto rounded-3xl overflow-hidden border border-slate-200 shadow-xl grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+        
+        <!-- Left Hero Gradient Banner -->
+        <div class="lg:col-span-5 bg-gradient-to-br from-slate-950 via-blue-950 to-blue-900 p-8 text-white flex flex-col justify-between relative overflow-hidden">
+          <!-- Background Glow Effect -->
+          <div class="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="relative z-10 space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center shadow-inner">
+                <i data-lucide="landmark" class="w-6 h-6 text-orange-400"></i>
+              </div>
+              <div>
+                <span class="text-[10px] tracking-widest font-mono uppercase text-orange-300 font-bold block">Pemerintah Provinsi DKI Jakarta</span>
+                <h3 class="text-lg font-black tracking-tight leading-none text-white">Kelurahan Pekayon</h3>
+              </div>
+            </div>
+
+            <div class="pt-8">
+              <span class="px-2.5 py-1 bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] font-extrabold uppercase rounded-lg">Aplikasi Pelaporan Resmi</span>
+              <h2 class="text-3xl font-black mt-3 leading-tight">SILAP PEKAYON</h2>
+              <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                Sistem Informasi Laporan Pekerjaan PPSU berbasis bukti GPS akurat dan verifikasi visual dokumentasi lapangan.
+              </p>
+            </div>
+          </div>
+
+          <!-- Feature Bullets -->
+          <div class="relative z-10 space-y-2.5 pt-8 border-t border-white/10 text-xs">
+            <div class="flex items-center gap-2 text-slate-200">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+              <span>Watermark GPS Terenkripsi & Anti-Spoof</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-200">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+              <span>Anti-Skip Tugas Berurutan (Tugas 1 - 5)</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-200">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+              <span>Pemantauan Spasial GIS Pekayon Real-Time</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Login Card -->
+        <div class="lg:col-span-7 bg-white p-8 md:p-10 flex flex-col justify-center">
+          <div class="max-w-md mx-auto w-full space-y-6">
+            
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-orange-600 uppercase tracking-wider" id="hi-auth-badge">PORTAL PETUGAS LAPANGAN</span>
+                <span class="text-[10px] font-mono text-slate-400">Versi 2.4.0 Live</span>
+              </div>
+              <h3 class="text-2xl font-black text-slate-900 mt-1" id="hi-auth-title">Selamat Datang Kembali</h3>
+              <p class="text-xs text-slate-500 mt-1" id="hi-auth-subtitle">Masukkan NIK terdaftar untuk mengakses formulir tugas hari ini.</p>
+            </div>
+
+            <form onsubmit="event.preventDefault(); alert('Login Berhasil! Mengalihkan ke antarmuka...');" class="space-y-4">
+              <!-- Field Username / NIK -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5" id="hi-lbl-user">
+                  Nomor Induk Kependudukan (NIK) *
+                </label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                  </div>
+                  <input type="text" id="hi-input-user" value="3175080101900001" placeholder="Masukkan 16 digit NIK..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all">
+                </div>
+              </div>
+
+              <!-- Field Password -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-bold text-slate-700 uppercase">Kata Sandi (Password) *</label>
+                  <a href="#" class="text-xs text-blue-700 hover:underline font-semibold">Lupa Sandi?</a>
+                </div>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                  </div>
+                  <input type="password" value="pekayon2026" placeholder="••••••••••••" class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all">
+                  <button type="button" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Remember Me & Info -->
+              <div class="flex items-center justify-between text-xs">
+                <label class="flex items-center gap-2 cursor-pointer select-none text-slate-600">
+                  <input type="checkbox" checked class="w-4 h-4 rounded text-blue-900 accent-blue-900 border-slate-300">
+                  <span>Ingat sesi saya di HP ini</span>
+                </label>
+                <span class="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Server Siap
+                </span>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-blue-900 to-indigo-800 hover:from-blue-950 hover:to-indigo-900 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-blue-900/25 transition-all flex items-center justify-center gap-2">
+                <span>Masuk ke Sistem SILAP</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+
+              <div class="text-center pt-2 text-xs text-slate-500">
+                <span>Belum memiliki akun regu? </span>
+                <button type="button" onclick="toggleRegisterModalHi(true)" class="text-blue-900 hover:underline font-bold">Daftar Akun Petugas</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MODAL REGISTRASI HI-FI -->
+      <div id="modal-register-hi" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-slate-200">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase text-orange-600">Form Pendaftaran Baru</span>
+              <h4 class="text-lg font-black text-slate-900">Registrasi Personel PPSU</h4>
+            </div>
+            <button onclick="toggleRegisterModalHi(false)" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold">✕</button>
+          </div>
+          <div class="space-y-4 pt-4 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Nama Lengkap Petugas *</label>
+              <input type="text" placeholder="Contoh: Ahmad Suryadi" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">NIK (16 Digit KTP) *</label>
+              <input type="text" placeholder="31750xxxxxxxxxxx" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Penempatan Regu / Sektor *</label>
+              <select class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <option>Regu A - Sektor Kalisari / RW 01 - RW 03</option>
+                <option>Regu B - Sektor Tipar / RW 04 - RW 06</option>
+                <option selected>Regu C - Sektor Madrasah / RW 07 - RW 09</option>
+                <option>Regu D - Sektor Ciracas / RW 10 - RW 11</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Nomor WhatsApp Aktif *</label>
+              <input type="text" placeholder="081288990011" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            </div>
+            <div class="pt-2 flex items-center justify-end gap-2">
+              <button onclick="toggleRegisterModalHi(false)" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold">Batal</button>
+              <button onclick="alert('Registrasi berhasil disimpan! Menunggu verifikasi admin.'); toggleRegisterModalHi(false);" class="px-5 py-2.5 rounded-xl bg-blue-900 text-white font-bold shadow-md shadow-blue-900/20">Daftar Sekarang</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- SPRINT 2: HIGH-FIDELITY MOBILE USER (PPSU)                      -->
+    <!-- =============================================================== -->
+    <section id="sprint-hi-2" class="sprint-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-extrabold uppercase rounded-full tracking-wider">Sprint 2</span>
+            <span class="text-xs font-mono text-slate-500">Mobile Field Reporter Portal</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">High-Fidelity: Formulir Pelaporan Bertahap Terpadu</h2>
+        </div>
+        <!-- Toggle Stepper Mobile View -->
+        <div class="flex items-center gap-2">
+          <button onclick="switchHiStep(1)" id="btn-hi-step-1" class="px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Tahap 1: Info & Lokasi
+          </button>
+          <button onclick="switchHiStep(2)" id="btn-hi-step-2" class="px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1">
+            <i data-lucide="camera" class="w-3.5 h-3.5"></i> Tahap 2: Progres & Foto
+          </button>
+        </div>
+      </div>
+
+      <!-- DEVICE CONTAINER -->
+      <div class="iphone-shell">
+        <div class="iphone-island"></div>
+        <div class="iphone-bar"></div>
+
+        <!-- Phone Top Bar -->
+        <div class="pt-10 px-5 pb-3 bg-white flex items-center justify-between border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-blue-900 text-white flex items-center justify-center font-black text-xs">
+              SL
+            </div>
+            <div>
+              <h4 class="text-xs font-extrabold text-slate-900 leading-none">SILAP Mobile</h4>
+              <span class="text-[9px] text-slate-500 font-mono">Kelurahan Pekayon</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="px-2 py-0.5 bg-blue-50 text-blue-900 text-[10px] font-bold rounded-full border border-blue-200">
+              Regu C (RW 07)
+            </span>
+          </div>
+        </div>
+
+        <!-- Stepper Header -->
+        <div class="p-3.5 bg-slate-50 border-b border-slate-100">
+          <div class="flex items-center justify-between text-xs">
+            <!-- Step 1 pill -->
+            <div class="flex items-center gap-1.5" id="hi-step-pill-1">
+              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">✓</span>
+              <div class="leading-none">
+                <span class="text-[8px] uppercase tracking-wider text-slate-400 block font-mono">Langkah 1</span>
+                <span class="font-bold text-[11px] text-slate-900">Info & Lokasi</span>
+              </div>
+            </div>
+            <div class="flex-1 mx-2 h-0.5 bg-emerald-500" id="hi-stepper-line"></div>
+            <!-- Step 2 pill -->
+            <div class="flex items-center gap-1.5" id="hi-step-pill-2">
+              <span class="w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm" id="hi-circle-2">2</span>
+              <div class="leading-none">
+                <span class="text-[8px] uppercase tracking-wider text-slate-400 block font-mono">Langkah 2</span>
+                <span class="font-bold text-[11px] text-orange-600" id="hi-text-2">Progres & Foto</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scrollable Mobile Content -->
+        <div class="p-4 space-y-4 max-h-[640px] overflow-y-auto custom-scroll pb-16 text-xs">
+
+          <!-- ==================== MOBILE TAHAP 1 VIEW ==================== -->
+          <div id="hi-mobile-step-1" class="space-y-4">
+            
+            <!-- Tanggal Card -->
+            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                  <i data-lucide="calendar" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Jadwal Harian</span>
+                  <div class="font-extrabold text-slate-900 text-xs">Selasa, 17 November 2026</div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-200">
+                Terjadwal
+              </span>
+            </div>
+
+            <!-- Target Penugasan 5 Tugas Pills (Anti-Skip Logic) -->
+            <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider">Target Penugasan Harian</span>
+                <span class="text-[10px] font-mono text-blue-900 font-bold">Tugas 3 dari 5</span>
+              </div>
+              <div class="grid grid-cols-5 gap-1.5 text-center text-[10px]">
+                <div class="py-2 px-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl font-bold flex flex-col items-center">
+                  <i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>
+                  <span>Tugas 1</span>
+                </div>
+                <div class="py-2 px-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl font-bold flex flex-col items-center">
+                  <i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>
+                  <span>Tugas 2</span>
+                </div>
+                <div class="py-2 px-1 bg-blue-900 text-white rounded-xl font-extrabold shadow-md shadow-blue-900/20 flex flex-col items-center">
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-400 mb-0.5"></span>
+                  <span>Tugas 3</span>
+                </div>
+                <div class="py-2 px-1 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl flex flex-col items-center opacity-70">
+                  <i data-lucide="lock" class="w-3 h-3"></i>
+                  <span>Tugas 4</span>
+                </div>
+                <div class="py-2 px-1 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl flex flex-col items-center opacity-70">
+                  <i data-lucide="lock" class="w-3 h-3"></i>
+                  <span>Tugas 5</span>
+                </div>
+              </div>
+              <p class="text-[9px] text-slate-500 font-medium pt-1">
+                🔒 <strong>Anti-Skip Aktif:</strong> Tugas 4 & 5 terkunci otomatis sampai Tugas 3 tuntas 100%.
+              </p>
+            </div>
+
+            <!-- Kategori Pekerjaan Lapangan -->
+            <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2">
+              <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider block">Jenis Pekerjaan Lapangan *</span>
+              
+              <div class="space-y-1.5">
+                <div class="p-2.5 bg-orange-50/80 border-2 border-orange-500 rounded-xl flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center">
+                      <i data-lucide="brush" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <h5 class="font-extrabold text-slate-900 text-xs">Pembersihan Jalan & Trotoar</h5>
+                      <p class="text-[9px] text-slate-500">Sapu sampah kering, debu, dan dedaunan</p>
+                    </div>
+                  </div>
+                  <div class="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center text-white text-[9px]">✓</div>
+                </div>
+
+                <div class="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between cursor-pointer hover:bg-slate-50">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-800 flex items-center justify-center">
+                      <i data-lucide="waves" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <h5 class="font-bold text-slate-800 text-xs">Pembersihan Saluran Air & Got</h5>
+                      <p class="text-[9px] text-slate-500">Keruk lumpur selokan dan lancarkan tali air</p>
+                    </div>
+                  </div>
+                  <div class="w-4 h-4 rounded-full border border-slate-300"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lokasi & Personel (Form Input Manual & Otomatis) -->
+            <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+              <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider block">Lokasi & Personel</span>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 mb-1">Wilayah RW (Pekayon) *</label>
+                <select class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 text-xs">
+                  <option selected>RW 07 - Madrasah</option>
+                  <option>RW 01 - Gandaria / Kalisari</option>
+                  <option>RW 02 - Tipar</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 mb-1">Nama Jalan / Lokasi *</label>
+                <input type="text" value="Jl. Madrasah No. 5" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 text-xs">
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 mb-1">Patokan Lokasi *</label>
+                <input type="text" value="Trotoar jalan samping pos kamling RW 07" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 text-xs">
+              </div>
+
+              <!-- Pelapor & WA (Otomatis dari Sesi) -->
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase">
+                  <span>Data Petugas Login (Otomatis)</span>
+                  <span class="text-emerald-600">✓ Terverifikasi</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span class="text-[9px] text-slate-400 block">Pelapor / Ketua Regu</span>
+                    <strong class="text-slate-800">Ahmad Suryadi</strong>
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-slate-400 block">No. WhatsApp</span>
+                    <strong class="text-slate-800">0812-8899-0011</strong>
+                  </div>
+                </div>
+                <div class="pt-1.5 border-t border-slate-200 text-[10px] flex items-center justify-between">
+                  <span class="text-slate-600">Absensi Regu: <strong>4 Personel Hadir</strong></span>
+                  <span class="text-blue-900 font-bold">Lengkap</span>
+                </div>
+              </div>
+
+              <!-- Mini-Map Leaflet GPS Lokasi Lapangan -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-[10px]">
+                  <span class="font-extrabold text-slate-700 uppercase">Titik GPS Lapangan</span>
+                  <span class="text-emerald-700 font-bold flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Presisi (±6m)
+                  </span>
+                </div>
+                <!-- Map Container -->
+                <div id="mini-map-step1" class="h-32 w-full rounded-xl border border-slate-200 overflow-hidden shadow-inner relative z-0"></div>
+                <div class="p-1.5 bg-slate-100 rounded-lg text-center text-[9px] font-mono text-slate-600 flex items-center justify-center gap-1">
+                  <i data-lucide="lock" class="w-3 h-3 text-slate-400"></i> Pin GPS terkunci otomatis di titik kerja (Anti-Geser)
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Button Lanjut ke Step 2 -->
+            <button onclick="switchHiStep(2)" class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-orange-600/25 flex items-center justify-center gap-2 transition-all">
+              <span>Lanjut ke Foto Dokumentasi</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+
+          </div>
+
+          <!-- ==================== MOBILE TAHAP 2 VIEW ==================== -->
+          <div id="hi-mobile-step-2" class="hidden space-y-4">
+            
+            <!-- Persentase Penyelesaian Card -->
+            <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h5 class="text-xs font-black text-slate-900">Persentase Penyelesaian</h5>
+                  <span class="text-[9px] text-slate-500">Tahapan kemajuan pekerjaan di lapangan</span>
+                </div>
+                <span class="px-2.5 py-1 bg-orange-100 text-orange-800 text-xs font-extrabold rounded-lg" id="hi-slider-val">
+                  50% Proses
+                </span>
+              </div>
+
+              <!-- Segmented Pills 0%, 50%, 100% -->
+              <div class="grid grid-cols-3 gap-1.5 text-center text-xs font-bold">
+                <button type="button" onclick="setSliderHi(0)" class="py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">0% Mulai</button>
+                <button type="button" onclick="setSliderHi(50)" class="py-2 rounded-xl bg-orange-600 text-white shadow-md shadow-orange-600/30">50% Proses</button>
+                <button type="button" onclick="setSliderHi(100)" class="py-2 rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-200">100% Selesai</button>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                <div class="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full transition-all duration-300 w-1/2" id="hi-bar-fill"></div>
+              </div>
+            </div>
+
+            <!-- Dokumentasi Foto Lapangan Bertahap (3 Slots) -->
+            <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider">Dokumentasi Foto Lapangan</span>
+                <span class="text-[9px] text-slate-400 font-mono">Stempel GPS Wajib</span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <!-- Foto 1 (0% - Selesai Diambil) -->
+                <div class="relative rounded-xl overflow-hidden border-2 border-emerald-500 h-36 bg-slate-900 group shadow-sm">
+                  <!-- Real image simulation -->
+                  <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80');"></div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent"></div>
+                  
+                  <div class="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-emerald-600 text-white text-[8px] font-extrabold rounded">
+                    0% Awal
+                  </div>
+                  
+                  <div class="absolute bottom-1.5 left-1.5 right-1.5 text-white">
+                    <span class="text-[8px] font-extrabold block leading-none">1. Sebelum (0%)</span>
+                    <span class="text-[7px] text-slate-300 font-mono">17 Nov · 08:16 WIB</span>
+                  </div>
+                </div>
+
+                <!-- Foto 2 (50% - Sedang Aktif Siap Diambil) -->
+                <div class="relative rounded-xl overflow-hidden border-2 border-orange-500 h-36 bg-orange-50 flex flex-col justify-between p-2 text-center shadow-sm">
+                  <div class="flex justify-end">
+                    <span class="px-1.5 py-0.5 bg-orange-500 text-white text-[8px] font-extrabold rounded">Aktif</span>
+                  </div>
+                  <div class="flex flex-col items-center justify-center my-auto">
+                    <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md shadow-orange-500/30">
+                      <i data-lucide="camera" class="w-4 h-4"></i>
+                    </div>
+                    <span class="text-[9px] font-extrabold text-slate-900 mt-1">2. Proses Kerja</span>
+                    <span class="text-[8px] text-orange-600 font-bold">Siap Diambil</span>
+                  </div>
+                  <span class="text-[7px] text-slate-400 font-mono">Tahap 50%</span>
+                </div>
+
+                <!-- Foto 3 (100% - Terkunci) -->
+                <div class="relative rounded-xl overflow-hidden border border-slate-200 h-36 bg-slate-50 flex flex-col justify-between p-2 text-center opacity-60">
+                  <div class="flex justify-end">
+                    <span class="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[8px] font-bold rounded">🔒 Terkunci</span>
+                  </div>
+                  <div class="flex flex-col items-center justify-center my-auto">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center">
+                      <i data-lucide="lock" class="w-4 h-4"></i>
+                    </div>
+                    <span class="text-[9px] font-bold text-slate-500 mt-1">3. Sesudah (100%)</span>
+                    <span class="text-[7px] text-slate-400">Kirim 50% Dulu</span>
+                  </div>
+                  <span class="text-[7px] text-slate-400 font-mono">Tahap Final</span>
+                </div>
+              </div>
+
+              <!-- Watermark Overlay Preview Pill -->
+              <div class="watermark-badge p-2 rounded-xl text-white text-[8px] font-mono space-y-0.5 mt-2">
+                <div class="flex items-center justify-between text-orange-300 font-bold">
+                  <span>📍 GPS WATERMARK AUTO-STAMP</span>
+                  <span>AKURAT (±6m)</span>
+                </div>
+                <div>Koordinat: -6.360678, +106.875347 · Jl. Madrasah No. 5 RW 07</div>
+                <div>Waktu: Selasa, 17 Nov 2026 09:49:12 WIB · Regu C PPSU Pekayon</div>
+              </div>
+            </div>
+
+            <!-- Catatan atau Kendala -->
+            <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1.5">
+              <label class="block text-[10px] font-extrabold text-slate-700 uppercase">Catatan / Hambatan Lapangan</label>
+              <textarea rows="2" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800" placeholder="Ketik keterangan situasi lapangan jika ada hambatan material / cuaca...">Pembersihan sampah kering dan pengangkutan dedaunan sedang berlangsung di trotoar.</textarea>
+            </div>
+
+            <!-- Action Submit Buttons -->
+            <div class="space-y-2 pt-1">
+              <button onclick="alert('Progres 50% berhasil dikirim! Slot 100% kini terbuka.');" class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-700/25 flex items-center justify-center gap-2 transition-all">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kirim Progres Lapangan (Progres 50%)</span>
+              </button>
+
+              <button onclick="switchHiStep(1)" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase rounded-xl transition-all">
+                ← Kembali ke Info & Lokasi
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- SPRINT 3: HIGH-FIDELITY ADMIN COMMAND CENTER                   -->
+    <!-- =============================================================== -->
+    <section id="sprint-hi-3" class="sprint-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase rounded-full tracking-wider">Sprint 3</span>
+            <span class="text-xs font-mono text-slate-500">Command Center & Spatial GIS</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">High-Fidelity: Dashboard Monitoring & Verifikasi Laporan</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleVerifyModalHi(true)" class="px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i> Buka Modal Verifikasi Laporan
+          </button>
+        </div>
+      </div>
+
+      <!-- DESKTOP COMMAND CENTER CANVAS -->
+      <div class="bg-slate-900 rounded-3xl p-5 md:p-6 text-white space-y-6 shadow-2xl border border-slate-800">
+        
+        <!-- Top Admin Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center font-black text-white text-lg shadow-md shadow-orange-600/30">
+              CC
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-black text-base text-white tracking-tight">SILAP COMMAND CENTER</h4>
+                <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold rounded-full">● LIVE SYSTEM</span>
+              </div>
+              <p class="text-xs text-slate-400">Pusat Kendali Pengawasan PPSU · Kelurahan Pekayon, Pasar Rebo</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 text-xs">
+            <div class="px-3 py-1.5 bg-slate-800 rounded-xl border border-slate-700 font-mono text-slate-300">
+              📅 17 Nov 2026 · 10:15:32 WIB
+            </div>
+            <div class="flex items-center gap-2.5 pl-2 border-l border-slate-700">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-white text-xs">
+                LP
+              </div>
+              <div>
+                <span class="font-bold block leading-none text-slate-200">Lurah Pekayon</span>
+                <span class="text-[10px] text-slate-400">Super Administrator</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 KPI Metrics Widgets -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- KPI 1 -->
+          <div class="bg-slate-800/80 border border-slate-700/80 p-4 rounded-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+              <span>Total Laporan Hari Ini</span>
+              <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <div class="text-3xl font-black font-mono text-white">128</div>
+            <span class="text-[10px] text-emerald-400 font-semibold block mt-1">↑ +14% dibanding kemarin</span>
+          </div>
+
+          <!-- KPI 2 -->
+          <div class="bg-slate-800/80 border border-amber-500/40 p-4 rounded-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between text-amber-400 text-xs mb-1">
+              <span>Menunggu Verifikasi</span>
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            </div>
+            <div class="text-3xl font-black font-mono text-amber-400">18</div>
+            <span class="text-[10px] text-slate-300 font-semibold block mt-1">Memerlukan persetujuan lurah</span>
+          </div>
+
+          <!-- KPI 3 -->
+          <div class="bg-slate-800/80 border border-slate-700/80 p-4 rounded-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+              <span>Laporan Disahkan (100%)</span>
+              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <div class="text-3xl font-black font-mono text-emerald-400">104</div>
+            <span class="text-[10px] text-slate-400 font-semibold block mt-1">Pekerjaan tuntas di lapangan</span>
+          </div>
+
+          <!-- KPI 4 -->
+          <div class="bg-slate-800/80 border border-slate-700/80 p-4 rounded-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+              <span>Personel Bertugas</span>
+              <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i>
+            </div>
+            <div class="text-3xl font-black font-mono text-indigo-300">42</div>
+            <span class="text-[10px] text-slate-400 font-semibold block mt-1">4 Regu Aktif di 11 RW</span>
+          </div>
+        </div>
+
+        <!-- Main GIS Map Leaflet Container -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div>
+              <h5 class="font-extrabold text-white text-sm">Pemantauan Spasial GIS Titik Pengerjaan (Kelurahan Pekayon)</h5>
+              <p class="text-[10px] text-slate-400">Sebaran koordinat GPS presisi regu PPSU RW 01 s/d RW 11</p>
+            </div>
+            <div class="flex items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Selesai 100%</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Proses 50%</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Menunggu</span>
+            </div>
+          </div>
+
+          <!-- Real Map Element -->
+          <div id="admin-gis-map" class="h-80 w-full rounded-xl overflow-hidden border border-slate-700 shadow-inner relative z-0"></div>
+        </div>
+
+        <!-- Live Reports Table -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-4">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              <select class="p-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-300 text-xs focus:outline-none">
+                <option>Semua Wilayah RW (Pekayon)</option>
+                <option>RW 01 - Gandaria</option>
+                <option selected>RW 07 - Madrasah</option>
+              </select>
+              <select class="p-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-300 text-xs focus:outline-none">
+                <option>Semua Status Laporan</option>
+                <option selected>Menunggu Verifikasi</option>
+                <option>Disetujui</option>
+              </select>
+            </div>
+            <div class="relative w-full md:w-72">
+              <input type="text" placeholder="Cari nama jalan / pelapor..." class="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none">
+              <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-2.5"></i>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300 border-collapse">
+              <thead>
+                <tr class="border-b border-slate-700 text-slate-400 uppercase text-[10px] font-mono tracking-wider">
+                  <th class="py-3 px-3">ID LAPORAN</th>
+                  <th class="py-3 px-3">WAKTU</th>
+                  <th class="py-3 px-3">REGU / KETUA</th>
+                  <th class="py-3 px-3">LOKASI & RW</th>
+                  <th class="py-3 px-3">PEKERJAAN</th>
+                  <th class="py-3 px-3">PROGRES</th>
+                  <th class="py-3 px-3">STATUS</th>
+                  <th class="py-3 px-3 text-center">AKSI VERIFIKASI</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-700/60 font-medium">
+                <tr class="hover:bg-slate-700/30 transition-colors">
+                  <td class="py-3 px-3 font-mono font-bold text-white">#LAP-042</td>
+                  <td class="py-3 px-3 font-mono text-slate-400">09:49 WIB</td>
+                  <td class="py-3 px-3 font-bold text-white">Regu C (Ahmad Suryadi)</td>
+                  <td class="py-3 px-3">Jl. Madrasah No. 5 (RW 07)</td>
+                  <td class="py-3 px-3">Pembersihan Jalan</td>
+                  <td class="py-3 px-3 font-mono font-bold text-orange-400">50%</td>
+                  <td class="py-3 px-3">
+                    <span class="px-2 py-0.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-full text-[10px] font-bold">DALAM PROSES</span>
+                  </td>
+                  <td class="py-3 px-3 text-center">
+                    <button onclick="toggleVerifyModalHi(true)" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-[11px] font-bold transition-colors">
+                      Review
+                    </button>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-slate-700/30 transition-colors">
+                  <td class="py-3 px-3 font-mono font-bold text-white">#LAP-041</td>
+                  <td class="py-3 px-3 font-mono text-slate-400">09:12 WIB</td>
+                  <td class="py-3 px-3 font-bold text-white">Regu A (Budi Santoso)</td>
+                  <td class="py-3 px-3">Jl. Raya Kalisari No. 12 (RW 01)</td>
+                  <td class="py-3 px-3">Pembersihan Saluran Got</td>
+                  <td class="py-3 px-3 font-mono font-bold text-emerald-400">100%</td>
+                  <td class="py-3 px-3">
+                    <span class="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-bold animate-pulse">MENUNGGU VERIFIKASI</span>
+                  </td>
+                  <td class="py-3 px-3 text-center">
+                    <button onclick="toggleVerifyModalHi(true)" class="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-[11px] font-bold shadow-md shadow-blue-600/30 transition-all">
+                      Verifikasi
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MODAL VERIFIKASI LAPORAN HI-FI -->
+      <div id="modal-verify-hi" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-6 md:p-8 shadow-2xl border border-slate-200">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-extrabold rounded-md uppercase">Verifikasi Laporan</span>
+                <span class="text-xs font-mono text-slate-500 font-bold">#LAP-20261117-0041</span>
+              </div>
+              <h4 class="text-xl font-black text-slate-900 mt-1">Review Hasil Pekerjaan Lapangan</h4>
+            </div>
+            <button onclick="toggleVerifyModalHi(false)" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold">✕</button>
+          </div>
+
+          <div class="space-y-4 pt-4 text-xs">
+            <!-- 3 Photos Visual Comparison -->
+            <div class="grid grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <span class="font-extrabold text-slate-700 text-[10px] uppercase block">1. Sebelum (0%)</span>
+                <div class="h-32 rounded-xl bg-slate-900 relative overflow-hidden border border-slate-200">
+                  <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1541888946425-d0fbb1861593?auto=format&fit=crop&w=300&q=80');"></div>
+                  <div class="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/80 text-white text-[8px] font-mono rounded">08:16 WIB</div>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <span class="font-extrabold text-slate-700 text-[10px] uppercase block">2. Pengerjaan (50%)</span>
+                <div class="h-32 rounded-xl bg-slate-900 relative overflow-hidden border border-slate-200">
+                  <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80');"></div>
+                  <div class="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/80 text-white text-[8px] font-mono rounded">08:45 WIB</div>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <span class="font-extrabold text-emerald-700 text-[10px] uppercase block">3. Tuntas (100%)</span>
+                <div class="h-32 rounded-xl bg-slate-900 relative overflow-hidden border-2 border-emerald-500">
+                  <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=300&q=80');"></div>
+                  <div class="absolute bottom-1 left-1 px-1.5 py-0.5 bg-emerald-600 text-white text-[8px] font-mono rounded">09:12 WIB</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detail Laporan Card -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl grid grid-cols-2 gap-3 text-slate-700">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Ketua & Regu Lapangan</span>
+                <strong class="text-slate-900 text-xs">Budi Santoso (Regu A - Gandaria)</strong>
+                <p class="text-[10px] text-slate-500 mt-0.5">Kontak WA: 0812-9999-0001</p>
+              </div>
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Lokasi & Verifikasi GPS</span>
+                <strong class="text-slate-900 text-xs">Jl. Raya Kalisari No. 12 (RW 01)</strong>
+                <p class="text-[10px] text-emerald-600 font-bold mt-0.5">✓ Terverifikasi di dalam wilayah Pekayon</p>
+              </div>
+              <div class="col-span-2 pt-1 border-t border-slate-200">
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Catatan Regu Lapangan</span>
+                <p class="text-xs text-slate-800 italic">"Sedimen lumpur dan daun kering di sepanjang saluran got telah dibersihkan dan diangkut ke truk."</p>
+              </div>
+            </div>
+
+            <!-- Approval Actions -->
+            <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+              <button onclick="alert('Laporan ditolak. Notifikasi perbaikan dikirim ke regu.'); toggleVerifyModalHi(false);" class="px-4 py-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-bold hover:bg-rose-100 transition-colors">
+                ✕ Tolak / Minta Revisi
+              </button>
+              <button onclick="alert('Laporan berhasil disahkan! Status berubah menjadi Selesai Disetujui.'); toggleVerifyModalHi(false);" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md shadow-emerald-600/25 transition-all flex items-center gap-1.5">
+                <i data-lucide="check" class="w-4 h-4"></i> Setujui & Sahkan Laporan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- SPRINT 4: MASTER REGU & REKAPITULASI (HIGH-FIDELITY)           -->
+    <!-- =============================================================== -->
+    <section id="sprint-hi-4" class="sprint-section bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase rounded-full tracking-wider">Sprint 4</span>
+            <span class="text-xs font-mono text-slate-500">Master Data & Formal Export</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 mt-1">High-Fidelity: Manajemen Personel Regu & Rekapitulasi Berkas</h2>
+        </div>
+        <!-- Sub Tabs Sprint 4 -->
+        <div class="flex items-center gap-2">
+          <button onclick="switchHiSprint4('regu')" id="btn-hi-s4-regu" class="px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1">
+            <i data-lucide="users-round" class="w-3.5 h-3.5"></i> 1. Master Data Regu
+          </button>
+          <button onclick="switchHiSprint4('rekap')" id="btn-hi-s4-rekap" class="px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1">
+            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> 2. Rekap & Cetak Laporan
+          </button>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW 1: MASTER DATA REGU -->
+      <div id="hi-s4-view-regu" class="space-y-4">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-700">Pilih Regu:</span>
+            <button class="px-3 py-1.5 bg-blue-900 text-white rounded-xl font-bold shadow-sm">Regu A (RW 01-03)</button>
+            <button class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 font-semibold">Regu B (RW 04-06)</button>
+            <button class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 font-semibold">Regu C (RW 07-09)</button>
+            <button class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 font-semibold">Regu D (RW 10-11)</button>
+          </div>
+          <button onclick="alert('Buka Form Tambah Anggota Regu');" class="px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl font-extrabold text-xs shadow-md shadow-orange-600/25 flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Tambah Anggota Regu
+          </button>
+        </div>
+
+        <!-- Cards Personnel Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Member 1 -->
+          <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-blue-900 text-white flex items-center justify-center font-black text-sm">
+                AS
+              </div>
+              <div>
+                <span class="px-2 py-0.5 bg-blue-100 text-blue-900 font-extrabold text-[9px] rounded-md">KETUA REGU</span>
+                <h5 class="font-extrabold text-slate-900 text-xs mt-0.5">Ahmad Suryadi</h5>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-600 space-y-1 font-mono">
+              <div>NIK: 3175080101900001</div>
+              <div>WA: 0812-8899-0011</div>
+            </div>
+            <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-md">HADIR (RFID OK)</span>
+              <button class="text-blue-900 font-bold hover:underline">Edit</button>
+            </div>
+          </div>
+
+          <!-- Member 2 -->
+          <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-indigo-800 text-white flex items-center justify-center font-black text-sm">
+                BS
+              </div>
+              <div>
+                <span class="px-2 py-0.5 bg-slate-200 text-slate-700 font-bold text-[9px] rounded-md">ANGGOTA</span>
+                <h5 class="font-extrabold text-slate-900 text-xs mt-0.5">Budi Santoso</h5>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-600 space-y-1 font-mono">
+              <div>NIK: 3175080202920002</div>
+              <div>WA: 0812-9999-0001</div>
+            </div>
+            <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-md">HADIR (RFID OK)</span>
+              <button class="text-blue-900 font-bold hover:underline">Edit</button>
+            </div>
+          </div>
+
+          <!-- Member 3 -->
+          <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-indigo-800 text-white flex items-center justify-center font-black text-sm">
+                JP
+              </div>
+              <div>
+                <span class="px-2 py-0.5 bg-slate-200 text-slate-700 font-bold text-[9px] rounded-md">ANGGOTA</span>
+                <h5 class="font-extrabold text-slate-900 text-xs mt-0.5">Joko Prasetyo</h5>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-600 space-y-1 font-mono">
+              <div>NIK: 3175080303930003</div>
+              <div>WA: 0813-1122-3344</div>
+            </div>
+            <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-md">HADIR (RFID OK)</span>
+              <button class="text-blue-900 font-bold hover:underline">Edit</button>
+            </div>
+          </div>
+
+          <!-- Member 4 -->
+          <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-indigo-800 text-white flex items-center justify-center font-black text-sm">
+                DK
+              </div>
+              <div>
+                <span class="px-2 py-0.5 bg-slate-200 text-slate-700 font-bold text-[9px] rounded-md">ANGGOTA</span>
+                <h5 class="font-extrabold text-slate-900 text-xs mt-0.5">Dedi Kurniawan</h5>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-600 space-y-1 font-mono">
+              <div>NIK: 3175080404940004</div>
+              <div>WA: 0812-7788-9900</div>
+            </div>
+            <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-md">HADIR (RFID OK)</span>
+              <button class="text-blue-900 font-bold hover:underline">Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW 2: REKAPITULASI & CETAK LAPORAN -->
+      <div id="hi-s4-view-rekap" class="hidden space-y-6">
+        <!-- Control Bar -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-bold text-slate-700">Filter Periode:</span>
+            <input type="date" value="2026-11-01" class="p-2 bg-white border border-slate-200 rounded-xl font-medium">
+            <span class="text-slate-400">s/d</span>
+            <input type="date" value="2026-11-17" class="p-2 bg-white border border-slate-200 rounded-xl font-medium">
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="alert('Mengunduh Laporan Rekapitulasi Excel (.xlsx)...');" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel (.xlsx)
+            </button>
+            <button onclick="alert('Mengunduh Data CSV...');" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all">
+              <i data-lucide="file-text" class="w-4 h-4"></i> Export CSV
+            </button>
+            <button onclick="window.print()" class="px-3.5 py-2 bg-blue-900 hover:bg-blue-950 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all">
+              <i data-lucide="printer" class="w-4 h-4"></i> Cetak Berkas PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Formal A4 Official Government Document Preview -->
+        <div class="bg-white border border-slate-300 p-8 md:p-12 rounded-2xl max-w-4xl mx-auto shadow-lg space-y-6 text-xs text-slate-900">
+          
+          <!-- Kop Surat Resmi -->
+          <div class="text-center pb-4 border-b-4 border-double border-slate-900 space-y-1">
+            <div class="flex items-center justify-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-blue-950 text-white flex items-center justify-center font-black text-xl shadow">
+                DKI
+              </div>
+              <div class="text-center">
+                <h4 class="font-extrabold text-sm md:text-base uppercase tracking-widest text-slate-900">PEMERINTAH PROVINSI DAERAH KHUSUS IBUKOTA JAKARTA</h4>
+                <h5 class="font-black text-xs md:text-sm uppercase tracking-wide text-slate-800">KECAMATAN PASAR REBO · KELURAHAN PEKAYON</h5>
+                <p class="text-[10px] text-slate-600 font-serif">Jl. Raya Kalisari No. 1, Pekayon, Pasar Rebo, Jakarta Timur - Telp: (021) 8710321 · Kode Pos 13710</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center pt-2">
+            <h5 class="font-black text-sm uppercase underline tracking-wider">BERITA ACARA REKAPITULASI LAPORAN PEKERJAAN PPSU</h5>
+            <span class="text-[10px] text-slate-500 font-mono">Nomor Berkas: 420/SILAP-PKY/XI/2026 · Periode: 01 s/d 17 November 2026</span>
+          </div>
+
+          <!-- Rekapitulasi Table -->
+          <table class="w-full text-left border-collapse border border-slate-400 text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-b border-slate-400 text-[11px] font-bold text-slate-800">
+                <th class="p-2.5 border-r border-slate-400">WILAYAH RW</th>
+                <th class="p-2.5 border-r border-slate-400">REGU PENANGGUNG JAWAB</th>
+                <th class="p-2.5 border-r border-slate-400 text-center">TOTAL TARGET</th>
+                <th class="p-2.5 border-r border-slate-400 text-center">TUNTAS (100%)</th>
+                <th class="p-2.5 border-r border-slate-400 text-center">PROSES (50%)</th>
+                <th class="p-2.5 text-center">PERSENTASE KINERJA</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-300">
+              <tr>
+                <td class="p-2.5 border-r border-slate-400 font-bold">RW 01 - Gandaria</td>
+                <td class="p-2.5 border-r border-slate-400">Regu A (Budi Santoso)</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono">35</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono font-bold text-emerald-700">33</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono">2</td>
+                <td class="p-2.5 text-center font-mono font-bold">94.3 %</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 border-r border-slate-400 font-bold">RW 07 - Madrasah</td>
+                <td class="p-2.5 border-r border-slate-400">Regu C (Ahmad Suryadi)</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono">32</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono font-bold text-emerald-700">30</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono">2</td>
+                <td class="p-2.5 text-center font-mono font-bold">93.8 %</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="bg-slate-50 font-bold border-t-2 border-slate-400">
+                <td colspan="2" class="p-2.5 border-r border-slate-400 text-right uppercase">Rata-Rata Kinerja Kelurahan:</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono">67</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono text-emerald-800">63</td>
+                <td class="p-2.5 border-r border-slate-400 text-center font-mono">4</td>
+                <td class="p-2.5 text-center font-mono text-emerald-700 font-black">94.0 %</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Official Signatures Block -->
+          <div class="pt-8 flex justify-between text-center text-xs">
+            <div class="space-y-1">
+              <p>Mengetahui,</p>
+              <p class="font-bold">Kasie Ekbang & LH Kelurahan Pekayon</p>
+              <div class="h-16"></div>
+              <p class="font-bold underline text-slate-900">Ir. H. Rahmat Hidayat, M.Si</p>
+              <p class="text-[10px] text-slate-500 font-mono">NIP. 19820415 200801 1 012</p>
+            </div>
+            <div class="space-y-1">
+              <p>Jakarta, 17 November 2026</p>
+              <p class="font-bold">Lurah Pekayon</p>
+              <div class="h-16"></div>
+              <p class="font-bold underline text-slate-900">Drs. Ahmad Jaelani, M.AP</p>
+              <p class="text-[10px] text-slate-500 font-mono">NIP. 19760810 200212 1 003</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-7xl mx-auto mt-12 py-6 text-center text-xs font-mono text-slate-500 border-t border-slate-200">
+    <span>SILAP High-Fidelity Showcase · Kelurahan Pekayon, Pasar Rebo, Jakarta Timur · Siap untuk Screenshot & Presentasi Sprint</span>
+  </footer>
+
+  <!-- SCRIPT LOGIKA & MAP INITIALIZATION -->
+  <script>
+    lucide.createIcons();
+
+    let isAllSprints = false;
+    let miniMap = null;
+    let adminMap = null;
+
+    function showSprint(num) {
+      isAllSprints = false;
+      document.querySelectorAll('.sprint-tab').forEach(tab => {
+        tab.className = 'sprint-tab px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-1.5';
+      });
+      const activeTab = document.getElementById(`tab-hi-${num}`);
+      if (activeTab) {
+        activeTab.className = 'sprint-tab active px-4 py-2 bg-blue-900 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-blue-950/20 transition-all flex items-center gap-1.5';
+      }
+
+      document.querySelectorAll('.sprint-section').forEach(sec => sec.classList.add('hidden'));
+      const activeSection = document.getElementById(`sprint-hi-${num}`);
+      if (activeSection) {
+        activeSection.classList.remove('hidden');
+      }
+
+      // Invalidate maps for correct leaflet rendering
+      setTimeout(() => {
+        if (num === 2 && miniMap) miniMap.invalidateSize();
+        if (num === 3 && adminMap) adminMap.invalidateSize();
+      }, 200);
+    }
+
+    function showAllSprints() {
+      isAllSprints = true;
+      document.querySelectorAll('.sprint-section').forEach(sec => sec.classList.remove('hidden'));
+      setTimeout(() => {
+        if (miniMap) miniMap.invalidateSize();
+        if (adminMap) adminMap.invalidateSize();
+      }, 200);
+    }
+
+    function toggleHideChrome() {
+      const header = document.getElementById('main-header');
+      if (header.style.display === 'none') {
+        header.style.display = 'block';
+      } else {
+        header.style.display = 'none';
+        alert('Mode Bersih Screenshot Aktif! Tekan tombol ESC di keyboard untuk memunculkan kembali menu navigasi.');
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const header = document.getElementById('main-header');
+        header.style.display = 'block';
+      }
+    });
+
+    // SPRINT 1 ROLE
+    function setHiRole(role) {
+      const btnPetugas = document.getElementById('btn-hi-role-petugas');
+      const btnAdmin = document.getElementById('btn-hi-role-admin');
+      const badge = document.getElementById('hi-auth-badge');
+      const title = document.getElementById('hi-auth-title');
+      const subtitle = document.getElementById('hi-auth-subtitle');
+      const lblUser = document.getElementById('hi-lbl-user');
+      const inputUser = document.getElementById('hi-input-user');
+
+      if (role === 'petugas') {
+        btnPetugas.className = 'px-3 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1';
+        btnAdmin.className = 'px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1';
+        badge.innerText = 'PORTAL PETUGAS LAPANGAN';
+        title.innerText = 'Selamat Datang Kembali';
+        subtitle.innerText = 'Masukkan NIK terdaftar untuk mengakses formulir tugas hari ini.';
+        lblUser.innerText = 'Nomor Induk Kependudukan (NIK) *';
+        inputUser.value = '3175080101900001';
+      } else {
+        btnAdmin.className = 'px-3 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1';
+        btnPetugas.className = 'px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1';
+        badge.innerText = 'ADMIN COMMAND CENTER';
+        title.innerText = 'Masuk Pengawas Kelurahan';
+        subtitle.innerText = 'Akses monitoring spasial GIS dan verifikasi laporan PPSU.';
+        lblUser.innerText = 'NIP / Username Administrator *';
+        inputUser.value = 'admin.pekayon';
+      }
+    }
+
+    function toggleRegisterModalHi(show) {
+      const modal = document.getElementById('modal-register-hi');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    // SPRINT 2 MOBILE STEP
+    function switchHiStep(step) {
+      const step1 = document.getElementById('hi-mobile-step-1');
+      const step2 = document.getElementById('hi-mobile-step-2');
+      const btn1 = document.getElementById('btn-hi-step-1');
+      const btn2 = document.getElementById('btn-hi-step-2');
+
+      const circle2 = document.getElementById('hi-circle-2');
+      const text2 = document.getElementById('hi-text-2');
+      const line = document.getElementById('hi-stepper-line');
+
+      if (step === 1) {
+        step1.classList.remove('hidden');
+        step2.classList.add('hidden');
+        btn1.className = 'px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1';
+        btn2.className = 'px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1';
+
+        circle2.className = 'w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center';
+        text2.className = 'font-bold text-[11px] text-slate-500';
+        line.className = 'flex-1 mx-2 h-0.5 bg-slate-200';
+        if (miniMap) setTimeout(() => miniMap.invalidateSize(), 100);
+      } else {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+        btn2.className = 'px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1';
+        btn1.className = 'px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1';
+
+        circle2.className = 'w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm';
+        text2.className = 'font-bold text-[11px] text-orange-600';
+        line.className = 'flex-1 mx-2 h-0.5 bg-emerald-500';
+      }
+    }
+
+    function setSliderHi(val) {
+      const fill = document.getElementById('hi-bar-fill');
+      const badge = document.getElementById('hi-slider-val');
+      if (val === 0) {
+        fill.style.width = '5%';
+        badge.innerText = '0% Mulai';
+      } else if (val === 50) {
+        fill.style.width = '50%';
+        badge.innerText = '50% Proses';
+      } else {
+        fill.style.width = '100%';
+        badge.innerText = '100% Selesai';
+      }
+    }
+
+    // SPRINT 3 VERIFY MODAL
+    function toggleVerifyModalHi(show) {
+      const modal = document.getElementById('modal-verify-hi');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    // SPRINT 4 SUB TABS
+    function switchHiSprint4(sub) {
+      const viewRegu = document.getElementById('hi-s4-view-regu');
+      const viewRekap = document.getElementById('hi-s4-view-rekap');
+      const btnRegu = document.getElementById('btn-hi-s4-regu');
+      const btnRekap = document.getElementById('btn-hi-s4-rekap');
+
+      if (sub === 'regu') {
+        viewRegu.classList.remove('hidden');
+        viewRekap.classList.add('hidden');
+        btnRegu.className = 'px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1';
+        btnRekap.className = 'px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1';
+      } else {
+        viewRegu.classList.add('hidden');
+        viewRekap.classList.remove('hidden');
+        btnRekap.className = 'px-3.5 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1';
+        btnRegu.className = 'px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1';
+      }
+    }
+
+    // INITIALIZE REAL LEAFLET MAPS
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Mini-Map Step 1 (Jl. Madrasah No. 5 RW 07 Pekayon: Lat -6.360678, Long 106.875347)
+      try {
+        miniMap = L.map('mini-map-step1', {
+          center: [-6.360678, 106.875347],
+          zoom: 16,
+          zoomControl: false,
+          attributionControl: false
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }).addTo(miniMap);
+        
+        const redIcon = L.divIcon({
+          className: 'custom-pin',
+          html: `<div style="background:#FF5416; width:16px; height:16px; border-radius:50%; border:3px solid #FFF; box-shadow:0 0 8px rgba(0,0,0,0.5);"></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+        L.marker([-6.360678, 106.875347], {icon: redIcon}).addTo(miniMap);
+      } catch (err) {
+        console.warn('Mini map init:', err);
+      }
+
+      // 2. Admin GIS Map Pekayon
+      try {
+        adminMap = L.map('admin-gis-map', {
+          center: [-6.335500, 106.864200],
+          zoom: 14,
+          zoomControl: true,
+          attributionControl: false
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }).addTo(adminMap);
+
+        // Marker 1: RW 01 (Selesai 100%)
+        const m1 = L.marker([-6.331500, 106.860200]).addTo(adminMap);
+        m1.bindPopup(`<b>RW 01 - Gandaria</b><br>Regu A: Pembersihan Got<br><span style="color:#10B981;font-weight:bold;">● 100% Selesai</span>`);
+
+        // Marker 2: RW 07 (Proses 50%)
+        const m2 = L.marker([-6.338500, 106.868200]).addTo(adminMap);
+        m2.bindPopup(`<b>RW 07 - Madrasah</b><br>Regu C: Pembersihan Jalan<br><span style="color:#FF5416;font-weight:bold;">● 50% Proses</span>`);
+
+        // Marker 3: RW 09 (Menunggu Verifikasi)
+        const m3 = L.marker([-6.342500, 106.862200]).addTo(adminMap);
+        m3.bindPopup(`<b>RW 09 - Kalisari</b><br>Regu B: Pangkas Pohon<br><span style="color:#F59E0B;font-weight:bold;">● Menunggu Verifikasi</span>`);
+      } catch (err) {
+        console.warn('Admin map init:', err);
+      }
+
+      // Default start on Sprint 1
+      showSprint(1);
+    });
+  </script>
+</body>
+</html>
