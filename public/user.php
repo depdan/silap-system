@@ -3,6 +3,9 @@
  * SILAP Mobile – Portal Lapor Pekerjaan PPSU (PHP Session Protected)
  */
 session_start();
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
 require_once __DIR__ . '/koneksi.php';
 
 // Geocoding Proxy (Reverse Geocoding OpenStreetMap via legitimate server User-Agent)
@@ -5145,25 +5148,6 @@ try {
 
     await startCameraStream(currentCameraFacing);
   }
-    activeCameraSlot = slot;
-    const modal = document.getElementById("camera-modal");
-    const label = document.getElementById("cam-slot-label");
-    const slotTitle = slot === "sebelum" ? "1. Foto Sebelum (0%)" : slot === "proses" ? "2. Foto Selama Proses (0-50%)" : "3. Foto Sesudah (100%)";
-    const tagText = slot === "sebelum" ? "FOTO SEBELUM (0%)" : slot === "proses" ? "PROSES PENGERJAAN" : "FOTO SESUDAH (100%)";
-
-    if (label) label.textContent = slotTitle;
-    const tag = document.getElementById("hud-badge-tag");
-    if (tag) tag.textContent = "PPSU DKI JAKARTA • " + tagText;
-
-    modal.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-
-    updateLiveHudClock();
-    if (hudTimer) clearInterval(hudTimer);
-    hudTimer = setInterval(updateLiveHudClock, 1000);
-
-    await startCameraStream(currentCameraFacing);
-  }
 
   function closeCameraModal() {
     stopCameraStream();
@@ -6238,7 +6222,6 @@ try {
       goToStep(1);
       switchUserTab("history");
     }
-  }
   }
 
   // ==========================================================
