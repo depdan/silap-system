@@ -72,8 +72,21 @@ function saveKategoriDB(db) {
 
 const DAFTAR_RW = [
   "RW 01", "RW 02", "RW 03", "RW 04", "RW 05",
-  "RW 06", "RW 07", "RW 08", "RW 09", "RW 10", "RW 11"
+  "RW 06", "RW 07", "RW 08", "RW 09", "RW 10"
 ];
+
+const DAFTAR_RW_JALAN = {
+  "RW 01": "Jl. Lapan",
+  "RW 02": "Jl. Gandaria",
+  "RW 03": "Jl. Gandaria",
+  "RW 04": "Jl. Buah",
+  "RW 05": "Jl. Raya Bogor",
+  "RW 06": "Jl. Belly",
+  "RW 07": "Jl. Tipar",
+  "RW 08": "Jl. Sukamto",
+  "RW 09": "Jl. Haji Balok",
+  "RW 10": "Jl. Lewa"
+};
 
 const DAFTAR_REGU_PPSU = [
   "Regu 1", "Regu 2", "Regu 3", "Regu 4", "Regu 5",
@@ -422,10 +435,10 @@ const INITIAL_REPORTS = [
     kat: "kebersihan",
     tugasKe: "Tugas 1",
     jenisPekerjaan: "Pembersihan Jalan & Trotoar",
-    judul: "Tugas 1: Pembersihan Jalan & Trotoar - Jl. Raya Kalisari RW 01",
+    judul: "Tugas 1: Pembersihan Jalan & Trotoar - Jl. Lapan RW 01",
     deskripsi: "Pembersihan sampah kering, debu, dedaunan gugur, dan kotoran trotoar serta bahu jalan.",
-    alamat: "Jl. Raya Kalisari No. 12, RW 01, Kel. Pekayon",
-    lokasiDetail: "Depan pos linmas RW 01 dekat gerbang masuk Kalisari",
+    alamat: "Jl. Lapan, RW 01, Kel. Pekayon",
+    lokasiDetail: "Depan pos linmas RW 01 Jl. Lapan",
     kendala: "Lalu lintas padat pagi hari, petugas menyapu menggunakan rompi reflektif.",
     petugas: "Ahmad Suryadi",
     regu: "Regu 1",
@@ -446,10 +459,10 @@ const INITIAL_REPORTS = [
     kat: "saluran",
     tugasKe: "Tugas 2",
     jenisPekerjaan: "Pembersihan Saluran Air & Got",
-    judul: "Tugas 2: Pembersihan Saluran Air & Got - Jl. Lapan RW 02",
+    judul: "Tugas 2: Pembersihan Saluran Air & Got - Jl. Gandaria RW 02",
     deskripsi: "Pembersihan tanaman liar, rumput pengganggu, serta pengerukan endapan lumpur dan sampah selokan.",
-    alamat: "Jl. Lapan No. 14, RW 02, Kel. Pekayon",
-    lokasiDetail: "Sepanjang saluran got Jl. Lapan samping pos RW 02",
+    alamat: "Jl. Gandaria, RW 02, Kel. Pekayon",
+    lokasiDetail: "Sepanjang saluran got Jl. Gandaria samping pos RW 02",
     kendala: "Endapan lumpur cukup padat, pengerukan dilakukan bertahap.",
     petugas: "Slamet Riyadi",
     regu: "Regu 2",
@@ -470,10 +483,10 @@ const INITIAL_REPORTS = [
     kat: "taman",
     tugasKe: "Tugas 3",
     jenisPekerjaan: "Perawatan Taman & Jalur Hijau",
-    judul: "Tugas 3: Perawatan Taman & Jalur Hijau - Gg. Tipar RW 03",
+    judul: "Tugas 3: Perawatan Taman & Jalur Hijau - Jl. Gandaria RW 03",
     deskripsi: "Pemeliharaan tanaman hias, pembersihan area hijau lingkungan, dan penataan pot tanaman.",
-    alamat: "Gg. Tipar RW 03, Kel. Pekayon",
-    lokasiDetail: "Area RTH di sebelah balai warga RW 03 Tipar",
+    alamat: "Jl. Gandaria, RW 03, Kel. Pekayon",
+    lokasiDetail: "Area RTH di sebelah balai warga RW 03 Gandaria",
     kendala: "Cuaca sempat gerimis, pekerjaan dilanjutkan setelah permukaan rumput kering.",
     petugas: "Gunawan Marzuki",
     regu: "Regu 3",
@@ -494,10 +507,10 @@ const INITIAL_REPORTS = [
     kat: "taman",
     tugasKe: "Tugas 4",
     jenisPekerjaan: "Pemangkasan Pohon & Dahan Rendah",
-    judul: "Tugas 4: Pemangkasan Pohon & Dahan Rendah - Jl. Belly RW 04",
+    judul: "Tugas 4: Pemangkasan Pohon & Dahan Rendah - Jl. Buah RW 04",
     deskripsi: "Pemotongan ranting/dahan pohon (tinggi maksimal 2 meter) yang menghalangi jalan atau kabel utilitas.",
-    alamat: "Jl. Belly No. 18, RW 04, Kel. Pekayon",
-    lokasiDetail: "Sisi kiri jalan depan pos RW 04 Belly",
+    alamat: "Jl. Buah, RW 04, Kel. Pekayon",
+    lokasiDetail: "Sisi kiri jalan depan pos RW 04 Buah",
     kendala: "Kabel utilitas melintas di sela dahan, pemangkasan manual ekstra hati-hati.",
     petugas: "Suroto Wibowo",
     regu: "Regu 4",
@@ -541,10 +554,10 @@ const INITIAL_REPORTS = [
     rw: "RW 06",
     kat: "taman",
     jenisPekerjaan: "Pemangkasan pohon rendah",
-    judul: "Pemangkasan pohon rendah - Jl. H. Hasan RW 06",
+    judul: "Pemangkasan pohon rendah - Jl. Belly RW 06",
     deskripsi: "Pemangkasan ranting pohon akasia yang menjorok rendah membahayakan kendaraan warga.",
-    alamat: "Jl. H. Hasan No. 8, RW 06, Kel. Pekayon",
-    lokasiDetail: "Depan pagar pembatas sekolah RW 06",
+    alamat: "Jl. Belly, RW 06, Kel. Pekayon",
+    lokasiDetail: "Depan pagar pembatas sekolah RW 06 Belly",
     kendala: "Perlu pengaturan lalu lintas searah selama pengangkutan sisa dahan.",
     petugas: "Suwanto Hadipuro",
     regu: "Regu Taman",
@@ -564,10 +577,10 @@ const INITIAL_REPORTS = [
     rw: "RW 07",
     kat: "jalan",
     jenisPekerjaan: "Jalan rusak (ringan)",
-    judul: "Perbaikan Jalan rusak (ringan) - Jl. Madrasah RW 07",
+    judul: "Perbaikan Jalan rusak (ringan) - Jl. Tipar RW 07",
     deskripsi: "Pemasangan kembali batu paving trotoar yang lepas agar tidak mencelakai pejalan kaki.",
-    alamat: "Jl. Madrasah No. 5, RW 07, Kel. Pekayon",
-    lokasiDetail: "Trotoar jalan samping pos kamling RW 07",
+    alamat: "Jl. Tipar, RW 07, Kel. Pekayon",
+    lokasiDetail: "Trotoar jalan samping pos kamling RW 07 Tipar",
     kendala: "Material pasir pasang sempat terlambat datang dari depo gudang.",
     petugas: "Ahmad Suryadi",
     regu: "Regu Jalan",
@@ -587,10 +600,10 @@ const INITIAL_REPORTS = [
     rw: "RW 08",
     kat: "saluran",
     jenisPekerjaan: "Pembersihan Saluran / Got",
-    judul: "Kuras Endapan Got Lingkungan - Komplek LAPAN RW 08",
-    deskripsi: "Pengangkatan lumpur hitam dan sampah plastik di saluran pemukiman komplek LAPAN RW 08.",
-    alamat: "Komplek LAPAN Blok B, RW 08, Kel. Pekayon",
-    lokasiDetail: "Saluran terbuka depan musala RW 08",
+    judul: "Kuras Endapan Got Lingkungan - Jl. Sukamto RW 08",
+    deskripsi: "Pengangkatan lumpur hitam dan sampah plastik di saluran pemukiman Jl. Sukamto RW 08.",
+    alamat: "Jl. Sukamto, RW 08, Kel. Pekayon",
+    lokasiDetail: "Saluran terbuka depan pos RW 08 Jl. Sukamto",
     kendala: "Akses jalan sempit gerobak motor tidak bisa masuk, pengangkutan estafet karung lumpur.",
     petugas: "Bambang Sutrisno",
     regu: "Regu Jalan",
@@ -610,10 +623,10 @@ const INITIAL_REPORTS = [
     rw: "RW 09",
     kat: "kebersihan",
     jenisPekerjaan: "Pembersihan Sampah Lingkungan",
-    judul: "Pembersihan Sampah Liar & Penyemprotan - RW 09",
-    deskripsi: "Pengangkutan timbulan sampah sisa daun kering dan plastik di Jl. Gongseng Raya RW 09.",
-    alamat: "Jl. Gongseng Raya, RW 09, Kel. Pekayon",
-    lokasiDetail: "Sepanjang jalur hijau Jl. Gongseng Raya RW 09",
+    judul: "Pembersihan Sampah Liar & Penyemprotan - Jl. Haji Balok RW 09",
+    deskripsi: "Pengangkutan timbulan sampah sisa daun kering dan plastik di Jl. Haji Balok RW 09.",
+    alamat: "Jl. Haji Balok, RW 09, Kel. Pekayon",
+    lokasiDetail: "Sepanjang jalur jalan Jl. Haji Balok RW 09",
     kendala: "Perlu kewaspadaan tinggi terhadap arus kendaraan bermotor.",
     petugas: "Rudi Hartono",
     regu: "Regu Taman",
@@ -633,10 +646,10 @@ const INITIAL_REPORTS = [
     rw: "RW 10",
     kat: "kantor",
     jenisPekerjaan: "Pemeliharaan Sarana Kantor",
-    judul: "Pembersihan & Penataan Posko Bersama RW 10",
+    judul: "Pembersihan & Penataan Posko Bersama - Jl. Lewa RW 10",
     deskripsi: "Pengecatan dinding posko, pembersihan talang air kantor operasional RW 10.",
-    alamat: "Jl. Gandaria 1 No. 1, RW 10, Kel. Pekayon",
-    lokasiDetail: "Gedung serbaguna posko terpadu RW 10",
+    alamat: "Jl. Lewa, RW 10, Kel. Pekayon",
+    lokasiDetail: "Gedung serbaguna posko terpadu RW 10 Jl. Lewa",
     kendala: "Peralatan tangga lipat dipinjam bergantian dengan regu lain.",
     petugas: "Hartono Prasetyo",
     regu: "Regu Kantor",
@@ -1209,7 +1222,7 @@ async function syncRealtimeFromBackend() {
         } else {
           for (let i = 0; i < data.reports.length; i++) {
             const s = data.reports[i];
-            const l = local.find(x => x.id === s.id);
+            const l = local.find(x => String(x.id) === String(s.id) || (x.noPekerjaan && s.noPekerjaan && String(x.noPekerjaan) === String(s.noPekerjaan)));
             if (!l || l.progres !== s.progres || l.status !== s.status || l.kendala !== s.kendala || l.judul !== s.judul) {
               changed = true;
               break;
@@ -1219,28 +1232,33 @@ async function syncRealtimeFromBackend() {
 
         if (changed) {
           const map = new Map();
-          data.reports.forEach(r => map.set(r.id, r));
+          data.reports.forEach(r => {
+            map.set(String(r.id), r);
+            if (r.noPekerjaan) map.set(String(r.noPekerjaan), r);
+          });
 
           local.forEach(l => {
-            const s = map.get(l.id);
+            const s = map.get(String(l.id)) || (l.noPekerjaan ? map.get(String(l.noPekerjaan)) : null);
             if (!s) {
-              if (Date.now() - _lastLocalSaveTime < 5000) {
-                map.set(l.id, l);
+              if (Date.now() - _lastLocalSaveTime < 15000) {
+                map.set(String(l.id), l);
               }
             } else {
               const mergedFoto = (s.foto || []).map((sf, idx) => {
                 const lf = l.foto && l.foto[idx];
                 return {
                   ...sf,
-                  src: sf.src || (lf ? lf.src : ""),
-                  timestamp: sf.timestamp || (lf ? lf.timestamp : "")
+                  src: (lf && lf.src) ? lf.src : (sf.src || ""),
+                  timestamp: (lf && lf.timestamp) ? lf.timestamp : (sf.timestamp || "")
                 };
               });
 
-              if (Date.now() - _lastLocalSaveTime < 5000 && l.progres > s.progres) {
-                map.set(l.id, { ...s, progres: l.progres, status: l.status, foto: mergedFoto });
+              const lProg = parseInt(l.progres, 10) || 0;
+              const sProg = parseInt(s.progres, 10) || 0;
+              if (Date.now() - _lastLocalSaveTime < 15000 && lProg > sProg) {
+                map.set(String(s.id), { ...s, progres: l.progres, status: l.status, foto: mergedFoto });
               } else {
-                map.set(l.id, { ...l, ...s, foto: mergedFoto });
+                map.set(String(s.id), { ...l, ...s, foto: mergedFoto });
               }
             }
           });

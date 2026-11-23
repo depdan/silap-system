@@ -30,6 +30,8 @@ if ($action === 'get_reports') {
                 'kat'            => $r['kat'],
                 'jenisPekerjaan' => $r['jenis_pekerjaan'],
                 'judul'          => $r['judul'],
+                'targetMeter'    => $r['target_meter'] ?? '',
+                'target_meter'   => $r['target_meter'] ?? '',
                 'alamat'         => $r['alamat'],
                 'lokasiDetail'   => $r['lokasi_detail'],
                 'kendala'        => $r['kendala'],
@@ -67,12 +69,12 @@ if ($action === 'save_all_reports' || $action === 'sync_reports') {
         $stmt = $conn->prepare("
             INSERT INTO `laporan` (
                 `id`, `no_pekerjaan`, `minggu`, `rw`, `kat`, `jenis_pekerjaan`, 
-                `judul`, `alamat`, `lokasi_detail`, `kendala`, `petugas`, 
+                `judul`, `target_meter`, `alamat`, `lokasi_detail`, `kendala`, `petugas`, 
                 `regu`, `no_hp`, `jumlah_petugas`, `progres`, `status`, 
                 `foto_sebelum`, `foto_proses`, `foto_sesudah`, `tanggal`
             ) VALUES (
                 :id, :no_pekerjaan, :minggu, :rw, :kat, :jenis_pekerjaan, 
-                :judul, :alamat, :lokasi_detail, :kendala, :petugas, 
+                :judul, :target_meter, :alamat, :lokasi_detail, :kendala, :petugas, 
                 :regu, :no_hp, :jumlah_petugas, :progres, :status, 
                 :foto_sebelum, :foto_proses, :foto_sesudah, :tanggal
             ) ON DUPLICATE KEY UPDATE 
@@ -82,6 +84,7 @@ if ($action === 'save_all_reports' || $action === 'sync_reports') {
                 `kat` = VALUES(`kat`),
                 `jenis_pekerjaan` = VALUES(`jenis_pekerjaan`),
                 `judul` = VALUES(`judul`),
+                `target_meter` = VALUES(`target_meter`),
                 `alamat` = VALUES(`alamat`),
                 `lokasi_detail` = VALUES(`lokasi_detail`),
                 `kendala` = VALUES(`kendala`),
@@ -111,6 +114,7 @@ if ($action === 'save_all_reports' || $action === 'sync_reports') {
                 ':kat'            => $r['kat'] ?? 'kebersihan',
                 ':jenis_pekerjaan' => $r['jenisPekerjaan'] ?? ($r['judul'] ?? 'Pekerjaan Lapangan'),
                 ':judul'          => $r['judul'] ?? ($r['jenisPekerjaan'] ?? 'Pekerjaan Lapangan'),
+                ':target_meter'   => (string)($r['targetMeter'] ?? ($r['target_meter'] ?? ($r['panjangTarget'] ?? ''))),
                 ':alamat'         => $r['alamat'] ?? 'Wilayah Kel. Pekayon',
                 ':lokasi_detail'   => $r['lokasiDetail'] ?? ($r['lokasi_detail'] ?? ''),
                 ':kendala'        => $r['kendala'] ?? ($r['deskripsi'] ?? ''),
@@ -436,6 +440,8 @@ if ($action === 'sync_realtime') {
                 'kat'            => $r['kat'],
                 'jenisPekerjaan' => $r['jenis_pekerjaan'],
                 'judul'          => $r['judul'],
+                'targetMeter'    => $r['target_meter'] ?? '',
+                'target_meter'   => $r['target_meter'] ?? '',
                 'alamat'         => $r['alamat'],
                 'lokasiDetail'   => $r['lokasi_detail'],
                 'kendala'        => $r['kendala'],

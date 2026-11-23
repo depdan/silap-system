@@ -218,6 +218,31 @@
             <input type="hidden" id="selected-kat-val" value="kebersihan">
           </div>
 
+          <!-- Bagian Tambahan: Target Penyelesaian (Panjang Target Pengerjaan dalam Meter) -->
+          <div class="figma-section-card">
+            <div class="section-header-row">
+              <div class="section-header-icon" style="background:#ECFDF5;color:#059669;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M6 8v8"/><path d="M18 8v8"/><path d="M10 10v4"/><path d="M14 10v4"/></svg>
+              </div>
+              <div class="section-header-text">
+                <h3 class="section-title">Target Penyelesaian (m)</h3>
+                <div class="section-sub">Panjang target pengerjaan fisik dalam satuan Meter</div>
+              </div>
+            </div>
+
+            <div class="form-field-item" style="margin-bottom:0;">
+              <div class="field-label">
+                <span>Panjang Target Pengerjaan (Meter)&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
+                <span class="field-tag-required">Wajib Diisi</span>
+              </div>
+              <div style="position:relative; display:flex; align-items:center;">
+                <input type="number" id="u-target-meter-inp" class="u-input-field" placeholder="Ketik target meter (contoh: 100)" value="" min="1" step="any" style="padding-right: 68px; font-weight:700; font-size:1rem;" oninput="triggerDraftAutoSave(); this.style.borderColor=''; this.style.boxShadow='';" required>
+                <span style="position:absolute; right:12px; font-weight:800; color:#059669; font-size:12px; pointer-events:none; background:#ECFDF5; padding:3px 8px; border-radius:6px; border:1px solid #A7F3D0;">Meter</span>
+              </div>
+              <div style="font-size:0.75rem; color:#64748B; margin-top:6px; line-height:1.4;">Target estimasi panjang atau bentangan fisik penanganan lapangan (dalam satuan Meter).</div>
+            </div>
+          </div>
+
           <!-- Bagian 3: Detail Lokasi & Tim Personel -->
           <div class="figma-section-card">
             <div class="section-header-row">
@@ -238,17 +263,16 @@
               </div>
               <select id="u-rw-select" class="u-input-field" onchange="onRwSelectChange(); this.style.borderColor=''; this.style.boxShadow='';" required>
                 <option value="" disabled selected>-- Pilih Wilayah RW --</option>
-                <option value="RW 01">RW 01 - Gandaria / Kalisari</option>
-                <option value="RW 02">RW 02 - Lapan</option>
-                <option value="RW 03">RW 03 - Tipar</option>
-                <option value="RW 04">RW 04 - Belly / Pedati</option>
-                <option value="RW 05">RW 05 - Raya Bogor</option>
-                <option value="RW 06">RW 06 - H. Hasan</option>
-                <option value="RW 07">RW 07 - Madrasah</option>
-                <option value="RW 08">RW 08 - Komplek LAPAN</option>
-                <option value="RW 09">RW 09 - Gongseng Raya</option>
-                <option value="RW 10">RW 10 - Gandaria 1</option>
-                <option value="RW 11">RW 11 - Tipar Timur</option>
+                <option value="RW 01">RW 01 - Jl. Lapan</option>
+                <option value="RW 02">RW 02 - Jl. Gandaria</option>
+                <option value="RW 03">RW 03 - Jl. Gandaria</option>
+                <option value="RW 04">RW 04 - Jl. Buah</option>
+                <option value="RW 05">RW 05 - Jl. Raya Bogor</option>
+                <option value="RW 06">RW 06 - Jl. Belly</option>
+                <option value="RW 07">RW 07 - Jl. Tipar</option>
+                <option value="RW 08">RW 08 - Jl. Sukamto</option>
+                <option value="RW 09">RW 09 - Jl. Haji Balok</option>
+                <option value="RW 10">RW 10 - Jl. Lewa</option>
               </select>
             </div>
 

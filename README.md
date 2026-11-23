@@ -1,4 +1,25 @@
-# SILAP – Sistem Informasi Laporan PPSU Kelurahan Pekayon
+<p align="center">
+  <img src="public/foto/silap.png" alt="Logo SILAP Kelurahan Pekayon" width="220">
+</p>
+
+<h1 align="center">SILAP – Sistem Informasi Laporan PPSU Kelurahan Pekayon</h1>
+
+<p align="center">
+  <b>Platform Digital Monitoring &amp; Verifikasi Operasional Kerja Harian PPSU Terpadu</b><br>
+  Kelurahan Pekayon, Kecamatan Pasar Rebo, Kota Administrasi Jakarta Timur
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/Laravel-Framework-FF2D20?style=flat-square&logo=laravel&logoColor=white" alt="Laravel">
+  <img src="https://img.shields.io/badge/Database-MySQL%20%2F%20SQLite-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/Maps-Leaflet.js-199900?style=flat-square&logo=leaflet&logoColor=white" alt="Leaflet">
+  <img src="https://img.shields.io/badge/Wilayah-10%20RW%20Pekayon-EA580C?style=flat-square" alt="10 RW Pekayon">
+</p>
+
+---
+
+## 📌 Ringkasan Sistem
 
 **SILAP** (Sistem Laporan PPSU) adalah sistem informasi operasional berbasis web yang dirancang untuk mendigitalkan, memvalidasi, serta mendokumentasikan pelaporan kegiatan kerja harian Petugas Penanganan Prasarana dan Sarana Umum (PPSU) di wilayah Kelurahan Pekayon, Jakarta Timur. 
 
@@ -49,8 +70,8 @@ Hak akses dan alur kerja aplikasi dibagi ke dalam 2 peran utama yang terisolasi:
 
 ### 1. Salin Repositori
 ```bash
-git clone https://github.com/depdan/silap-laravel.git
-cd silap-laravel
+git clone https://github.com/depdan/silap-system.git
+cd silap-system
 ```
 
 ### 2. Pasang Dependensi

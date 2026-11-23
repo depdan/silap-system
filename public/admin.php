@@ -1273,7 +1273,7 @@ try {
       });
 
       // Row 1: Title
-      ws.mergeCells("A1:R1");
+      ws.mergeCells("A1:O1");
       const t1 = ws.getCell("A1");
       t1.value = "REKAP LAPORAN OPERASIONAL PPSU – KELURAHAN PEKAYON";
       t1.font = { name: "Arial", size: 14, bold: true, color: { argb: "FFEA580C" } };
@@ -1281,7 +1281,7 @@ try {
       ws.getRow(1).height = 26;
 
       // Row 2: Subtitle
-      ws.mergeCells("A2:R2");
+      ws.mergeCells("A2:O2");
       const t2 = ws.getCell("A2");
       t2.value = "Master Rekapitulasi Penanganan Prasarana Wilayah 10 RW dengan Dokumentasi Foto Lapangan.";
       t2.font = { name: "Arial", size: 10, italic: true, color: { argb: "FF64748B" } };
@@ -1292,12 +1292,11 @@ try {
 
       // Row 4: Headers
       const headers = [
-        "No Pekerjaan", "Periode Minggu", "RW", "Kategori", "Jenis Pekerjaan",
-        "Judul", "Petugas", "Regu", "No HP", "Jml Petugas",
-        "Alamat", "Patokan Lokasi", "Catatan / Kendala", "Status", "Progres %",
-        "Foto Sebelum", "Foto Proses", "Foto Selesai"
+        "Periode Minggu", "RW", "Kategori", "Jenis Pekerjaan",
+        "Judul", "Target Penyelesaian (m)", "Petugas", "Regu", "No HP", "Jml Petugas",
+        "Alamat", "Catatan / Kendala", "0%", "50%", "100%"
       ];
-      const colWidths = [19, 32, 9, 16, 32, 45, 30, 14, 18, 13, 38, 35, 45, 14, 12, 20, 20, 20];
+      const colWidths = [32, 9, 16, 32, 42, 22, 28, 14, 18, 13, 38, 42, 20, 20, 20];
 
       const headerRow = ws.getRow(4);
       headerRow.height = 32;
@@ -1353,23 +1352,22 @@ try {
         const prgVal = r.progres !== undefined ? Number(r.progres) : (r.status === "selesai" ? 100 : (r.status === "proses" ? 50 : 0));
         const statusLabel = r.status === "selesai" ? "Selesai" : (r.status === "proses" ? "Dalam Proses" : "Belum Dikerjakan");
         const katLabel = (KATEGORI_INFO && KATEGORI_INFO[r.kat] && KATEGORI_INFO[r.kat].label) ? KATEGORI_INFO[r.kat].label : (r.kat || "Prasarana");
+        const rawTarget = r.targetMeter || r.target_meter || r.panjangTarget;
+        const targetMtr = rawTarget ? (String(rawTarget).includes("m") ? String(rawTarget) : `${rawTarget} m`) : "-";
 
         const rowValues = [
-          r.noPekerjaan || r.id || `PKJ-${rIdx + 1}`,
           r.minggu || (r.tanggal ? `Laporan ${formatTanggalExcel(r.tanggal)}` : "Laporan Mingguan"),
           r.rw || "RW 01",
           katLabel,
           r.jenisPekerjaan || r.judul || "-",
           r.judul || r.jenisPekerjaan || "-",
+          targetMtr,
           r.petugas || "-",
           r.regu || "-",
           r.noHp || "-",
           r.jumlahPetugas || 4,
           r.alamat || "-",
-          r.lokasiDetail || "-",
           r.kendala || r.deskripsi || "Tidak ada kendala.",
-          statusLabel,
-          `${prgVal}%`,
           "-",
           "-",
           "-"
@@ -1392,7 +1390,7 @@ try {
             right: { style: "thin", color: { argb: "FFFED7AA" } }
           };
 
-          const isCenter = [1, 3, 8, 9, 10, 14, 15, 16, 17, 18].includes(c);
+          const isCenter = [2, 6, 8, 9, 10, 13, 14, 15].includes(c);
           cell.alignment = {
             vertical: "middle",
             horizontal: isCenter ? "center" : "left",
@@ -1400,11 +1398,11 @@ try {
           };
         }
 
-        // Embedding Photos for col 16 (Sebelum), 17 (Proses), 18 (Selesai)
+        // Embedding Photos for col 13 (0%), 14 (50%), 15 (100%)
         const tahapConfigs = [
-          { stage: 0, col: 16, allowed: prgVal >= 0 && r.status !== "belum" || (r.foto && r.foto[0] && r.foto[0].src) },
-          { stage: 50, col: 17, allowed: prgVal >= 50 },
-          { stage: 100, col: 18, allowed: prgVal >= 100 || r.status === "selesai" }
+          { stage: 0, col: 13, allowed: prgVal >= 0 && r.status !== "belum" || (r.foto && r.foto[0] && r.foto[0].src) },
+          { stage: 50, col: 14, allowed: prgVal >= 50 },
+          { stage: 100, col: 15, allowed: prgVal >= 100 || r.status === "selesai" }
         ];
 
         tahapConfigs.forEach((cfg, pIdx) => {

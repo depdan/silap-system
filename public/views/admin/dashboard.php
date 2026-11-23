@@ -195,19 +195,19 @@
                 <input type="text" class="search-input-field" placeholder="Cari tugas berdasarkan nomor ID, jenis pekerjaan, jalan, RW, petugas..." oninput="searchTodoList(this.value)">
               </div>
             </div>
-            <div style="width:160px;">
+            <div style="min-width:190px;">
               <select id="todo-filter-rw-select" class="form-input" style="width:100%;height:44px;border-radius:12px;border:1.5px solid #CBD5E1;font-weight:700;font-size:0.85rem;" onchange="filterTodoByRw(this.value)">
                 <option value="all">Semua RW (10 RW)</option>
-                <option value="RW 01">RW 01</option>
-                <option value="RW 02">RW 02</option>
-                <option value="RW 03">RW 03</option>
-                <option value="RW 04">RW 04</option>
-                <option value="RW 05">RW 05</option>
-                <option value="RW 06">RW 06</option>
-                <option value="RW 07">RW 07</option>
-                <option value="RW 08">RW 08</option>
-                <option value="RW 09">RW 09</option>
-                <option value="RW 10">RW 10</option>
+                <option value="RW 01">RW 01 - Jl. Lapan</option>
+                <option value="RW 02">RW 02 - Jl. Gandaria</option>
+                <option value="RW 03">RW 03 - Jl. Gandaria</option>
+                <option value="RW 04">RW 04 - Jl. Buah</option>
+                <option value="RW 05">RW 05 - Jl. Raya Bogor</option>
+                <option value="RW 06">RW 06 - Jl. Belly</option>
+                <option value="RW 07">RW 07 - Jl. Tipar</option>
+                <option value="RW 08">RW 08 - Jl. Sukamto</option>
+                <option value="RW 09">RW 09 - Jl. Haji Balok</option>
+                <option value="RW 10">RW 10 - Jl. Lewa</option>
               </select>
             </div>
           </div>

@@ -3414,17 +3414,16 @@ try {
 
   const PEKAYON_CENTER = { lat: -6.338520, lng: 106.865410 };
   const PEKAYON_RW_DATA = {
-    "RW 01": { road: "Jl. Raya Kalisari No. 12", patokan: "Dekat Kantor Kelurahan Pekayon / Pos RW 01", lat: -6.335500, lng: 106.864200 },
-    "RW 02": { road: "Jl. Lapan No. 14", patokan: "Sepanjang got Jl. Lapan samping pos RW 02", lat: -6.337100, lng: 106.862500 },
-    "RW 03": { road: "Gg. Tipar RW 03", patokan: "Area RTH sebelah balai warga RW 03 Tipar", lat: -6.339200, lng: 106.866500 },
-    "RW 04": { road: "Jl. Belly No. 18", patokan: "Sisi kiri jalan depan pos RW 04 Belly", lat: -6.341500, lng: 106.863800 },
-    "RW 05": { road: "Jl. Raya Bogor KM 27", patokan: "Halaman parkir dan pertigaan jalan lingkungan RW 05", lat: -6.343200, lng: 106.868000 },
-    "RW 06": { road: "Jl. H. Hasan No. 8", patokan: "Depan pagar pembatas sekolah RW 06", lat: -6.336200, lng: 106.867200 },
-    "RW 07": { road: "Jl. Madrasah No. 5", patokan: "Trotoar jalan depan Madrasah RW 07", lat: -6.334100, lng: 106.865800 },
-    "RW 08": { road: "Komplek LAPAN Blok B", patokan: "Saluran terbuka depan musala RW 08", lat: -6.338800, lng: 106.861500 },
-    "RW 09": { road: "Jl. Gongseng Raya", patokan: "Sepanjang jalur hijau Jl. Gongseng Raya RW 09", lat: -6.332500, lng: 106.864000 },
-    "RW 10": { road: "Jl. Gandaria 1 No. 1", patokan: "Gedung serbaguna posko terpadu RW 10", lat: -6.334800, lng: 106.868500 },
-    "RW 11": { road: "Jl. Tipar Timur No. 22", patokan: "Dekat SMPN 184 / lapangan RW 11", lat: -6.340500, lng: 106.869800 }
+    "RW 01": { road: "Jl. Lapan", patokan: "Wilayah RW 01 - Jl. Lapan", lat: -6.335800, lng: 106.863500 },
+    "RW 02": { road: "Jl. Gandaria", patokan: "Wilayah RW 02 - Jl. Gandaria", lat: -6.333800, lng: 106.868200 },
+    "RW 03": { road: "Jl. Gandaria", patokan: "Wilayah RW 03 - Jl. Gandaria", lat: -6.335200, lng: 106.869000 },
+    "RW 04": { road: "Jl. Buah", patokan: "Wilayah RW 04 - Jl. Buah", lat: -6.337500, lng: 106.866000 },
+    "RW 05": { road: "Jl. Raya Bogor", patokan: "Wilayah RW 05 - Jl. Raya Bogor", lat: -6.343200, lng: 106.868000 },
+    "RW 06": { road: "Jl. Belly", patokan: "Wilayah RW 06 - Jl. Belly", lat: -6.341500, lng: 106.863800 },
+    "RW 07": { road: "Jl. Tipar", patokan: "Wilayah RW 07 - Jl. Tipar", lat: -6.339200, lng: 106.866500 },
+    "RW 08": { road: "Jl. Sukamto", patokan: "Wilayah RW 08 - Jl. Sukamto", lat: -6.336800, lng: 106.861200 },
+    "RW 09": { road: "Jl. Haji Balok", patokan: "Wilayah RW 09 - Jl. Haji Balok", lat: -6.331800, lng: 106.863200 },
+    "RW 10": { road: "Jl. Lewa", patokan: "Wilayah RW 10 - Jl. Lewa", lat: -6.334000, lng: 106.869800 }
   };
 
   // Form State
@@ -3796,15 +3795,14 @@ try {
 
       const isCompleted = completedTasks.has(tName);
       const inProg = inProgressTasks.get(tName);
-      const isPrevCompleted = (i === 1) || completedTasks.has("Tugas " + (i - 1));
 
       if (isCompleted) {
         completedCount++;
-        btn.disabled = true;
+        btn.disabled = false;
         btn.classList.add("tugas-disabled-done");
         btn.classList.remove("active", "tugas-in-progress", "tugas-locked");
         btn.style.opacity = "";
-        btn.style.cursor = "default";
+        btn.style.cursor = "pointer";
         btn.title = `${tName} sudah selesai dikerjakan untuk jadwal ini`;
         btn.innerHTML = `<span>✓&nbsp;Tugas&nbsp;${i}</span><span class="tugas-done-tag">Selesai</span>`;
       } else if (inProg) {
@@ -3819,9 +3817,9 @@ try {
         if (!firstAvailableTask) {
           firstAvailableTask = tName;
         }
-      } else if (isPrevCompleted) {
+      } else {
         btn.disabled = false;
-        btn.classList.remove("tugas-disabled-done", "tugas-in-progress", "tugas-locked");
+        btn.classList.remove("active", "tugas-in-progress", "tugas-disabled-done", "tugas-locked");
         btn.style.opacity = "";
         btn.style.cursor = "pointer";
         btn.title = `Pilih ${tName}`;
@@ -3829,14 +3827,6 @@ try {
         if (!firstAvailableTask) {
           firstAvailableTask = tName;
         }
-      } else {
-        btn.disabled = true;
-        btn.classList.remove("active", "tugas-in-progress", "tugas-disabled-done");
-        btn.classList.add("tugas-locked");
-        btn.style.opacity = "0.5";
-        btn.style.cursor = "not-allowed";
-        btn.title = `Terkunci: Selesaikan Tugas ${i - 1} terlebih dahulu`;
-        btn.innerHTML = `<span>🔒&nbsp;Tugas&nbsp;${i}</span>`;
       }
     }
 
@@ -3882,39 +3872,9 @@ try {
   function selectTugasKe(tugas, skipAutoResume = false) {
     const taskNum = parseInt(tugas.replace(/\D/g, ""), 10) || 1;
     const btn = Array.from(document.querySelectorAll(".btn-tugas-pill")).find(b => b.dataset.tugas === tugas);
-    if (btn && btn.disabled) {
-      if (btn.classList.contains("tugas-disabled-done")) {
-        showToast(`${tugas} sudah diselesaikan untuk hari ini (100% Tuntas).`, "info");
-      } else {
-        showToast(`Target Penugasan harus berurutan! Selesaikan Tugas ${taskNum - 1} terlebih dahulu sebelum membuka ${tugas}.`, "warning");
-      }
+    if (btn && btn.classList.contains("tugas-disabled-done")) {
+      showToast(`${tugas} sudah diselesaikan untuk hari ini (100% Tuntas).`, "info");
       return;
-    }
-
-    if (taskNum > 1) {
-      const prevTask = "Tugas " + (taskNum - 1);
-      const list = getLaporanDB();
-      const targetDay = mobileSelectedHari;
-      const targetDateStr = currentCalendarDateStr;
-      const isPrevDone = list.some(r => {
-        const matchRegu = (r.regu || "Regu 1").toLowerCase() === (mobileRegu || "Regu 1").toLowerCase();
-        const matchTugas = r.tugasKe === prevTask;
-        let matchDate = false;
-        if (r.minggu && r.minggu.indexOf(targetDay) !== -1) matchDate = true;
-        if (r.tanggal && targetDateStr) {
-          const parts = targetDateStr.split("-");
-          if (parts.length === 3) {
-            const dNum = parseInt(parts[2], 10);
-            if (r.tanggal.indexOf(dNum + " ") !== -1 || r.tanggal.indexOf("/" + parts[2] + "/") !== -1) matchDate = true;
-          }
-        }
-        return matchRegu && matchTugas && matchDate && (r.status === 'selesai' || parseInt(r.progres, 10) >= 100);
-      });
-
-      if (!isPrevDone) {
-        showToast(`Target Penugasan harus berurutan! Selesaikan ${prevTask} terlebih dahulu sebelum membuka ${tugas}.`, "warning");
-        return;
-      }
     }
 
     mobileSelectedTugas = tugas;
@@ -4308,6 +4268,21 @@ try {
           patokanInp.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, 0.15)";
           patokanInp.focus();
           patokanInp.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+      return false;
+    }
+
+    const targetInp = document.getElementById("u-target-meter-inp");
+    const targetMeterVal = targetInp ? targetInp.value.trim() : "";
+    if (!targetMeterVal || isNaN(Number(targetMeterVal)) || Number(targetMeterVal) <= 0) {
+      if (showFeedback) {
+        showToast("Harap masukkan Target Penyelesaian (panjang target dalam meter) yang valid!", "warning");
+        if (targetInp) {
+          targetInp.style.borderColor = "#DC2626";
+          targetInp.style.boxShadow = "0 0 0 3px rgba(220, 38, 38, 0.15)";
+          targetInp.focus();
+          targetInp.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
       return false;
@@ -4727,6 +4702,8 @@ try {
     if (addrInp) addrInp.value = "";
     const patokanInp = document.getElementById("u-patokan-inp");
     if (patokanInp) patokanInp.value = "";
+    const targetInp = document.getElementById("u-target-meter-inp");
+    if (targetInp) targetInp.value = "";
     mobileRw = "";
     mobileAddress = "";
     const catInp = document.getElementById("u-catatan-inp");
@@ -4957,6 +4934,7 @@ try {
         lng: liveCoords.lng,
         jalan: document.getElementById("u-custom-address-inp") ? document.getElementById("u-custom-address-inp").value : "",
         patokan: document.getElementById("u-patokan-inp") ? document.getElementById("u-patokan-inp").value : "",
+        targetMeter: document.getElementById("u-target-meter-inp") ? document.getElementById("u-target-meter-inp").value : "",
         progres: mobileProgres,
         catatan: document.getElementById("u-catatan-inp") ? document.getElementById("u-catatan-inp").value : "",
         photoSebelum: mobilePhotoSebelum || "",
@@ -5021,6 +4999,7 @@ try {
         if (d.jalan && document.getElementById("u-custom-address-inp")) document.getElementById("u-custom-address-inp").value = d.jalan;
         if (d.patokan && document.getElementById("u-patokan-inp")) document.getElementById("u-patokan-inp").value = d.patokan;
       }
+      if (d.targetMeter && document.getElementById("u-target-meter-inp")) document.getElementById("u-target-meter-inp").value = d.targetMeter;
       if (d.catatan && document.getElementById("u-catatan-inp")) document.getElementById("u-catatan-inp").value = d.catatan;
 
       if (d.lat && d.lng) {
@@ -5089,6 +5068,7 @@ try {
       document.getElementById("u-custom-address-inp").value = jalanOnly;
     }
     if (lap.lokasiDetail && document.getElementById("u-patokan-inp")) document.getElementById("u-patokan-inp").value = lap.lokasiDetail;
+    if ((lap.targetMeter || lap.target_meter) && document.getElementById("u-target-meter-inp")) document.getElementById("u-target-meter-inp").value = lap.targetMeter || lap.target_meter;
     if (lap.noHp && document.getElementById("u-nohp-inp")) document.getElementById("u-nohp-inp").value = lap.noHp;
     if (lap.jumlahPetugas && document.getElementById("u-jml-petugas-inp")) document.getElementById("u-jml-petugas-inp").value = lap.jumlahPetugas;
     if (lap.kendala && document.getElementById("u-catatan-inp")) document.getElementById("u-catatan-inp").value = lap.kendala;
@@ -5466,7 +5446,7 @@ try {
     }
     // Deteksi Area Pekayon / Pasar Rebo
     if (lat <= -6.320 && lat >= -6.348 && lng >= 106.850 && lng <= 106.880) {
-      return "Jl. Raya Kalisari No. 12, RW 01, Kel. Pekayon, Jakarta Timur";
+      return "Jl. Lapan, RW 01, Kel. Pekayon, Jakarta Timur";
     }
     return null;
   }
@@ -5990,6 +5970,7 @@ try {
     const noHp = document.getElementById("u-nohp-inp") ? document.getElementById("u-nohp-inp").value.trim() : "081234567890";
     const jmlPetugas = document.getElementById("u-jml-petugas-inp") ? parseInt(document.getElementById("u-jml-petugas-inp").value, 10) || 4 : 4;
     const patokanVal = document.getElementById("u-patokan-inp") ? document.getElementById("u-patokan-inp").value.trim() : "";
+    const targetMeterVal = (document.getElementById("u-target-meter-inp") && document.getElementById("u-target-meter-inp").value.trim()) ? document.getElementById("u-target-meter-inp").value.trim() : "";
     const catatan = document.getElementById("u-catatan-inp") ? document.getElementById("u-catatan-inp").value.trim() : "";
 
     const now = new Date();
@@ -6026,6 +6007,7 @@ try {
         tugasKe: mobileSelectedTugas || "Tugas 1",
         jenisPekerjaan: mobileSelectedJob,
         judul: (mobileSelectedTugas || "Tugas 1") + ": " + mobileSelectedJob + " - " + activeAddr,
+        targetMeter: targetMeterVal,
         deskripsi: catatan || ("Penanganan " + mobileSelectedJob.toLowerCase() + " di " + activeAddr + "."),
         alamat: activeAddr,
         lokasiDetail: patokanVal || ("Lokasi pengerjaan di area " + mobileRw),
@@ -6107,6 +6089,7 @@ try {
         tugasKe: mobileSelectedTugas || oldLap.tugasKe || "Tugas 1",
         jenisPekerjaan: mobileSelectedJob || oldLap.jenisPekerjaan,
         judul: (mobileSelectedTugas || oldLap.tugasKe || "Tugas 1") + ": " + (mobileSelectedJob || oldLap.jenisPekerjaan) + " - " + activeAddr,
+        targetMeter: targetMeterVal || oldLap.targetMeter || oldLap.target_meter || "",
         deskripsi: catatan || oldLap.deskripsi || ("Penanganan " + (mobileSelectedJob || "").toLowerCase() + " di " + activeAddr + "."),
         alamat: activeAddr,
         lokasiDetail: patokanVal || oldLap.lokasiDetail || ("Lokasi pengerjaan di area " + mobileRw),
@@ -6193,6 +6176,7 @@ try {
         tugasKe: mobileSelectedTugas || oldLap.tugasKe || "Tugas 1",
         jenisPekerjaan: mobileSelectedJob || oldLap.jenisPekerjaan,
         judul: (mobileSelectedTugas || oldLap.tugasKe || "Tugas 1") + ": " + (mobileSelectedJob || oldLap.jenisPekerjaan) + " - " + activeAddr,
+        targetMeter: targetMeterVal || oldLap.targetMeter || oldLap.target_meter || "",
         deskripsi: catatan || oldLap.deskripsi || ("Penanganan " + (mobileSelectedJob || "").toLowerCase() + " di " + activeAddr + "."),
         alamat: activeAddr,
         lokasiDetail: patokanVal || oldLap.lokasiDetail || ("Lokasi pengerjaan di area " + mobileRw),
@@ -6327,7 +6311,7 @@ try {
       });
 
       // Row 1: Title
-      ws.mergeCells("A1:P1");
+      ws.mergeCells("A1:M1");
       const t1 = ws.getCell("A1");
       t1.value = "REKAP LAPORAN PENANGANAN PPSU – KELURAHAN PEKAYON";
       t1.font = { name: "Arial", size: 13, bold: true, color: { argb: "FFEA580C" } };
@@ -6335,7 +6319,7 @@ try {
       ws.getRow(1).height = 24;
 
       // Row 2: Subtitle
-      ws.mergeCells("A2:P2");
+      ws.mergeCells("A2:M2");
       const t2 = ws.getCell("A2");
       t2.value = "Periode: " + (periodNames[activePeriod] || "Semua") + " | Regu: " + (activeReguFilter === "SEMUA" ? "Semua Regu PPSU" : activeReguFilter) + " | Diunduh: " + new Date().toLocaleString("id-ID");
       t2.font = { name: "Arial", size: 9.5, italic: true, color: { argb: "FF64748B" } };
@@ -6345,11 +6329,11 @@ try {
 
       // Row 4: Headers
       const headers = [
-        "No Pekerjaan", "Periode", "RW", "Kategori", "Jenis Pekerjaan",
-        "Judul Laporan", "Petugas", "Regu", "No HP", "Jml Anggota",
-        "Alamat Lokasi", "Patokan", "Catatan Kendala", "Status", "Progres %", "Waktu Terdata"
+        "Periode", "RW", "Kategori", "Jenis Pekerjaan",
+        "Judul Laporan", "Target Penyelesaian (m)", "Petugas", "Regu", "No HP", "Jml Anggota",
+        "Alamat Lokasi", "Catatan Kendala", "Waktu Terdata"
       ];
-      const colWidths = [18, 30, 9, 15, 28, 38, 25, 14, 16, 12, 35, 30, 35, 14, 12, 20];
+      const colWidths = [30, 9, 15, 28, 38, 22, 25, 14, 16, 12, 35, 35, 20];
 
       const headerRow = ws.getRow(4);
       headerRow.height = 30;
@@ -6378,24 +6362,22 @@ try {
         const isEven = idx % 2 === 1;
         const bgArgb = isEven ? "FFFFF7ED" : "FFFFFFFF";
         const katLabel = (typeof KATEGORI_INFO !== 'undefined' && KATEGORI_INFO[r.kat] && KATEGORI_INFO[r.kat].label) ? KATEGORI_INFO[r.kat].label : (r.kat || "Prasarana");
-        const statusLabel = r.status === "selesai" ? "Selesai (100%)" : (r.status === "proses" ? "Dalam Proses (" + (r.progres || 50) + "%)" : "Mulai (0%)");
+        const rawTarget = r.targetMeter || r.target_meter || r.panjangTarget;
+        const targetMtr = rawTarget ? (String(rawTarget).includes("m") ? String(rawTarget) : `${rawTarget} m`) : "-";
 
         wsRow.values = [
-          r.noPekerjaan || r.id || ("PKJ-" + (idx + 1)),
           r.minggu || "-",
           r.rw || "RW 01",
           katLabel,
           r.jenisPekerjaan || r.judul || "-",
           r.judul || r.jenisPekerjaan || "-",
+          targetMtr,
           r.petugas || "-",
           r.regu || "-",
           r.noHp || "-",
           r.jumlahPetugas || 4,
           r.alamat || "-",
-          r.lokasiDetail || "-",
           r.kendala || r.deskripsi || "Tidak ada kendala.",
-          statusLabel,
-          (r.progres || 0) + "%",
           r.tanggal || "-"
         ];
 
@@ -6409,7 +6391,7 @@ try {
             left: { style: "thin", color: { argb: "FFFED7AA" } },
             right: { style: "thin", color: { argb: "FFFED7AA" } }
           };
-          const isCenter = [1, 3, 8, 9, 10, 14, 15, 16].includes(c);
+          const isCenter = [2, 6, 8, 9, 10, 13].includes(c);
           cell.alignment = { vertical: "middle", horizontal: isCenter ? "center" : "left", wrapText: true };
         }
       });
