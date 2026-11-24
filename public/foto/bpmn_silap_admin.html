@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; padding: 20px; background: #FFFFFF; display: flex; justify-content: center; align-items: center; }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1850 580" width="1850" height="580" style="background:#FFFFFF; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Arrowhead Marker -->
+    <marker id="bpmn-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1E293B" />
+    </marker>
+  </defs>
+
+  <!-- ================= MAIN POOL ================= -->
+  <!-- Outer Pool Box -->
+  <rect x="20" y="25" width="1800" height="520" fill="#FFFFFF" stroke="#334155" stroke-width="1.8" />
+
+  <!-- Pool Title Bar (Leftmost vertical stripe) -->
+  <rect x="20" y="25" width="38" height="520" fill="#F8FAFC" stroke="#334155" stroke-width="1.8" />
+  <text x="-285" y="44" transform="rotate(-90)" font-size="13" font-weight="800" fill="#0F172A" text-anchor="middle" letter-spacing="1">
+    SILAP – Alur Admin
+  </text>
+
+  <!-- ================= LANE 1: ADMIN KELURAHAN ================= -->
+  <!-- Lane 1 Header (Vertical stripe) -->
+  <rect x="58" y="25" width="35" height="275" fill="#F1F5F9" stroke="#334155" stroke-width="1.5" />
+  <text x="-162" y="80" transform="rotate(-90)" font-size="11.5" font-weight="700" fill="#1E293B" text-anchor="middle">
+    Admin Kelurahan
+  </text>
+  <!-- Lane 1 Area -->
+  <rect x="93" y="25" width="1727" height="275" fill="#FFFFFF" stroke="#334155" stroke-width="1.5" />
+
+  <!-- ================= LANE 2: SISTEM SILAP ================= -->
+  <!-- Lane 2 Header (Vertical stripe) -->
+  <rect x="58" y="300" width="35" height="245" fill="#F1F5F9" stroke="#334155" stroke-width="1.5" />
+  <text x="-422" y="80" transform="rotate(-90)" font-size="11.5" font-weight="700" fill="#1E293B" text-anchor="middle">
+    Sistem SILAP
+  </text>
+  <!-- Lane 2 Area -->
+  <rect x="93" y="300" width="1727" height="245" fill="#FFFFFF" stroke="#334155" stroke-width="1.5" />
+
+  <!-- ================= COMMON STYLES ================= -->
+  <!--
+    Task style: rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4"
+    Font: size 11, font-weight 600, fill #0F172A, text-anchor middle
+  -->
+
+  <!-- ================= SEQUENCE FLOWS (BACKGROUND ARROWS) ================= -->
+  <g id="sequence-flows" stroke="#1E293B" stroke-width="1.4" fill="none">
+    <!-- Flow: Start -> Login Admin -->
+    <path d="M 166 110 L 205 110" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Login Admin -> Validasi Kredensial (Down to Lane 2) -->
+    <path d="M 265 140 L 265 410" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Validasi Kredensial -> Gateway Kredensial Valid? -->
+    <path d="M 325 440 L 370 440" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Gateway Kredensial Valid? -> [Tidak] loop back to Login Admin -->
+    <path d="M 395 415 L 395 200 L 305 200 L 305 146" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Gateway Kredensial Valid? -> [Ya] Tampilkan Dashboard Admin -->
+    <path d="M 420 440 L 465 440" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Tampilkan Dashboard Admin -> Pantau Statistik Laporan (Up to Lane 1) -->
+    <path d="M 545 410 L 545 146" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Pantau Statistik Laporan -> Gateway Pilih Menu -->
+    <path d="M 610 110 L 665 110" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Gateway Pilih Menu -> [Kelola Regu] (Down) Kelola Regu, Anggota & Ketua Regu -->
+    <path d="M 690 135 L 690 195" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Kelola Regu... -> Simpan Perubahan Data Regu (Down to Lane 2) -->
+    <path d="M 690 255 L 690 410" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Simpan Perubahan Data Regu -> End Event Data Regu Tersimpan -->
+    <path d="M 765 440 L 815 440" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Gateway Pilih Menu -> [Verifikasi] (Right) Filter & Cari Laporan Petugas -->
+    <path d="M 715 110 L 775 110" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Filter & Cari -> Periksa Detail & Bukti Foto -->
+    <path d="M 895 110 L 935 110" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Periksa Detail -> Gateway Laporan Sesuai? -->
+    <path d="M 1065 110 L 1120 110" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Gateway Laporan Sesuai? -> [Tidak] (Down to Lane 2 Ubah Status Perlu Revisi) -->
+    <path d="M 1145 135 L 1145 410" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Ubah Status Perlu Revisi -> End Event Menunggu Revisi Petugas -->
+    <path d="M 1220 440 L 1270 440" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Gateway Laporan Sesuai? -> [Ya] (Right to Setujui Laporan) -->
+    <path d="M 1170 110 L 1260 110" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Setujui Laporan -> Ubah Status Selesai (Down to Lane 2) -->
+    <path d="M 1320 140 L 1320 410" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Setujui Laporan -> Rekap Mingguan & Unduh CSV / Cetak -->
+    <path d="M 1380 110 L 1465 110" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Ubah Status Selesai (Lane 2) -> Rekap Mingguan & Unduh CSV / Cetak (Lane 1) -->
+    <path d="M 1400 440 L 1435 440 L 1435 125 L 1465 125" marker-end="url(#bpmn-arrow)" />
+
+    <!-- Flow: Rekap Mingguan & Unduh CSV / Cetak -> End Event Selesai -->
+    <path d="M 1605 110 L 1665 110" marker-end="url(#bpmn-arrow)" />
+  </g>
+
+  <!-- ================= FLOW LABELS ================= -->
+  <!-- Label Tidak on login gateway -->
+  <text x="403" y="275" font-size="10.5" font-weight="600" fill="#0F172A">Tidak</text>
+  <!-- Label Ya on login gateway -->
+  <text x="430" y="433" font-size="10.5" font-weight="600" fill="#0F172A">Ya</text>
+  <!-- Label Kelola Regu on Pilih menu gateway -->
+  <text x="698" y="168" font-size="10.5" font-weight="600" fill="#0F172A">Kelola Regu</text>
+  <!-- Label Verifikasi on Pilih menu gateway -->
+  <text x="725" y="103" font-size="10.5" font-weight="600" fill="#0F172A">Verifikasi</text>
+  <!-- Label Tidak on Laporan sesuai? gateway -->
+  <text x="1153" y="275" font-size="10.5" font-weight="600" fill="#0F172A">Tidak</text>
+  <!-- Label Ya on Laporan sesuai? gateway -->
+  <text x="1200" y="103" font-size="10.5" font-weight="600" fill="#0F172A">Ya</text>
+
+  <!-- ================= START EVENT ================= -->
+  <!-- Mulai (Green Circle) -->
+  <circle cx="148" cy="110" r="18" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.8" />
+  <text x="148" y="142" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Mulai</text>
+
+  <!-- ================= LANE 1 TASKS (ADMIN KELURAHAN) ================= -->
+  <!-- Task: Login Admin -->
+  <rect x="205" y="80" width="120" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="265" y="114" font-size="11" font-weight="600" fill="#0F172A" text-anchor="middle">Login Admin</text>
+
+  <!-- Task: Pantau Statistik Laporan -->
+  <rect x="480" y="80" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="545" y="107" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Pantau Statistik</text>
+  <text x="545" y="122" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Laporan</text>
+
+  <!-- Gateway: Pilih menu -->
+  <g transform="translate(690, 110)">
+    <polygon points="0,-25 25,0 0,25 -25,0" fill="#FEF08A" stroke="#EAB308" stroke-width="1.8" />
+    <text x="0" y="6" font-size="18" font-weight="900" fill="#854D0E" text-anchor="middle">×</text>
+    <text x="0" y="-30" font-size="10" font-weight="700" fill="#0F172A" text-anchor="middle">Pilih menu</text>
+  </g>
+
+  <!-- Task: Kelola Regu, Anggota & Ketua Regu -->
+  <rect x="615" y="195" width="150" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="690" y="222" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Kelola Regu, Anggota</text>
+  <text x="690" y="237" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">&amp; Ketua Regu</text>
+
+  <!-- Task: Filter & Cari Laporan Petugas -->
+  <rect x="775" y="80" width="120" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="835" y="107" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Filter &amp; Cari</text>
+  <text x="835" y="122" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Laporan Petugas</text>
+
+  <!-- Task: Periksa Detail & Bukti Foto -->
+  <rect x="935" y="80" width="130" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="1000" y="107" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Periksa Detail</text>
+  <text x="1000" y="122" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">&amp; Bukti Foto</text>
+
+  <!-- Gateway: Laporan sesuai? -->
+  <g transform="translate(1145, 110)">
+    <polygon points="0,-25 25,0 0,25 -25,0" fill="#FEF08A" stroke="#EAB308" stroke-width="1.8" />
+    <text x="0" y="6" font-size="18" font-weight="900" fill="#854D0E" text-anchor="middle">×</text>
+    <text x="0" y="-30" font-size="10" font-weight="700" fill="#0F172A" text-anchor="middle">Laporan sesuai?</text>
+  </g>
+
+  <!-- Task: Setujui Laporan -->
+  <rect x="1260" y="80" width="120" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="1320" y="114" font-size="11" font-weight="600" fill="#0F172A" text-anchor="middle">Setujui Laporan</text>
+
+  <!-- Task: Rekap Mingguan & Unduh CSV / Cetak -->
+  <rect x="1465" y="80" width="140" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="1535" y="107" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Rekap Mingguan</text>
+  <text x="1535" y="122" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">&amp; Unduh CSV / Cetak</text>
+
+  <!-- End Event: Selesai -->
+  <circle cx="1685" cy="110" r="18" fill="#FEE2E2" stroke="#DC2626" stroke-width="3.5" />
+  <text x="1685" y="142" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Selesai</text>
+
+  <!-- ================= LANE 2 TASKS (SISTEM SILAP) ================= -->
+  <!-- Task: Validasi Kredensial -->
+  <rect x="205" y="410" width="120" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="265" y="437" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Validasi</text>
+  <text x="265" y="452" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Kredensial</text>
+
+  <!-- Gateway: Kredensial valid? -->
+  <g transform="translate(395, 440)">
+    <polygon points="0,-25 25,0 0,25 -25,0" fill="#FEF08A" stroke="#EAB308" stroke-width="1.8" />
+    <text x="0" y="6" font-size="18" font-weight="900" fill="#854D0E" text-anchor="middle">×</text>
+    <text x="0" y="-30" font-size="10" font-weight="700" fill="#0F172A" text-anchor="middle">Kredensial valid?</text>
+  </g>
+
+  <!-- Task: Tampilkan Dashboard Admin (Halaman Awal) -->
+  <rect x="465" y="410" width="160" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="545" y="437" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Tampilkan Dashboard</text>
+  <text x="545" y="452" font-size="10" font-weight="500" fill="#0F172A" text-anchor="middle">Admin (Halaman Awal)</text>
+
+  <!-- Task: Simpan Perubahan Data Regu & Anggota -->
+  <rect x="615" y="410" width="150" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="690" y="437" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Simpan Perubahan</text>
+  <text x="690" y="452" font-size="10.5" font-weight="600" fill="#0F172A" text-anchor="middle">Data Regu &amp; Anggota</text>
+
+  <!-- End Event: Data regu tersimpan -->
+  <circle cx="835" cy="440" r="18" fill="#FEE2E2" stroke="#DC2626" stroke-width="3.5" />
+  <text x="835" y="472" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">Data regu</text>
+  <text x="835" y="484" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">tersimpan</text>
+
+  <!-- Task: Ubah Status Perlu Revisi & Beri Notifikasi Petugas -->
+  <rect x="1070" y="410" width="150" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="1145" y="432" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Ubah Status Perlu</text>
+  <text x="1145" y="445" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Revisi &amp; Beri</text>
+  <text x="1145" y="458" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Notifikasi Petugas</text>
+
+  <!-- End Event: Menunggu revisi petugas -->
+  <circle cx="1290" cy="440" r="18" fill="#FEE2E2" stroke="#DC2626" stroke-width="3.5" />
+  <text x="1290" y="472" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">Menunggu</text>
+  <text x="1290" y="484" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">revisi petugas</text>
+
+  <!-- Task: Ubah Status Selesai, Simpan & Beri Notifikasi -->
+  <rect x="1245" y="410" width="150" height="60" rx="8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.4" />
+  <text x="1320" y="432" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Ubah Status Selesai,</text>
+  <text x="1320" y="445" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Simpan &amp; Beri</text>
+  <text x="1320" y="458" font-size="10" font-weight="600" fill="#0F172A" text-anchor="middle">Notifikasi</text>
+
+</svg>
+
+</body>
+</html>

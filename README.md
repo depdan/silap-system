@@ -57,6 +57,18 @@ Hak akses dan alur kerja aplikasi dibagi ke dalam 2 peran utama yang terisolasi:
 
 ---
 
+## 🔄 Alur Proses Bisnis (BPMN - Alur Admin Sprint 4)
+
+Diagram alur bisnis pemrosesan pelaporan dan tata kelola data operasional antara **Admin Kelurahan** dan **Sistem SILAP**:
+
+<p align="center">
+  <img src="public/foto/bpmn_silap_admin_sprint4.png" alt="BPMN SILAP Alur Admin Sprint 4" width="100%">
+</p>
+
+*Diagram BPMN mencakup seluruh cakupan kerja Sprint 4: Autentikasi Admin, Pemantauan Statistik, Pengelolaan Master Data Regu & Anggota (14 regu, 74 anggota), Verifikasi Lapangan & Validasi Bukti Foto, serta Rekapitulasi Data & Ekspor.*
+
+---
+
 ## 📋 Kebutuhan Sistem
 
 * **PHP:** Versi 8.2 atau lebih tinggi (ekstensi aktif: `pdo_mysql`, `mbstring`, `openssl`, `curl`).
