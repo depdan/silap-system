@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>UAT Sprint 2: Fitur User (Petugas Lapangan) - SILAP Kelurahan Pekayon</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #111827;
+    line-height: 1.45;
+    margin: 0;
+    padding: 24px;
+    background: #FFFFFF;
+    width: 900px;
+    box-sizing: border-box;
+  }
+  .header-box {
+    text-align: center;
+    border-bottom: 2.5px solid #1E3A8A;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .header-box h2 {
+    margin: 0 0 4px 0;
+    color: #1E3A8A;
+    font-size: 19pt;
+    letter-spacing: 0.5px;
+    font-weight: 800;
+  }
+  .header-box .sub {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #374151;
+    margin: 0 0 4px 0;
+  }
+  .header-box .meta-badge {
+    display: inline-block;
+    background: #EEF2FF;
+    color: #1D4ED8;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 9.5pt;
+    font-weight: 600;
+    border: 1px solid #BFDBFE;
+  }
+  .info-table {
+    width: 100%;
+    margin-bottom: 16px;
+    border-collapse: collapse;
+  }
+  .info-table td {
+    border: none;
+    padding: 4px 8px;
+    font-size: 10pt;
+    vertical-align: top;
+  }
+  .section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 14px 0 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  table.eval-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    background: #FFFFFF;
+  }
+  table.eval-table th, table.eval-table td {
+    border: 1px solid #475569;
+    padding: 6.5px 8px;
+    font-size: 9.5pt;
+  }
+  table.eval-table th {
+    background: #F1F5F9;
+    font-weight: 700;
+    text-align: center;
+    color: #0F172A;
+  }
+  .score-col {
+    width: 28px;
+    text-align: center;
+    font-weight: 600;
+  }
+  .notes-col {
+    width: 85px;
+  }
+  .scale-box {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .scale-table {
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    width: 65%;
+  }
+  .scale-table th, .scale-table td {
+    border: 1px solid #64748B;
+    padding: 4px 8px;
+  }
+  .scale-table th {
+    background: #F8FAFC;
+    color: #1E293B;
+  }
+  .sign-area {
+    width: 32%;
+    text-align: center;
+    font-size: 9pt;
+    padding-top: 4px;
+    margin-left: auto;
+  }
+  .sign-space {
+    height: 48px;
+  }
+  .dots {
+    color: #94A3B8;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-box">
+  <h2>USER ACCEPTANCE TEST (UAT)</h2>
+  <div class="sub">SISTEM INFORMASI LAPORAN PPSU (SILAP) - KELURAHAN PEKAYON</div>
+  <div class="meta-badge">SPRINT 2: FITUR USER PETUGAS LAPANGAN (PERIODE: 20 - 31 OKTOBER 2026)</div>
+</div>
+
+<table class="info-table">
+  <tr>
+    <td style="width: 50%;">
+      <b>Nama Responden</b> : ....................................................<br>
+      <b>NIK / NIP</b> : ....................................................<br>
+      <b>Jabatan / Unit Kerja</b> : ....................................................
+    </td>
+    <td style="width: 50%;">
+      <b>Tanggal Pengujian</b> : 31 Oktober 2026<br>
+      <b>Peran (Role)</b> : [ ] Administrator &nbsp;&nbsp; [ ] Petugas Lapangan PPSU<br>
+      <b>Status Pengujian</b> : [✓] <b>Sudah Terlaksana (Passed)</b>
+    </td>
+  </tr>
+</table>
+
+<div class="section-title">
+  <span>Tabel Evaluasi Pengujian Pengguna (Sprint 2: Form Laporan, GPS, Foto 3 Tahap, Watermark & Riwayat)</span>
+</div>
+
+<table class="eval-table">
+  <thead>
+    <tr>
+      <th rowspan="2" style="width: 5%;">NO</th>
+      <th rowspan="2" style="width: 14%;">VARIABEL</th>
+      <th rowspan="2" style="width: 51%;">PERTANYAAN PENGUJIAN</th>
+      <th colspan="5" style="width: 15%;">NILAI</th>
+      <th rowspan="2" style="width: 15%;">CATATAN / NOTES</th>
+    </tr>
+    <tr>
+      <th class="score-col">A</th>
+      <th class="score-col">B</th>
+      <th class="score-col">C</th>
+      <th class="score-col">D</th>
+      <th class="score-col">E</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="3" align="center"><b>1</b></td>
+      <td rowspan="3" align="center"><b>Design</b></td>
+      <td>Apakah antarmuka formulir pelaporan mobile-friendly dan nyaman dioperasikan oleh petugas langsung dari lapangan?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah tata letak pilihan kategori penanganan (Jalan & Trotoar, Saluran Air, Taman, Pohon) dan wilayah RW tersaji jelas?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah kolom input panjang target pengerjaan (Meter) serta area unggah bukti foto 3 tahap terlihat terstruktur dan tidak membingungkan?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td rowspan="7" align="center"><b>2</b></td>
+      <td rowspan="7" align="center"><b>Layanan</b></td>
+      <td>Apakah formulir pelaporan tugas lapangan mudah diisi lengkap dengan pemilihan kategori pekerjaan, wilayah RW (RW 01–RW 10), dan nama jalan?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah fitur deteksi lokasi GPS otomatis mampu mengunci titik koordinat posisi kerja petugas secara presisi pada peta digital?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah kolom 'Panjang Target Pengerjaan (Meter)' dapat diinput dengan fleksibel sesuai target fisik penanganan di lapangan?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah proses pengunggahan 3 tahap bukti foto berjalan lancar: Foto Sebelum Pengerjaan (0%), Proses Pengerjaan (50%), dan Selesai (100%)?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah sistem kamera/upload menyematkan penanda otomatis (watermark tanggal, waktu, dan geotag koordinat) pada foto dokumentasi?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah pemilihan regu kerja (14 regu) dan pencatatan personel anggota lapangan dapat dipilih secara tepat?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah laporan yang telah dikirimkan langsung masuk ke menu 'Riwayat Laporan Petugas' dengan status progres yang transparan?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td rowspan="3" align="center"><b>3</b></td>
+      <td rowspan="3" align="center"><b>Efisien</b></td>
+      <td>Apakah pengisian laporan digital berbasis aplikasi ini lebih praktis dan hemat waktu dibanding pelaporan manual via grup chat/kertas?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah dokumentasi foto 3 tahap (0%, 50%, 100%) dan stempel GPS memperkuat keabsahan serta validitas bukti fisik kerja petugas?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td>Apakah fitur riwayat laporan membantu petugas dan ketua regu dalam memantau rekam jejak pekerjaan harian secara terorganisir?</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<div class="scale-box">
+  <table class="scale-table">
+    <thead>
+      <tr>
+        <th>Kriteria Penilaian Bobot</th>
+        <th style="width: 18%; text-align: center;">Bobot Nilai</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><b>A. Sangat :</b> Mudah / Bagus / Sesuai / Jelas / Memuaskan</td><td align="center"><b>5</b></td></tr>
+      <tr><td><b>B. Baik / Cukup :</b> Mudah / Bagus / Sesuai / Jelas</td><td align="center"><b>4</b></td></tr>
+      <tr><td><b>C. Netral :</b> Cukup / Memadai</td><td align="center"><b>3</b></td></tr>
+      <tr><td><b>D. Kurang :</b> Mudah / Bagus / Sesuai / Jelas</td><td align="center"><b>2</b></td></tr>
+      <tr><td><b>E. Sangat :</b> Sulit / Tidak Sesuai / Tidak Berfungsi</td><td align="center"><b>1</b></td></tr>
+    </tbody>
+  </table>
+
+  <div class="sign-area">
+    Pekayon, 31 Oktober 2026<br>
+    Menyetujui,<br>
+    <b>RESPONDEN PENGUJI</b>
+    <div class="sign-space"></div>
+    ( .................................................... )<br>
+    <span style="font-size: 8pt; color: #64748B;">NIP/NIK: ............................................</span>
+  </div>
+</div>
+
+</body>
+</html>
