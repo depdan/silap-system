@@ -1,5 +1,5 @@
       <!-- ==================== 1. DASHBOARD VIEW ==================== -->
-      <section class="admin-tab-pane active" id="pane-dashboard">
+      <section class="admin-tab-pane <?= (!isset($_GET['tab']) || $_GET['tab'] === 'dashboard') ? 'active' : '' ?>" id="pane-dashboard">
         <!-- Human Greeting Bar -->
         <div class="admin-welcome-bar">
           <div class="admin-welcome-text">
@@ -208,6 +208,9 @@
                 <option value="RW 08">RW 08 - Jl. Sukamto</option>
                 <option value="RW 09">RW 09 - Jl. Haji Balok</option>
                 <option value="RW 10">RW 10 - Jl. Lewa</option>
+                <option value="Kantor Kel. Pekayon">Kantor Kel. Pekayon</option>
+                <option value="Jalan Raya Pekayon">Jalan Raya Pekayon</option>
+                <option value="Taman & RTH Pekayon">Taman &amp; RTH Pekayon</option>
               </select>
             </div>
           </div>

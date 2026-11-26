@@ -63,9 +63,12 @@
         </div>
       </div>
 
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;border-top:1px solid #E2E8F0;padding-top:14px;">
-        <button type="button" class="btn-modal-secondary" onclick="closeDetailModal()">Tutup</button>
-        <button type="button" class="btn-modal-primary" id="btn-verify-action" onclick="verifyCurrentReport()">Verifikasi & Setujui</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px;border-top:1px solid #E2E8F0;padding-top:14px;flex-wrap:wrap;">
+        <button type="button" class="btn-modal-secondary" id="btn-delete-report-action" onclick="deleteCurrentReport()" style="color:#DC2626;border-color:#FCA5A5;background:#FEF2F2;">Hapus Tugas</button>
+        <div style="display:flex;gap:10px;align-items:center;margin-left:auto;">
+          <button type="button" class="btn-modal-secondary" onclick="closeDetailModal()">Tutup</button>
+          <button type="button" class="btn-modal-primary" id="btn-verify-action" onclick="verifyCurrentReport()">Verifikasi & Setujui</button>
+        </div>
       </div>
     </div>
   </div>
@@ -99,8 +102,8 @@
             </select>
           </div>
           <div>
-            <label style="display:block;font-size:0.8rem;font-weight:700;color:#475467;margin-bottom:4px;">No. Handphone / WhatsApp *</label>
-            <input type="text" id="inp-agt-hp" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="0812-xxxx-xxxx" required>
+            <label style="display:block;font-size:0.8rem;font-weight:700;color:#475467;margin-bottom:4px;">No. HP / WA <span style="font-weight:500;color:#64748B;">(Wajib u/ Ketua)</span></label>
+            <input type="text" id="inp-agt-hp" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="0812-xxxx-xxxx">
           </div>
         </div>
 
@@ -221,7 +224,7 @@
         </div>
 
         <div style="margin-bottom:16px;">
-          <label style="display:block;font-size:0.8rem;font-weight:700;color:#475467;margin-bottom:6px;">Tambah Personel dari Daftar Master (Belum di Regu Lain):</label>
+          <label style="display:block;font-size:0.8rem;font-weight:700;color:#475467;margin-bottom:6px;">Tambah / Pindahkan Personel ke Regu Ini:</label>
           <div style="display:flex;gap:8px;align-items:center;">
             <select id="edit-regu-select-unassigned" class="form-input" style="flex:1;box-sizing:border-box;">
               <!-- Populated dynamically -->
@@ -230,7 +233,7 @@
               + Masukkan
             </button>
           </div>
-          <p style="font-size:0.75rem;color:#64748B;margin:4px 0 0;">*Pilih nama personel yang belum tergabung di regu manapun.</p>
+          <p style="font-size:0.75rem;color:#64748B;margin:4px 0 0;">*Pilih personel lalu klik "+ Masukkan" (atau langsung klik "Simpan Perubahan").</p>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #E2E8F0;padding-top:14px;">

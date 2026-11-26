@@ -1,9 +1,14 @@
       <!-- ==================== 2. TUGAS VIEW ==================== -->
-      <section class="admin-tab-pane" id="pane-tugas">
+      <section class="admin-tab-pane <?= (isset($_GET['tab']) && $_GET['tab'] === 'tugas') ? 'active' : '' ?>" id="pane-tugas">
         <div class="admin-welcome-bar" style="flex-direction:column;align-items:flex-start;gap:12px;">
-          <div>
-            <h1 class="admin-welcome-heading">Semua Tugas Lapangan</h1>
-            <p style="color:#64748B;font-size:0.9rem;margin-top:4px;">Kelola dan saring seluruh tugas operasional prasarana wilayah kelurahan (10 RW & 3 Jenis Regu).</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;width:100%;flex-wrap:wrap;gap:10px;">
+            <div>
+              <h1 class="admin-welcome-heading">Semua Tugas Lapangan</h1>
+              <p style="color:#64748B;font-size:0.9rem;margin-top:4px;">Kelola dan saring seluruh tugas operasional prasarana wilayah kelurahan (10 RW & 3 Jenis Regu).</p>
+            </div>
+            <button type="button" onclick="hapusSemuaTugasAdmin()" style="padding:8px 14px;border-radius:10px;border:1.5px solid #FCA5A5;background:#FEF2F2;color:#DC2626;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;">
+              Hapus Semua Tugas
+            </button>
           </div>
 
           <!-- Filter Baris 0: Saring Status Pengerjaan -->

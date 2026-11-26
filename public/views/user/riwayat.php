@@ -17,20 +17,17 @@
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:0.75rem;font-weight:700;color:#64748B;">Regu Tampil:</span>
           <select id="hist-filter-regu" class="regu-filter-select" onchange="onHistReguFilterChanged(this.value)">
-            <option value="SEMUA" selected>Semua Regu PPSU</option>
-            <option value="Regu 1">Regu 1</option>
-            <option value="Regu 2">Regu 2</option>
-            <option value="Regu 3">Regu 3</option>
-            <option value="Regu 4">Regu 4</option>
-            <option value="Regu 5">Regu 5</option>
-            <option value="Regu 6">Regu 6</option>
-            <option value="Regu 7">Regu 7</option>
-            <option value="Regu 8">Regu 8</option>
-            <option value="Regu 9">Regu 9</option>
-            <option value="Regu 10">Regu 10</option>
-            <option value="Regu Jalan">Regu Jalan</option>
-            <option value="Regu Taman">Regu Taman</option>
-            <option value="Regu Kantor">Regu Kantor</option>
+            <?php if ($userRole !== 'admin' && empty($userOfficialRegu)): ?>
+              <option value="__UNASSIGNED__" selected>Laporan Saya (Belum Ber-Regu)</option>
+            <?php else: ?>
+              <option value="SEMUA" <?= ($userRole === 'admin') ? 'selected' : '' ?>>Semua Regu PPSU</option>
+            <?php endif; ?>
+            <?php if (!empty($formattedServerRegu)): ?>
+              <?php foreach ($formattedServerRegu as $srOpt): ?>
+                <?php $isSelectedRegu = ($userRole !== 'admin' && !empty($userOfficialRegu) && strcasecmp($userOfficialRegu, $srOpt['nama']) === 0); ?>
+                <option value="<?= htmlspecialchars($srOpt['nama']) ?>" <?= $isSelectedRegu ? 'selected' : '' ?>><?= htmlspecialchars($srOpt['nama']) ?></option>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </select>
         </div>
         <span id="hist-filtered-count-badge" style="font-size:0.72rem;font-weight:800;color:#0369A1;background:#E0F2FE;padding:2px 8px;border-radius:6px;">Memuat...</span>

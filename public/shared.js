@@ -685,40 +685,19 @@ function getLaporanDB() {
     const raw = localStorage.getItem(STORAGE_KEY_REPORTS);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         _laporanMemoryCache = parsed;
         return parsed;
       }
     }
   } catch(e) {}
 
-  if (_laporanMemoryCache && Array.isArray(_laporanMemoryCache) && _laporanMemoryCache.length > 0) {
+  if (_laporanMemoryCache && Array.isArray(_laporanMemoryCache)) {
     return _laporanMemoryCache;
   }
 
-  const now = new Date();
-  const indoMonths = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-  const todayStr = String(now.getDate()).padStart(2, "0") + " " + indoMonths[now.getMonth()] + " " + now.getFullYear() + ", 08:30";
-  const yest = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const yestStr = String(yest.getDate()).padStart(2, "0") + " " + indoMonths[yest.getMonth()] + " " + yest.getFullYear() + ", 10:15";
-
-  const seeded = INITIAL_REPORTS.map((l, idx) => {
-    let tgl = l.tanggal;
-    if (idx === 0 || idx === 6) tgl = todayStr;
-    else if (idx === 1 || idx === 7) tgl = yestStr;
-    return Object.assign({}, l, {
-      tanggal: tgl,
-      foto: [
-        { src: "", timestamp: tgl, name: "sebelum_" + l.id + ".jpg", tahap: "Sebelum (0%)" },
-        { src: "", timestamp: tgl, name: "proses_" + l.id + ".jpg", tahap: "Proses (" + l.progres + "%)" },
-        { src: "", timestamp: tgl, name: "sesudah_" + l.id + ".jpg", tahap: "Sesudah (100%)" }
-      ]
-    });
-  });
-
-  _laporanMemoryCache = seeded;
-  saveLaporanDB(seeded);
-  return seeded;
+  _laporanMemoryCache = [];
+  return [];
 }
 
 let _lastLocalSaveTime = 0;
@@ -756,16 +735,17 @@ function saveLaporanDB(list) {
     }
   } catch(eEvt) {}
 
-  // Sinkronisasi asinkron ke database MySQL backend (api.php)
+  // Sinkronisasi ke database MySQL backend (api.php) & kembalikan Promise agar pemanggil bisa await
   try {
     if (typeof fetch !== "undefined") {
-      fetch("api.php?action=save_all_reports", {
+      return fetch("api.php?action=save_all_reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(list)
       }).catch(err => console.debug("API sync background note:", err));
     }
   } catch(eFetch) {}
+  return Promise.resolve();
 }
 
 function formatPhone08(phone) {
@@ -877,17 +857,17 @@ function getReguDB() {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch(e) {}
-  saveReguDB(INITIAL_REGU);
+  saveReguDB(INITIAL_REGU, false);
   return INITIAL_REGU;
 }
 
-function saveReguDB(list) {
+function saveReguDB(list, syncServer = true) {
   _lastLocalSaveTime = Date.now();
   try {
     localStorage.setItem(STORAGE_KEY_REGU, JSON.stringify(list));
     window.dispatchEvent(new CustomEvent("silap_regu_updated", { detail: list }));
     if (_syncChannel) _syncChannel.postMessage({ type: "regu_updated", timestamp: Date.now() });
-    if (typeof fetch !== "undefined") {
+    if (syncServer && typeof fetch !== "undefined") {
       fetch("api.php?action=save_all_regu", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -931,17 +911,17 @@ function getAnggotaDB() {
       }
     }
   } catch(e) {}
-  saveAnggotaDB(INITIAL_ANGGOTA);
+  saveAnggotaDB(INITIAL_ANGGOTA, false);
   return INITIAL_ANGGOTA;
 }
 
-function saveAnggotaDB(list) {
+function saveAnggotaDB(list, syncServer = true) {
   _lastLocalSaveTime = Date.now();
   try {
     localStorage.setItem(STORAGE_KEY_ANGGOTA, JSON.stringify(list));
     window.dispatchEvent(new CustomEvent("silap_anggota_updated", { detail: list }));
     if (_syncChannel) _syncChannel.postMessage({ type: "anggota_updated", timestamp: Date.now() });
-    if (typeof fetch !== "undefined") {
+    if (syncServer && typeof fetch !== "undefined") {
       fetch("api.php?action=save_all_anggota", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1187,8 +1167,10 @@ async function syncRealtimeFromBackend() {
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
     if (data && data.success) {
+      const recentlySavedLocally = (Date.now() - _lastLocalSaveTime < 10000);
+
       // 1. Sinkronisasi Anggota PPSU & Role
-      if (Array.isArray(data.anggota)) {
+      if (!recentlySavedLocally && Array.isArray(data.anggota)) {
         data.anggota.forEach(a => { if (a.hp) a.hp = formatPhone08(a.hp); });
         const currentAnggotaStr = localStorage.getItem(STORAGE_KEY_ANGGOTA) || "";
         const newAnggotaStr = JSON.stringify(data.anggota);
@@ -1199,7 +1181,7 @@ async function syncRealtimeFromBackend() {
       }
 
       // 2. Sinkronisasi Master Regu & Personel Tim
-      if (Array.isArray(data.regu)) {
+      if (!recentlySavedLocally && Array.isArray(data.regu)) {
         data.regu.forEach(r => {
           if (r.noHp) r.noHp = formatPhone08(r.noHp);
           if (r.no_hp) r.no_hp = formatPhone08(r.no_hp);
@@ -1213,7 +1195,7 @@ async function syncRealtimeFromBackend() {
       }
 
       // 3. Sinkronisasi Laporan (Progres 0% -> 50% -> 100%, Status, Validasi)
-      if (Array.isArray(data.reports)) {
+      if (!recentlySavedLocally && Array.isArray(data.reports)) {
         const local = getLaporanDB();
         let changed = false;
 

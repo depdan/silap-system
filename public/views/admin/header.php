@@ -1,9 +1,13 @@
     <!-- Topbar -->
     <header class="admin-topbar">
-      <div style="font-size:0.88rem;color:#64748B;font-weight:600;display:flex;align-items:center;gap:8px;">
+      <div style="font-size:0.88rem;color:#64748B;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="color:#0F172A;font-weight:800;">Command Center</span>
         <span style="color:#CBD5E1;">/</span>
         <span id="topbar-current-view" style="color:#FF5416;font-weight:700;">Dashboard</span>
+        <span style="background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;font-size:0.76rem;font-weight:700;padding:4px 12px 4px 7px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;">
+          <img src="foto/gunadarma.png" alt="Logo Universitas Gunadarma" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;">
+          <span>Aplikasi ini dibuat oleh Mahasiswa Gunadarma</span>
+        </span>
       </div>
 
       <div class="admin-topbar-actions">

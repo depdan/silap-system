@@ -1,5 +1,5 @@
       <!-- ==================== 3. VERIFIKASI VIEW ==================== -->
-      <section class="admin-tab-pane" id="pane-verifikasi">
+      <section class="admin-tab-pane <?= (isset($_GET['tab']) && $_GET['tab'] === 'verifikasi') ? 'active' : '' ?>" id="pane-verifikasi">
         <div class="admin-welcome-bar">
           <div>
             <h1 class="admin-welcome-heading">Antrean Verifikasi Laporan</h1>

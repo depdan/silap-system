@@ -1,5 +1,5 @@
       <!-- ==================== 6. REGU VIEW ==================== -->
-      <section class="admin-tab-pane" id="pane-regu">
+      <section class="admin-tab-pane <?= (isset($_GET['tab']) && $_GET['tab'] === 'regu') ? 'active' : '' ?>" id="pane-regu">
         <div class="admin-welcome-bar">
           <div>
             <h1 class="admin-welcome-heading">Manajemen Regu Lapangan</h1>

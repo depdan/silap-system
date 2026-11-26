@@ -50,9 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'login') {
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
+        $normalizedPhone = str_replace(['-', ' '], '', $username);
+        if (strpos($normalizedPhone, '+62') === 0) {
+            $normalizedPhone = '0' . substr($normalizedPhone, 3);
+        } elseif (strpos($normalizedPhone, '62') === 0) {
+            $normalizedPhone = '0' . substr($normalizedPhone, 2);
+        }
 
         if (empty($username) || empty($password)) {
-            $err_msg = 'Mohon masukkan username/nomor telepon dan kata sandi!';
+            $err_msg = 'Mohon masukkan nomor WA / username dan kata sandi!';
             if ($is_ajax) {
                 header('Content-Type: application/json');
                 echo json_encode(['success' => false, 'message' => $err_msg]);
@@ -60,10 +66,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $error_login = $err_msg;
         } else {
-            // Cari pengguna berdasarkan username ATAU nomor telepon
-            $stmt = $conn->prepare("SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR no_hp = ? LIMIT 1");
-            $stmt->execute([$username, $username]);
+            // Cari pengguna berdasarkan username ATAU nomor telepon (termasuk normalisasi WA 08xx)
+            $stmt = $conn->prepare("SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR no_hp = ? OR no_hp = ? LIMIT 1");
+            $stmt->execute([$username, $username, $normalizedPhone]);
             $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                // Wajib: selain Admin, hanya Ketua Regu aktif yang diperbolehkan login
+                if ($user['role'] !== 'admin') {
+                    $chkKetua = $conn->prepare("SELECT id FROM anggota WHERE (LOWER(TRIM(nama)) = LOWER(TRIM(?)) OR hp = ?) AND role = 'Ketua Regu' LIMIT 1");
+                    $chkKetua->execute([$user['nama'], $user['no_hp']]);
+                    $isKetua = (bool)$chkKetua->fetch();
+                    if (!$isKetua) {
+                        $chkRegu = $conn->prepare("SELECT id FROM regu WHERE LOWER(TRIM(ketua)) = LOWER(TRIM(?)) OR no_hp = ? LIMIT 1");
+                        $chkRegu->execute([$user['nama'], $user['no_hp']]);
+                        $isKetua = (bool)$chkRegu->fetch();
+                    }
+                    if (!$isKetua) {
+                        $err_msg = 'Akses ditolak: Hanya Ketua Regu yang diizinkan masuk ke sistem!';
+                        if ($is_ajax) {
+                            header('Content-Type: application/json');
+                            echo json_encode(['success' => false, 'message' => $err_msg]);
+                            exit;
+                        }
+                        $error_login = $err_msg;
+                        $user = null;
+                    }
+                }
+            }
 
             if ($user && password_verify($password, $user['password'])) {
                 // Login Berhasil -> Simpan Sesi PHP
@@ -92,13 +122,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: " . $redirect_url);
                 exit;
             } else {
-                $err_msg = 'Username / nomor telepon atau kata sandi tidak cocok!';
-                if ($is_ajax) {
-                    header('Content-Type: application/json');
-                    echo json_encode(['success' => false, 'message' => $err_msg]);
-                    exit;
+                if (empty($error_login)) {
+                    $err_msg = 'Nomor WA / username atau kata sandi tidak cocok!';
+                    if ($is_ajax) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => false, 'message' => $err_msg]);
+                        exit;
+                    }
+                    $error_login = $err_msg;
                 }
-                $error_login = $err_msg;
             }
         }
     }
@@ -118,6 +150,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($name) || empty($username) || empty($rawPhone) || empty($password) || empty($confirm)) {
             $reg_err = 'Mohon lengkapi semua data pendaftaran (termasuk nama pengguna/username)!';
+        } else {
+            $chkKetuaReg = $conn->prepare("SELECT id FROM anggota WHERE hp = ? AND role = 'Ketua Regu' LIMIT 1");
+            $chkKetuaReg->execute([$phone]);
+            $isRegisteredKetua = (bool)$chkKetuaReg->fetch();
+            if (!$isRegisteredKetua) {
+                $chkReguMaster = $conn->prepare("SELECT id FROM regu WHERE no_hp = ? LIMIT 1");
+                $chkReguMaster->execute([$phone]);
+                $isRegisteredKetua = (bool)$chkReguMaster->fetch();
+            }
+            if (!$isRegisteredKetua) {
+                $reg_err = 'Pendaftaran ditolak: Hanya nomor WA Ketua Regu terdaftar yang dapat memiliki akun login!';
+            }
+        }
+
+        if (!empty($reg_err)) {
+            // already handled
         } elseif (strpos($rawPhone, '+62') === 0 || strpos($rawPhone, '62') === 0 || strpos($rawPhone, '+') === 0) {
             $reg_err = 'Format "+62" ditolak! Nomor telepon wajib diawali dengan "08" (contoh: 081234567890).';
         } elseif (!preg_match('/^08[0-9]{8,13}$/', $phone)) {
@@ -290,6 +338,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div>
             <div class="art-brand-title">SILAP</div>
             <div class="art-brand-sub">Sistem Laporan PPSU • Pekayon</div>
+            <div style="margin-top:6px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.38);color:#FFFFFF;font-size:0.74rem;font-weight:700;padding:4px 12px 4px 6px;border-radius:999px;backdrop-filter:blur(4px);line-height:1.2;">
+              <img src="foto/gunadarma.png" alt="Logo Universitas Gunadarma" style="width:24px;height:24px;object-fit:contain;background:#FFFFFF;border-radius:50%;padding:2px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.12);">
+              <span>Aplikasi ini dibuat oleh Mahasiswa Gunadarma</span>
+            </div>
           </div>
         </div>
 
@@ -367,6 +419,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div>
             <h3 class="login-brand-title">SILAP</h3>
             <span class="login-brand-tagline">Sistem Laporan PPSU Kelurahan</span>
+            <div style="margin-top:6px;display:inline-flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;padding:4px 11px 4px 6px;border-radius:10px;font-size:0.71rem;font-weight:700;color:#5B21B6;line-height:1.25;">
+              <img src="foto/gunadarma.png" alt="Logo Universitas Gunadarma" style="width:26px;height:26px;object-fit:contain;flex-shrink:0;">
+              <span>Aplikasi ini dibuat oleh<br>Mahasiswa Gunadarma</span>
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,17 @@
 <?php
 
+if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+    if (isset($_SESSION['user'])) {
+        header("Location: " . ($_SESSION['user']['role'] === 'admin' ? 'admin.php' : 'user.php'));
+    } else {
+        header("Location: login.php");
+    }
+    exit;
+}
+
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 

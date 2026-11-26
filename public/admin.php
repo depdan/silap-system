@@ -88,11 +88,24 @@ try {
     }
     foreach ($serverReguRows as $sr) {
         $rId = $sr['id'];
+        $kName = trim($sr['ketua'] ?? '');
+        // Jika ketua di database regu kosong atau '-', otomatis isi dari anggota yang role-nya Ketua Regu
+        if (empty($kName) || $kName === '-') {
+            foreach ($serverAnggotaRows as $sa) {
+                if ($sa['regu_id'] == $rId && $sa['role'] === 'Ketua Regu') {
+                    $kName = $sa['nama'];
+                    try {
+                        $conn->prepare("UPDATE regu SET ketua = ? WHERE id = ?")->execute([$kName, $rId]);
+                    } catch (Exception $e) {}
+                    break;
+                }
+            }
+        }
         $formattedServerRegu[] = [
             'id'         => $rId,
             'nama'       => $sr['nama'],
             'jenis'      => $sr['jenis'],
-            'ketua'      => $sr['ketua'],
+            'ketua'      => $kName,
             'noHp'       => $sr['no_hp'],
             'no_hp'      => $sr['no_hp'],
             'wilayah'    => $sr['wilayah'],
@@ -458,14 +471,14 @@ try {
     // Sinkronkan master regu dari database server ke client
     if (Array.isArray(SERVER_REGU_DATA) && SERVER_REGU_DATA.length > 0) {
       try {
-        saveReguDB(SERVER_REGU_DATA);
+        saveReguDB(SERVER_REGU_DATA, false);
       } catch(e) {}
     }
 
     // Sinkronkan master anggota dari database server ke client
     if (Array.isArray(SERVER_ANGGOTA_DATA) && SERVER_ANGGOTA_DATA.length > 0) {
       try {
-        saveAnggotaDB(SERVER_ANGGOTA_DATA);
+        saveAnggotaDB(SERVER_ANGGOTA_DATA, false);
       } catch(e) {}
     }
 
@@ -473,27 +486,40 @@ try {
     try {
       const curRegu = typeof getReguDB === "function" ? getReguDB() : [];
       const curAnggota = typeof getAnggotaDB === "function" ? getAnggotaDB() : [];
-      let needSave = false;
+      let needSaveRegu = false;
+      let needSaveAgt = false;
+
       curRegu.forEach(rg => {
-        if (rg.ketua && rg.ketua.trim()) {
-          const kName = rg.ketua.trim().toLowerCase();
+        let kName = (rg.ketua || "").trim();
+        // Jika nama ketua kosong atau '-', cari anggota di regu ini yang role-nya Ketua Regu
+        if (!kName || kName === "-") {
+          const km = curAnggota.find(a => (a.reguId === rg.id || (rg.anggotaIds && rg.anggotaIds.includes(a.id))) && a.role === "Ketua Regu");
+          if (km) {
+            rg.ketua = km.nama;
+            kName = km.nama;
+            needSaveRegu = true;
+          }
+        }
+
+        if (kName && kName !== "-") {
+          const kLower = kName.toLowerCase();
           curAnggota.forEach(a => {
             if (a.reguId === rg.id || (rg.anggotaIds && rg.anggotaIds.includes(a.id))) {
-              const match = (a.nama || "").trim().toLowerCase() === kName;
+              const match = (a.nama || "").trim().toLowerCase() === kLower;
               if (match && a.role !== "Ketua Regu") {
                 a.role = "Ketua Regu";
-                needSave = true;
+                needSaveAgt = true;
               } else if (!match && a.role === "Ketua Regu") {
                 a.role = "Anggota Regu";
-                needSave = true;
+                needSaveAgt = true;
               }
             }
           });
         }
       });
-      if (needSave) {
-        saveAnggotaDB(curAnggota);
-      }
+
+      if (needSaveRegu) saveReguDB(curRegu);
+      if (needSaveAgt) saveAnggotaDB(curAnggota);
     } catch(eSync) {}
 
     // Load Data & Inisialisasi Realtime Synchronizer
@@ -533,6 +559,12 @@ try {
     window.addEventListener("focus", () => refreshAdminData());
     setInterval(refreshAdminData, 3000);
     setupMobileBottomNavPin();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const reqTab = urlParams.get("tab");
+    if (reqTab && typeof switchAdminTab === "function") {
+      switchAdminTab(reqTab);
+    }
   }
 
   // Kunci posisi Bottom Nav agar selalu tegak menempel bawah layar di iOS/Android saat scroll
@@ -672,8 +704,8 @@ try {
     allReports = getLaporanDB();
     const total = allReports.length;
     const selesai = allReports.filter(r => r.status === "selesai").length;
-    const proses = allReports.filter(r => r.status === "proses").length;
-    const belum = allReports.filter(r => r.status === "belum").length;
+    const belum = allReports.filter(r => r.status === "belum" || (r.status !== "selesai" && parseInt(r.progres, 10) >= 100)).length;
+    const proses = allReports.filter(r => r.status === "proses" && parseInt(r.progres, 10) < 100).length;
 
     document.getElementById("ds-total").textContent = total;
     document.getElementById("ds-selesai").textContent = selesai;
@@ -773,7 +805,7 @@ try {
           </div>
         </div>
         <button type="button" class="btn-lihat-detail" onclick="event.stopPropagation(); openDetailModal('${lap.id}')">
-          <span>Detail (3 Foto)</span>
+          <span>Detail (${(lap.foto || []).filter(f => f && f.src && f.src.trim() !== '').length} Foto)</span>
         </button>
       </div>
     `;
@@ -1088,12 +1120,18 @@ try {
     if (!agt) return;
 
     const oldReguId = agt.reguId;
+    const newReg = allRegu.find(r => r.id === newReguId);
     agt.reguId = newReguId;
+    agt.regu = newReg ? newReg.nama : "Belum Ditugaskan";
+    agt.wilayah = newReg ? (newReg.wilayah || "-") : "-";
 
     allRegu.forEach(rg => {
       if (!rg.anggotaIds) rg.anggotaIds = [];
-      if (rg.id === oldReguId) {
+      if (rg.id === oldReguId && rg.id !== newReguId) {
         rg.anggotaIds = rg.anggotaIds.filter(id => id !== agtId);
+        if (rg.ketua && rg.ketua.trim().toLowerCase() === (agt.nama || "").trim().toLowerCase()) {
+          rg.ketua = "";
+        }
       }
       if (rg.id === newReguId && !rg.anggotaIds.includes(agtId)) {
         rg.anggotaIds.push(agtId);
@@ -1103,13 +1141,11 @@ try {
     saveAnggotaDB(allAnggota);
     saveReguDB(allRegu);
 
-    const newReg = allRegu.find(r => r.id === newReguId);
-    showToast(`Berhasil! ${agt.nama} dipindahkan ke ${newReg ? newReg.nama : 'Regu baru'}.`, 'success');
+    showToast(`Berhasil! ${agt.nama} dipindahkan ke ${newReg ? newReg.nama : 'Belum Ditugaskan'}.`, 'success');
 
     renderDashboardReguTable();
     renderAnggotaTable(allAnggota);
     renderReguCards(allRegu);
-    renderDashboardReguTable();
     updateStats();
   }
 
@@ -1722,7 +1758,7 @@ try {
     const container = document.getElementById("verifikasi-list-container");
     if (!container) return;
 
-    const pending = list.filter(r => r.status === "belum");
+    const pending = list.filter(r => r.status === "belum" || (r.status !== "selesai" && parseInt(r.progres, 10) >= 100));
     if (pending.length === 0) {
       container.innerHTML = '<div style="text-align:center;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:3rem;color:#64748B;">Semua laporan telah diverifikasi dan disetujui.</div>';
       return;
@@ -1748,19 +1784,37 @@ try {
             ${lap.kendala ? `<div style="margin-top:6px;font-size:0.78rem;color:#92400E;">Kendala: ${lap.kendala}</div>` : ''}
           </div>
           <div style="display:flex;gap:10px;">
-            <button type="button" class="btn-lihat-detail" onclick="openDetailModal('${lap.id}')">Tinjau 3 Foto</button>
-            <button type="button" class="admin-btn-primary" onclick="quickVerify('${lap.id}')">Setujui Sekarang</button>
+            <button type="button" class="btn-lihat-detail" onclick="openDetailModal('${lap.id}')">Tinjau Foto (${(lap.foto || []).filter(f => f && f.src && f.src.trim() !== '').length}/3)</button>
+            ${((parseInt(lap.progres, 10) || 0) >= 100 && (lap.foto || []).filter(f => f && f.src && f.src.trim() !== '').length >= 3)
+              ? `<button type="button" class="admin-btn-primary" onclick="quickVerify('${lap.id}')">Setujui Sekarang</button>`
+              : `<button type="button" class="admin-btn-primary" onclick="quickVerify('${lap.id}')" style="background:#94A3B8;border-color:#94A3B8;cursor:not-allowed;opacity:0.75;" title="Menunggu 3 foto & progres 100%">Belum Lengkap</button>`}
           </div>
         </div>
       `;
     }).join("");
   }
 
+  function formatVerifiedTimestamp() {
+    const now = new Date();
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    return `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${hh}:${mm}`;
+  }
+
   function quickVerify(id) {
     const lap = allReports.find(r => r.id === id);
     if (!lap) return;
+    const validPhotos = (lap.foto || []).filter(f => f && f.src && typeof f.src === "string" && f.src.trim() !== "" && f.src !== "null" && f.src !== "undefined");
+    const curProg = parseInt(lap.progres, 10) || 0;
+    if (curProg < 100 || validPhotos.length < 3) {
+      showToast(`Belum bisa disetujui! Petugas harus mengirim 3 foto lengkap & progres 100% (Saat ini: ${validPhotos.length}/3 foto, ${curProg}%).`, "warning");
+      return;
+    }
     lap.status = "selesai";
     lap.progres = 100;
+    lap.tanggal = formatVerifiedTimestamp();
     saveLaporanDB(allReports);
     updateStats();
     renderVerifikasiList(allReports);
@@ -2084,6 +2138,13 @@ try {
 
     container.innerHTML = reguList.map(rg => {
       const members = allAnggota.filter(a => (rg.anggotaIds && rg.anggotaIds.includes(a.id)) || a.reguId === rg.id);
+      // Deteksi nama ketua regu: dari rg.ketua ATAU anggota di regu ini yang role-nya "Ketua Regu"
+      const ketuaMember = members.find(m => m.role === "Ketua Regu" || (rg.ketua && (m.nama || "").trim().toLowerCase() === rg.ketua.trim().toLowerCase()));
+      const displayKetua = (rg.ketua && rg.ketua.trim() !== "-" && rg.ketua.trim() !== "") ? rg.ketua : (ketuaMember ? ketuaMember.nama : "-");
+      if (displayKetua !== "-" && (!rg.ketua || rg.ketua.trim() === "-" || rg.ketua.trim() === "")) {
+        rg.ketua = displayKetua;
+      }
+
       return `
         <div class="regu-card">
           <div>
@@ -2103,7 +2164,7 @@ try {
             <div style="margin-top:12px;padding:10px 14px;background:#FFF7ED;border-radius:10px;border:1px solid #FFEDD5;font-size:0.85rem;display:flex;justify-content:space-between;align-items:center;">
               <div>
                 <span style="color:#C2410C;font-weight:600;">Ketua Regu:</span>
-                <strong style="color:#9A3412;margin-left:4px;">${rg.ketua || '-'}</strong>
+                <strong style="color:#9A3412;margin-left:4px;">${displayKetua}</strong>
               </div>
             </div>
 
@@ -2114,15 +2175,18 @@ try {
               </div>
               <div class="regu-members-list">
                 ${members.length === 0 ? '<span style="font-size:0.78rem;color:#94A3B8;font-style:italic;">Belum ada anggota terdaftar</span>' : ''}
-                ${members.map(m => `
-                  <span class="regu-member-chip" style="display:inline-flex;align-items:center;gap:6px;">
+                ${members.map(m => {
+                  const isKetua = (m.nama === displayKetua || m.role === "Ketua Regu");
+                  return `
+                  <span class="regu-member-chip" style="display:inline-flex;align-items:center;gap:6px;${isKetua ? 'background:#FFF7ED;border:1px solid #FED7AA;color:#C2410C;font-weight:700;' : ''}">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>${m.nama}</span>
+                    <span>${m.nama} ${isKetua ? '(Ketua)' : ''}</span>
                     <button type="button" onclick="keluarkanAnggotaDariRegu('${rg.id}', '${m.id}')" title="Keluarkan dari regu ini" style="border:none;background:none;color:#94A3B8;cursor:pointer;padding:0 2px;display:inline-flex;align-items:center;">
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                   </span>
-                `).join("")}
+                `;
+                }).join("")}
               </div>
             </div>
           </div>
@@ -2162,32 +2226,67 @@ try {
     const bidang = document.getElementById("inp-agt-bidang").value;
     const reguId = document.getElementById("inp-agt-regu").value;
 
-    if (!nama || !hp) return;
-
-    if (hp.startsWith("+62") || hp.startsWith("62") || hp.startsWith("+")) {
-      showToast('Format "+62" ditolak! Nomor telepon wajib diawali dengan "08" (contoh: 081234567890).', 'error');
+    if (!nama) {
+      showToast("Nama lengkap petugas wajib diisi!", "error");
       return;
     }
 
-    const cleanHp = hp.replace(/[- ]/g, "");
-    if (!/^08[0-9]{8,13}$/.test(cleanHp)) {
-      showToast('Nomor HP wajib diawali dengan "08" dan terdiri dari 10-15 angka!', 'error');
+    if (role === "Ketua Regu" && !hp) {
+      showToast("No. HP / WhatsApp wajib diisi untuk Ketua Regu sebagai ID Login!", "error");
       return;
     }
+
+    let cleanHp = "";
+    if (hp !== "") {
+      if (hp.startsWith("+62") || hp.startsWith("62") || hp.startsWith("+")) {
+        showToast('Format "+62" ditolak! Nomor telepon wajib diawali dengan "08" (contoh: 081234567890).', 'error');
+        return;
+      }
+
+      cleanHp = hp.replace(/[- ]/g, "");
+      if (!/^08[0-9]{8,13}$/.test(cleanHp)) {
+        showToast('Nomor HP wajib diawali dengan "08" dan terdiri dari 10-15 angka!', 'error');
+        return;
+      }
+    }
+
+    const targetRegu = allRegu.find(r => r.id === reguId);
+    let maxAgtNum = 0;
+    allAnggota.forEach(a => {
+      const m = String(a.id || "").match(/AGT-(\d+)/);
+      if (m) maxAgtNum = Math.max(maxAgtNum, parseInt(m[1], 10));
+    });
 
     const newAgt = {
-      id: "AGT-" + String(allAnggota.length + 1).padStart(3, "0"),
-      nama, role, hp: cleanHp, bidang, reguId, status: "aktif"
+      id: "AGT-" + String(maxAgtNum + 1).padStart(3, "0"),
+      nama,
+      role,
+      hp: cleanHp,
+      bidang,
+      reguId,
+      regu: targetRegu ? targetRegu.nama : "Belum Ditugaskan",
+      wilayah: targetRegu ? (targetRegu.wilayah || "-") : "-",
+      status: "aktif"
     };
+
+    if (targetRegu && role === "Ketua Regu") {
+      allAnggota.forEach(other => {
+        if (other.reguId === targetRegu.id || (targetRegu.anggotaIds && targetRegu.anggotaIds.includes(other.id))) {
+          other.role = "Anggota Regu";
+        }
+      });
+    }
 
     allAnggota.push(newAgt);
     saveAnggotaDB(allAnggota);
 
-    const targetRegu = allRegu.find(r => r.id === reguId);
     if (targetRegu) {
       if (!targetRegu.anggotaIds) targetRegu.anggotaIds = [];
       targetRegu.anggotaIds.push(newAgt.id);
-      if (role === "Ketua Regu") targetRegu.ketua = newAgt.nama;
+      if (role === "Ketua Regu") {
+        targetRegu.ketua = newAgt.nama;
+        targetRegu.noHp = cleanHp;
+      }
       saveReguDB(allRegu);
     }
 
@@ -2197,7 +2296,8 @@ try {
     updateStats();
     closeTambahAnggotaModal();
     document.getElementById("form-tambah-anggota").reset();
-    showToast("Anggota " + nama + " berhasil ditambahkan ke " + (targetRegu ? targetRegu.nama : "Regu") + ".", "success");
+    const loginHint = role === "Ketua Regu" ? ` (Akun Login Aktif: ${cleanHp} / PW: Ketua123)` : "";
+    showToast("Anggota " + nama + " berhasil ditambahkan ke " + (targetRegu ? targetRegu.nama : "Daftar Personel") + "." + loginHint, "success");
   }
 
   // CREATE REGU
@@ -2327,21 +2427,34 @@ try {
       }
     }
 
-    // 2. Render Unassigned Personnel Dropdown (NOT in another regu & NOT already in tempEditingMemberIds)
+    // 2. Render Available Personnel Dropdown (Unassigned first, plus personnel from other regus to move/add)
     if (unassignedSelect) {
-      const freePersonnel = allAnggota.filter(a => {
-        const inAnotherRegu = a.reguId && a.reguId !== "" && a.reguId !== editingReguId;
-        const alreadyInThis = tempEditingMemberIds.includes(a.id);
-        return !inAnotherRegu && !alreadyInThis;
-      });
+      const availablePersonnel = allAnggota.filter(a => !tempEditingMemberIds.includes(a.id));
+      const freePersonnel = availablePersonnel.filter(a => !a.reguId || a.reguId === "");
+      const otherReguPersonnel = availablePersonnel.filter(a => a.reguId && a.reguId !== "" && a.reguId !== editingReguId);
 
-      if (freePersonnel.length === 0) {
-        unassignedSelect.innerHTML = `<option value="">(Semua personel sudah memiliki regu)</option>`;
+      if (availablePersonnel.length === 0) {
+        unassignedSelect.innerHTML = `<option value="">(Semua personel sudah ada di regu ini)</option>`;
         unassignedSelect.disabled = true;
       } else {
         unassignedSelect.disabled = false;
-        unassignedSelect.innerHTML = `<option value="">-- Pilih Nama Personel Bebas (${freePersonnel.length} Tersedia) --</option>` +
-          freePersonnel.map(a => `<option value="${a.id}">${a.nama} - ${a.role || 'Anggota'} (${typeof formatPhone08 === 'function' ? formatPhone08(a.hp) : (a.hp || '-').replace(/-/g, '').replace(/^\+?62/, '0')})</option>`).join("");
+        let optsHtml = `<option value="">-- Pilih Nama Personel (${availablePersonnel.length} Tersedia) --</option>`;
+        if (freePersonnel.length > 0) {
+          optsHtml += `<optgroup label="Belum Punya Regu (${freePersonnel.length})">` +
+            freePersonnel.map(a => {
+              const hpStr = a.hp ? (typeof formatPhone08 === 'function' ? formatPhone08(a.hp) : a.hp) : 'Tanpa HP';
+              return `<option value="${a.id}">${a.nama} - ${a.role || 'Anggota'} (${hpStr})</option>`;
+            }).join("") + `</optgroup>`;
+        }
+        if (otherReguPersonnel.length > 0) {
+          optsHtml += `<optgroup label="Pindahkan dari Regu Lain (${otherReguPersonnel.length})">` +
+            otherReguPersonnel.map(a => {
+              const regObj = allRegu.find(r => r.id === a.reguId);
+              const regLabel = regObj ? regObj.nama : (a.regu || 'Regu Lain');
+              return `<option value="${a.id}">${a.nama} (Saat ini: ${regLabel})</option>`;
+            }).join("") + `</optgroup>`;
+        }
+        unassignedSelect.innerHTML = optsHtml;
       }
     }
 
@@ -2392,13 +2505,25 @@ try {
     const reg = allRegu.find(r => r.id === editingReguId);
     if (!reg) return;
 
+    // Jika user memilih personel di dropdown tapi langsung klik Simpan Perubahan tanpa klik "+ Masukkan"
+    const pendingSel = document.getElementById("edit-regu-select-unassigned");
+    if (pendingSel && pendingSel.value && !tempEditingMemberIds.includes(pendingSel.value)) {
+      tempEditingMemberIds.push(pendingSel.value);
+    }
+
     const nama = document.getElementById("edit-regu-nama").value.trim();
     const wilayah = document.getElementById("edit-regu-wilayah").value.trim();
-    const ketua = document.getElementById("edit-regu-ketua").value.trim();
+    let ketua = document.getElementById("edit-regu-ketua").value.trim();
 
     if (!nama || !wilayah) {
       showToast("Nama regu dan wilayah wajib diisi.", "error");
       return;
+    }
+
+    // Jika dropdown ketua kosong, otomatis cari jika ada personel di tim ini yang role-nya Ketua Regu
+    if (!ketua) {
+      const km = allAnggota.find(a => tempEditingMemberIds.includes(a.id) && a.role === "Ketua Regu");
+      if (km) ketua = km.nama;
     }
 
     reg.nama = nama;
@@ -2413,19 +2538,28 @@ try {
       }
     }
 
+    // Lepaskan anggota yang dipindahkan dari regu lama agar sinkron dua arah
+    allRegu.forEach(otherReg => {
+      if (otherReg.id !== reg.id && Array.isArray(otherReg.anggotaIds)) {
+        otherReg.anggotaIds = otherReg.anggotaIds.filter(id => !tempEditingMemberIds.includes(id));
+      }
+    });
+
     allAnggota.forEach(a => {
       if (tempEditingMemberIds.includes(a.id)) {
         a.reguId = reg.id;
         a.regu = reg.nama;
+        a.wilayah = reg.wilayah;
         // 1 Regu hanya boleh 1 Ketua Regu:
         if (ketua && (a.nama || "").trim().toLowerCase() === ketua.trim().toLowerCase()) {
           a.role = "Ketua Regu";
-        } else {
+        } else if (ketua) {
           a.role = "Anggota Regu";
         }
       } else if (a.reguId === reg.id) {
         a.reguId = "";
         a.regu = "Belum Ditugaskan";
+        a.wilayah = "-";
         if (a.role === "Ketua Regu") a.role = "Anggota Regu";
       }
     });
@@ -2559,34 +2693,53 @@ try {
     badgeEl.innerHTML = `<span class="status-dot"></span>${badgeTxt}`;
 
     const photosGrid = document.getElementById("m-photos-grid");
-    const photoArr = (lap.foto && lap.foto.length > 0) ? lap.foto : [
-      { src: "", tahap: "Sebelum (0%)" },
-      { src: "", tahap: "Proses (50%)" },
-      { src: "", tahap: "Sesudah (100%)" }
-    ];
+    const rawPhotos = Array.isArray(lap.foto) ? lap.foto : [];
+    const photoArr = rawPhotos.filter(f => f && f.src && typeof f.src === "string" && f.src.trim() !== "" && f.src !== "null" && f.src !== "undefined");
 
-    photosGrid.innerHTML = photoArr.map((f, pIdx) => {
-      const validSrc = typeof getReportPhotoUrl === "function" ? getReportPhotoUrl(f, lap, pIdx) : (f && f.src ? f.src : "foto/silap.png");
-      const labelText = f.tahap || f.name || (pIdx === 0 ? "Sebelum (0%)" : pIdx === 1 ? "Proses (50%)" : "Sesudah (100%)");
-      return `
-        <div style="border-radius:10px;overflow:hidden;border:1.5px solid #CBD5E1;box-shadow:0 2px 6px rgba(0,0,0,0.06);background:#FFFFFF;display:flex;flex-direction:column;">
-          <div style="width:100%;height:140px;background:#0F172A;overflow:hidden;position:relative;">
-            <img src="${validSrc}" alt="${labelText}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='foto/silap.png'">
+    if (photoArr.length === 0) {
+      photosGrid.innerHTML = `<div style="grid-column:1/-1;padding:18px;text-align:center;color:#94A3B8;font-size:0.84rem;background:#F8FAFC;border:1.5px dashed #CBD5E1;border-radius:10px;">Belum ada bukti foto dokumentasi yang diunggah.</div>`;
+    } else {
+      photosGrid.style.gridTemplateColumns = photoArr.length === 1 ? "minmax(180px, 240px)" : `repeat(${Math.min(3, photoArr.length)}, 1fr)`;
+      photosGrid.innerHTML = photoArr.map((f, pIdx) => {
+        const validSrc = f.src;
+        let labelText = f.tahap || f.name || (pIdx === 0 ? "Sebelum (0%)" : pIdx === 1 ? "Proses (50%)" : "Sesudah (100%)");
+        labelText = labelText.replace("Proses (0%)", "Proses (50%)");
+        return `
+          <div style="border-radius:10px;overflow:hidden;border:1.5px solid #CBD5E1;box-shadow:0 2px 6px rgba(0,0,0,0.06);background:#FFFFFF;display:flex;flex-direction:column;">
+            <div style="width:100%;height:140px;background:#0F172A;overflow:hidden;position:relative;">
+              <img src="${validSrc}" alt="${labelText}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='foto/silap.png'">
+            </div>
+            <div style="padding:6px 8px;font-size:0.75rem;font-weight:700;color:#0F172A;background:#FFFFFF;border-top:1px solid #E2E8F0;text-align:center;">
+              ${labelText}
+            </div>
           </div>
-          <div style="padding:6px 8px;font-size:0.75rem;font-weight:700;color:#0F172A;background:#FFFFFF;border-top:1px solid #E2E8F0;text-align:center;">
-            ${labelText}
-          </div>
-        </div>
-      `;
-    }).join("");
+        `;
+      }).join("");
+    }
 
     const btnVerify = document.getElementById("btn-verify-action");
+    const isReadyToVerify = (prg >= 100 && photoArr.length >= 3);
     if (lap.status === "selesai") {
       btnVerify.textContent = "Sudah Terverifikasi (100%)";
+      btnVerify.disabled = false;
+      btnVerify.style.background = "#15803D";
+      btnVerify.style.borderColor = "#15803D";
+      btnVerify.style.cursor = "pointer";
+      btnVerify.style.opacity = "1";
+    } else if (!isReadyToVerify) {
+      btnVerify.textContent = `Belum Lengkap (${photoArr.length}/3 Foto · ${prg}%)`;
       btnVerify.disabled = true;
+      btnVerify.style.background = "#94A3B8";
+      btnVerify.style.borderColor = "#94A3B8";
+      btnVerify.style.cursor = "not-allowed";
+      btnVerify.style.opacity = "0.75";
     } else {
       btnVerify.textContent = "Verifikasi & Setujui";
       btnVerify.disabled = false;
+      btnVerify.style.background = "";
+      btnVerify.style.borderColor = "";
+      btnVerify.style.cursor = "pointer";
+      btnVerify.style.opacity = "1";
     }
 
     document.getElementById("modal-detail").classList.remove("hidden");
@@ -2608,8 +2761,19 @@ try {
 
   function verifyCurrentReport() {
     if (!activeModalReport) return;
+    const repId = activeModalReport.noPekerjaan || activeModalReport.id;
+    const validPhotos = (activeModalReport.foto || []).filter(f => f && f.src && typeof f.src === "string" && f.src.trim() !== "" && f.src !== "null" && f.src !== "undefined");
+    const curProg = parseInt(activeModalReport.progres, 10) || 0;
+    const alreadyVerified = (activeModalReport.status === "selesai" && curProg >= 100);
+
+    if (!alreadyVerified && (curProg < 100 || validPhotos.length < 3)) {
+      showToast(`Belum bisa diverifikasi! Petugas harus mengirim 3 foto lengkap & progres 100% (Saat ini: ${validPhotos.length}/3 foto, ${curProg}%).`, "warning");
+      return;
+    }
+
     activeModalReport.status = "selesai";
     activeModalReport.progres = 100;
+    activeModalReport.tanggal = formatVerifiedTimestamp();
 
     saveLaporanDB(allReports);
     updateStats();
@@ -2617,7 +2781,42 @@ try {
     renderVerifikasiList(allReports);
     renderRekapTable(allReports);
     closeDetailModal();
-    showToast("Laporan #" + activeModalReport.id + " berhasil diverifikasi dan disetujui.", "success");
+    showToast(
+      alreadyVerified
+        ? `Laporan #${repId} sudah berstatus Terverifikasi (100%).`
+        : `Laporan #${repId} berhasil diverifikasi dan disetujui.`,
+      "success"
+    );
+  }
+
+  function deleteCurrentReport() {
+    if (!activeModalReport) return;
+    const repId = activeModalReport.id;
+    const repCode = activeModalReport.noPekerjaan || repId;
+    if (!confirm(`Hapus tugas #${repCode} secara permanen dari sistem?`)) return;
+
+    allReports = allReports.filter(r => String(r.id) !== String(repId));
+    saveLaporanDB(allReports);
+
+    try {
+      fetch(`api.php?action=delete_report&id=${encodeURIComponent(repId)}`, { method: "POST" });
+    } catch(e) {}
+
+    closeDetailModal();
+    refreshAdminData();
+    showToast(`Tugas #${repCode} berhasil dihapus.`, "info");
+  }
+
+  function hapusSemuaTugasAdmin() {
+    if (!confirm("Yakin ingin menghapus SEMUA tugas/laporan lapangan? Data yang dihapus tidak dapat dikembalikan.")) return;
+    allReports = [];
+    saveLaporanDB([]);
+    try {
+      localStorage.setItem(STORAGE_KEY_REPORTS, "[]");
+      fetch("api.php?action=delete_all_reports", { method: "POST" });
+    } catch(e) {}
+    refreshAdminData();
+    showToast("Seluruh data tugas lapangan berhasil dikosongkan.", "success");
   }
 
   // Handle Logout Sesi PHP & LocalStorage
@@ -2629,7 +2828,12 @@ try {
     window.location.href = "logout.php";
   }
 
-  document.addEventListener("DOMContentLoaded", initAdmin);
+  document.addEventListener("DOMContentLoaded", () => {
+    initAdmin();
+    <?php if (isset($_GET['tab'])): ?>
+    switchAdminTab("<?= htmlspecialchars($_GET['tab']) ?>");
+    <?php endif; ?>
+  });
 </script>
 </body>
 </html>

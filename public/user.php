@@ -88,7 +88,7 @@ if ($userRole !== 'admin') {
 $userOfficialRole = 'Anggota Regu';
 $userOfficialRegu = '';
 $userOfficialReguId = '';
-$userOfficialWilayah = '10 RW';
+$userOfficialWilayah = ($userRole === 'admin') ? 'Semua RW' : '-';
 
 try {
     if ($userRole === 'admin') {
@@ -108,7 +108,7 @@ try {
                 $userOfficialRegu = $uRow['regu'];
             }
             $userOfficialReguId = $uRow['regu_id'] ?: '';
-            $userOfficialWilayah = $uRow['wilayah'] ?: '10 RW';
+            $userOfficialWilayah = ($userOfficialRegu !== '') ? ($uRow['wilayah'] ?: '-') : '-';
         }
 
         // Cek juga jika tercatat sebagai ketua di tabel regu
@@ -127,6 +127,7 @@ try {
     $stmtAllAgt = $conn->query("SELECT * FROM anggota ORDER BY id ASC");
     $serverAnggotaRows = $stmtAllAgt ? $stmtAllAgt->fetchAll(PDO::FETCH_ASSOC) : [];
     foreach ($serverAnggotaRows as $sa) {
+        $hasSaRegu = !empty($sa['regu']) && $sa['regu'] !== 'Belum Ditugaskan';
         $formattedServerAnggota[] = [
             'id'       => $sa['id'],
             'nama'     => $sa['nama'],
@@ -135,7 +136,7 @@ try {
             'reguId'   => $sa['regu_id'] ?: '',
             'regu_id'  => $sa['regu_id'] ?: '',
             'regu'     => $sa['regu'] ?: 'Belum Ditugaskan',
-            'wilayah'  => $sa['wilayah'] ?: '10 RW',
+            'wilayah'  => $hasSaRegu ? ($sa['wilayah'] ?: '-') : '-',
             'status'   => 'aktif'
         ];
     }
@@ -264,17 +265,30 @@ try {
     /* Base Body Canvas */
     *, *::before, *::after { box-sizing: border-box; }
 
-    html, body {
+    html {
+      margin: 0;
+      padding: 0;
+      height: auto;
+      overflow-x: clip;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
+      height: auto;
       background: #EDF2F7;
       font-family: var(--font-family);
       color: var(--color-slate-800);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       line-height: 1.5;
-      overscroll-behavior-y: none;
+      overflow-x: clip;
+      overflow-y: visible;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Full-height centered canvas so content never hugs left edge on desktop */
@@ -2172,8 +2186,8 @@ try {
       background: #ECFDF5 !important;
       border: 1.5px solid #A7F3D0 !important;
       color: #065F46 !important;
-      cursor: not-allowed !important;
-      opacity: 0.9 !important;
+      cursor: pointer !important;
+      opacity: 0.95 !important;
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
@@ -3374,6 +3388,19 @@ try {
         padding: 5px 1px !important;
       }
     }
+    <?php if (isset($_GET['tab']) && $_GET['tab'] === 'history'): ?>
+      #user-phone-form-view { display: none !important; }
+      #user-history-panel { display: block !important; }
+      #tab-btn-form { background: transparent !important; color: #64748B !important; }
+      #tab-btn-history { background: #FF5500 !important; color: #FFF !important; }
+    <?php endif; ?>
+    <?php if (isset($_GET['step']) && $_GET['step'] === '2'): ?>
+      #step-container-1 { display: none !important; }
+      #step-container-2 { display: block !important; }
+      #wizard-node-1 .node-circle { background: #10B981 !important; color: #FFF !important; }
+      #wizard-node-2 .node-circle { background: #FF5500 !important; color: #FFF !important; }
+      #wizard-line { background: #10B981 !important; }
+    <?php endif; ?>
   </style>
 </head>
 <body>
@@ -3472,10 +3499,10 @@ try {
 
   // Sinkronkan data master server ke client
   if (Array.isArray(SERVER_REGU_DATA) && SERVER_REGU_DATA.length > 0) {
-    try { saveReguDB(SERVER_REGU_DATA); } catch(e) {}
+    try { saveReguDB(SERVER_REGU_DATA, false); } catch(e) {}
   }
   if (Array.isArray(SERVER_ANGGOTA_DATA) && SERVER_ANGGOTA_DATA.length > 0) {
-    try { saveAnggotaDB(SERVER_ANGGOTA_DATA); } catch(e) {}
+    try { saveAnggotaDB(SERVER_ANGGOTA_DATA, false); } catch(e) {}
   }
 
   // ==========================================================
@@ -3572,14 +3599,14 @@ try {
 
     let assignedRole = (currentUser && currentUser.official_role) ? currentUser.official_role : "Anggota Regu";
     let assignedRegu = (currentUser && currentUser.official_regu) ? currentUser.official_regu : "";
-    let assignedWilayah = "10 RW";
+    let assignedWilayah = "-";
 
     // Cek apakah tercatat sebagai ketua di daftar regu
     const regMatch = listRegu.find(r => (r.ketua || "").trim().toLowerCase() === currentName);
     if (regMatch) {
       assignedRole = "Ketua Regu";
       assignedRegu = regMatch.nama;
-      assignedWilayah = regMatch.wilayah || "10 RW";
+      assignedWilayah = regMatch.wilayah || "-";
     }
 
     if (found) {
@@ -3596,20 +3623,41 @@ try {
         const rg = listRegu.find(r => r.id === rId);
         if (rg) {
           assignedRegu = rg.nama;
-          assignedWilayah = rg.wilayah || "10 RW";
+          assignedWilayah = rg.wilayah || "-";
         } else {
           assignedRegu = "";
         }
       } else {
         assignedRegu = "";
       }
-      if (found.wilayah) assignedWilayah = found.wilayah;
+
+      // Deteksi regu dari anggotaIds atau pencocokan ketua di list regu
+      if (!assignedRegu || assignedRegu === "Belum Ditugaskan") {
+        const memberRegu = listRegu.find(r => (r.anggotaIds && r.anggotaIds.includes(found.id)) || (r.ketua && (r.ketua || "").trim().toLowerCase() === currentName));
+        if (memberRegu) {
+          assignedRegu = memberRegu.nama;
+          assignedWilayah = memberRegu.wilayah || "-";
+          if (memberRegu.ketua && (memberRegu.ketua || "").trim().toLowerCase() === currentName) {
+            assignedRole = "Ketua Regu";
+            found.role = "Ketua Regu";
+          }
+          found.regu = assignedRegu;
+          found.reguId = memberRegu.id;
+        }
+      }
+
+      if (assignedRegu && found.wilayah && found.wilayah !== "10 RW" && found.wilayah !== "-") {
+        assignedWilayah = found.wilayah;
+      }
     }
 
     mobileOfficerRole = assignedRole;
     mobileRegu = assignedRegu;
 
     const hasRegu = (assignedRegu && assignedRegu !== "Belum Ditugaskan" && assignedRegu.trim() !== "");
+    if (!hasRegu) {
+      assignedWilayah = "-";
+    }
 
     // Tampilkan Role & Regu Gabungan yang Terkunci (Read-Only)
     const roleTextEl = document.getElementById("u-role-text");
@@ -3659,7 +3707,16 @@ try {
     if (inpRegu) inpRegu.value = hasRegu ? assignedRegu : "";
 
     const badgeEl = document.getElementById("u-header-badge");
-    if (badgeEl && assignedWilayah) badgeEl.textContent = assignedWilayah;
+    if (badgeEl) badgeEl.textContent = assignedWilayah || "-";
+
+    if (!window._userHistFilterInitialized) {
+      window._userHistFilterInitialized = true;
+      histFilterRegu = hasRegu ? assignedRegu : "__UNASSIGNED__";
+      const filterReguSelect = document.getElementById("hist-filter-regu");
+      if (filterReguSelect && hasRegu) {
+        filterReguSelect.value = assignedRegu;
+      }
+    }
 
     const recapRole = document.getElementById("modal-recap-regu");
     if (recapRole) {
@@ -3753,21 +3810,24 @@ try {
     const targetDay = mobileSelectedHari;
     const targetDateStr = currentCalendarDateStr;
 
+    const hasAssignedRegu = mobileRegu && mobileRegu !== "Belum Ditugaskan" && mobileRegu.trim() !== "";
+    const moShorts = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+
     list.forEach(r => {
-      const matchRegu = (r.regu || "Regu 1").toLowerCase() === (mobileRegu || "Regu 1").toLowerCase();
+      if (!hasAssignedRegu) return;
+      const matchRegu = (r.regu || "").toLowerCase() === mobileRegu.toLowerCase();
       if (!matchRegu) return;
 
-      // Cek apakah tanggal/hari cocok
+      // Cek apakah tanggal/jadwal cocok dengan tanggal kalender aktif
       let matchDate = false;
-      if (r.minggu && r.minggu.indexOf(targetDay) !== -1) {
-        matchDate = true;
-      }
-      if (r.tanggal && targetDateStr) {
-        // Cek kecocokan tahun/bulan/hari
+      if (r.isoDate && targetDateStr) {
+        matchDate = (r.isoDate === targetDateStr);
+      } else if (r.tanggal && targetDateStr) {
         const parts = targetDateStr.split("-");
         if (parts.length === 3) {
           const dNum = parseInt(parts[2], 10);
-          if (r.tanggal.indexOf(dNum + " ") !== -1 || r.tanggal.indexOf("/" + parts[2] + "/") !== -1) {
+          const moShort = moShorts[parseInt(parts[1], 10) - 1] || "";
+          if (r.tanggal.indexOf(dNum + " " + moShort + " " + parts[0]) !== -1 || r.tanggal === targetDateStr) {
             matchDate = true;
           }
         }
@@ -3795,33 +3855,36 @@ try {
 
       const isCompleted = completedTasks.has(tName);
       const inProg = inProgressTasks.get(tName);
+      // Validasi Berurutan: Tugas i terbuka HANYA jika i === 1 ATAU Tugas sebelumnya (i-1) sudah selesai 100%
+      const isPrevCompleted = (i === 1) || completedTasks.has("Tugas " + (i - 1));
 
       if (isCompleted) {
         completedCount++;
         btn.disabled = false;
         btn.classList.add("tugas-disabled-done");
         btn.classList.remove("active", "tugas-in-progress", "tugas-locked");
-        btn.style.opacity = "";
-        btn.style.cursor = "pointer";
-        btn.title = `${tName} sudah selesai dikerjakan untuk jadwal ini`;
-        btn.innerHTML = `<span>✓&nbsp;Tugas&nbsp;${i}</span><span class="tugas-done-tag">Selesai</span>`;
+        btn.title = `${tName} sudah selesai (100% Tuntas). Klik untuk melihat detail`;
+        btn.innerHTML = `<span>Tugas&nbsp;${i}</span><span class="tugas-done-tag">Selesai</span>`;
+      } else if (!isPrevCompleted) {
+        // Terkunci ketat: tugas sebelumnya belum diselesaikan
+        btn.disabled = false;
+        btn.classList.add("tugas-locked");
+        btn.classList.remove("active", "tugas-in-progress", "tugas-disabled-done");
+        btn.title = `Tugas ${i} terkunci! Selesaikan Tugas ${i - 1} terlebih dahulu`;
+        btn.innerHTML = `<span>Tugas&nbsp;${i}</span>`;
       } else if (inProg) {
         btn.disabled = false;
         btn.classList.remove("tugas-disabled-done", "tugas-locked");
         btn.classList.add("tugas-in-progress");
-        btn.style.opacity = "";
-        btn.style.cursor = "pointer";
         const progVal = parseInt(inProg.progres, 10) || 0;
         btn.title = `${tName} sedang berjalan (${progVal}%). Klik untuk melanjutkan`;
-        btn.innerHTML = `<span>⏳&nbsp;Tugas&nbsp;${i}</span><span class="tugas-done-tag" style="background:#FEF3C7;color:#D97706;border:1px solid #FDE68A">${progVal}%</span>`;
+        btn.innerHTML = `<span>Tugas&nbsp;${i}</span><span class="tugas-done-tag" style="background:#FEF3C7;color:#D97706;border:1px solid #FDE68A">${progVal}%</span>`;
         if (!firstAvailableTask) {
           firstAvailableTask = tName;
         }
       } else {
         btn.disabled = false;
         btn.classList.remove("active", "tugas-in-progress", "tugas-disabled-done", "tugas-locked");
-        btn.style.opacity = "";
-        btn.style.cursor = "pointer";
         btn.title = `Pilih ${tName}`;
         btn.innerHTML = `<span>Tugas&nbsp;${i}</span>`;
         if (!firstAvailableTask) {
@@ -3852,29 +3915,67 @@ try {
       }
     }
 
-    // Jika tugas yang sedang aktif sudah selesai 100%, alihkan ke tugas berikutnya yang belum selesai
-    if (completedTasks.has(mobileSelectedTugas)) {
-      if (firstAvailableTask) {
-        selectTugasKe(firstAvailableTask);
-      }
-    } else {
-      // Pastikan button tugas aktif memiliki styling active
-      document.querySelectorAll(".btn-tugas-pill").forEach(b => {
-        if (b.dataset.tugas === mobileSelectedTugas && !b.disabled) {
-          b.classList.add("active");
-        } else if (b.dataset.tugas !== mobileSelectedTugas) {
-          b.classList.remove("active");
-        }
-      });
+    // Jika tugas aktif saat ini ternyata terkunci, otomatis alihkan ke tugas pertama yang tersedia
+    const currentNum = parseInt((mobileSelectedTugas || "Tugas 1").replace(/\D/g, ""), 10) || 1;
+    if (currentNum > 1 && !completedTasks.has("Tugas " + (currentNum - 1))) {
+      selectTugasKe(firstAvailableTask || "Tugas 1");
+      return;
     }
+
+    // Pastikan button tugas aktif memiliki styling active
+    document.querySelectorAll(".btn-tugas-pill").forEach(b => {
+      if (b.dataset.tugas === mobileSelectedTugas && !b.classList.contains("tugas-locked")) {
+        b.classList.add("active");
+      } else {
+        b.classList.remove("active");
+      }
+    });
   }
 
   function selectTugasKe(tugas, skipAutoResume = false) {
     const taskNum = parseInt(tugas.replace(/\D/g, ""), 10) || 1;
     const btn = Array.from(document.querySelectorAll(".btn-tugas-pill")).find(b => b.dataset.tugas === tugas);
-    if (btn && btn.classList.contains("tugas-disabled-done")) {
-      showToast(`${tugas} sudah diselesaikan untuk hari ini (100% Tuntas).`, "info");
-      return;
+
+    // KUNCI BERURUTAN: Tugas N terkunci jika Tugas (N - 1) belum 100% selesai
+    if (taskNum > 1) {
+      const list = getLaporanDB();
+      const targetDateStr = currentCalendarDateStr;
+      const hasAssignedRegu = mobileRegu && mobileRegu !== "Belum Ditugaskan" && mobileRegu.trim() !== "";
+      const prevTaskName = "Tugas " + (taskNum - 1);
+      const moShorts = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+
+      const prevDone = list.some(r => {
+        let matchOwner = false;
+        if (hasAssignedRegu) {
+          matchOwner = (r.regu || "").toLowerCase() === mobileRegu.toLowerCase();
+        } else if (currentUser && (currentUser.name || currentUser.nama)) {
+          const uName = (currentUser.name || currentUser.nama).trim().toLowerCase();
+          matchOwner = (r.petugas || "").toLowerCase().indexOf(uName) !== -1;
+        }
+        if (!matchOwner) return false;
+
+        let matchDate = false;
+        if (r.isoDate && targetDateStr) {
+          matchDate = (r.isoDate === targetDateStr);
+        } else if (r.tanggal && targetDateStr) {
+          const parts = targetDateStr.split("-");
+          if (parts.length === 3) {
+            const dNum = parseInt(parts[2], 10);
+            const moShort = moShorts[parseInt(parts[1], 10) - 1] || "";
+            if (r.tanggal.indexOf(dNum + " " + moShort + " " + parts[0]) !== -1 || r.tanggal === targetDateStr) matchDate = true;
+          }
+        } else {
+          matchDate = true;
+        }
+
+        const prog = parseInt(r.progres, 10) || 0;
+        return matchDate && r.tugasKe === prevTaskName && (r.status === 'selesai' || prog >= 100);
+      });
+
+      if (!prevDone) {
+        showToast(`Tugas ${taskNum} Terkunci! Harap selesaikan Tugas ${taskNum - 1} terlebih dahulu agar berurutan.`, "warning");
+        return;
+      }
     }
 
     mobileSelectedTugas = tugas;
@@ -3889,7 +3990,7 @@ try {
     if (sub) sub.textContent = `Tugas ${num} dari 5`;
 
     document.querySelectorAll(".btn-tugas-pill").forEach(b => {
-      if (b.dataset.tugas === tugas && !b.disabled) {
+      if (b.dataset.tugas === tugas && !b.classList.contains("tugas-locked")) {
         b.classList.add("active");
       } else {
         b.classList.remove("active");
@@ -3901,21 +4002,25 @@ try {
       const targetDay = mobileSelectedHari;
       const targetDateStr = currentCalendarDateStr;
       
-      const existingActive = list.find(r => {
-        const matchRegu = (r.regu || "Regu 1").toLowerCase() === (mobileRegu || "Regu 1").toLowerCase();
+      const hasAssignedRegu = mobileRegu && mobileRegu !== "Belum Ditugaskan" && mobileRegu.trim() !== "";
+      const moShorts = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+      const existingActive = hasAssignedRegu ? list.find(r => {
+        const matchRegu = (r.regu || "").toLowerCase() === mobileRegu.toLowerCase();
         const matchTugas = r.tugasKe === tugas;
         let matchDate = false;
-        if (r.minggu && r.minggu.indexOf(targetDay) !== -1) matchDate = true;
-        if (r.tanggal && targetDateStr) {
+        if (r.isoDate && targetDateStr) {
+          matchDate = (r.isoDate === targetDateStr);
+        } else if (r.tanggal && targetDateStr) {
           const parts = targetDateStr.split("-");
           if (parts.length === 3) {
             const dNum = parseInt(parts[2], 10);
-            if (r.tanggal.indexOf(dNum + " ") !== -1 || r.tanggal.indexOf("/" + parts[2] + "/") !== -1) matchDate = true;
+            const moShort = moShorts[parseInt(parts[1], 10) - 1] || "";
+            if (r.tanggal.indexOf(dNum + " " + moShort + " " + parts[0]) !== -1 || r.tanggal === targetDateStr) matchDate = true;
           }
         }
         const isNotDone = r.status !== 'selesai' && (parseInt(r.progres, 10) < 100);
         return matchRegu && matchTugas && matchDate && isNotDone;
-      });
+      }) : null;
 
       if (existingActive) {
         resumeReportFromHistory(existingActive.id || existingActive.noPekerjaan);
@@ -4218,6 +4323,14 @@ try {
       refreshUserReports();
       handleAnggotaSync();
     });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("tab") === "history" && typeof switchUserTab === "function") {
+      switchUserTab("history");
+    }
+    if (urlParams.get("step") === "2" && typeof goToStep === "function") {
+      goToStep(2);
+    }
   }
 
   // ==========================================================
@@ -4444,15 +4557,21 @@ try {
   // MANAJEMEN SESI FORM LAPORAN (FLEKSIBEL & RESPONSIF)
   // Memungkinkan petugas memilih 0%, 50%, atau 100% dan membuka semua slot foto
   // ==========================================================
+  function getStageStatus(activeLap) {
+    if (!activeEditingReportId || !activeLap) return { hasSubmitted0: false, hasSubmitted50: false };
+    const validPhotos = (activeLap.foto || []).filter(f => f && f.src && typeof f.src === "string" && f.src.trim() !== "" && f.src !== "null" && f.src !== "undefined");
+    const prog = parseInt(activeLap.progres, 10) || 0;
+    const hasSubmitted0 = validPhotos.length >= 1;
+    const hasSubmitted50 = (prog >= 50 && validPhotos.length >= 2);
+    return { hasSubmitted0, hasSubmitted50 };
+  }
+
   function updateSesiState(forcedReport) {
     const list = getLaporanDB();
     const activeLap = forcedReport || (activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null);
 
-    // Status resmi pengiriman bertahap ke sistem:
-    // 1. hasSubmitted0: Laporan Awal (0%) telah terdaftar di database (activeEditingReportId ada & punya foto)
-    // 2. hasSubmitted50: Progres Lapangan (50%) telah terdaftar di database (progres >= 50 dan punya >= 2 foto)
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai") && activeLap.foto && activeLap.foto.length >= 2);
+    // Status resmi pengiriman bertahap ke sistem (wajib cek foto valid + progres):
+    const { hasSubmitted0, hasSubmitted50 } = getStageStatus(activeLap);
 
     const isResume = !!activeEditingReportId;
     const sesiNoticeEl = document.getElementById("sesi-notice-container");
@@ -4617,8 +4736,7 @@ try {
     val = parseInt(val, 10);
     const list = getLaporanDB();
     const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai") && activeLap.foto && activeLap.foto.length >= 2);
+    const { hasSubmitted0, hasSubmitted50 } = getStageStatus(activeLap);
 
     if (val >= 50 && !hasSubmitted0) {
       showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
@@ -4640,8 +4758,7 @@ try {
     val = parseInt(val, 10);
     const list = getLaporanDB();
     const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai") && activeLap.foto && activeLap.foto.length >= 2);
+    const { hasSubmitted0, hasSubmitted50 } = getStageStatus(activeLap);
 
     if (val >= 50 && !hasSubmitted0) {
       showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
@@ -4897,6 +5014,17 @@ try {
 
     if (target && (parseInt(target.progres, 10) < 100 && target.status !== "selesai")) {
       resumeReportFromHistory(target.id || target.noPekerjaan);
+      // Gabungkan foto draft lokal (jika sempat memotret foto 50%/100% sebelum keluar/refresh sebelum klik Kirim)
+      try {
+        const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (rawDraft) {
+          const d = JSON.parse(rawDraft);
+          if (d && String(d.activeEditingReportId) === String(target.id || target.noPekerjaan)) {
+            if (!mobilePhotoProses && d.photoProses) setMobilePhotoSlot("proses", d.photoProses, "Draft");
+            if (!mobilePhotoSesudah && d.photoSesudah) setMobilePhotoSlot("sesudah", d.photoSesudah, "Draft");
+          }
+        }
+      } catch(eDraftMerge) {}
       return true;
     }
     localStorage.removeItem("silap_active_task_id");
@@ -5218,12 +5346,11 @@ try {
       if (loading) {
         loading.innerHTML = '<div style="padding:24px;text-align:center;max-width:320px;">' +
           '<div style="font-size:1.05rem;font-weight:800;margin-bottom:8px;color:#F8FAFC;">Kamera Lapangan Siap</div>' +
-          '<div style="font-size:0.8rem;color:#FDBA74;line-height:1.5;margin-bottom:14px;font-weight:600;">Gunakan kamera ponsel langsung atau buat foto GPS instan:</div>' +
-          '<div style="display:flex;flex-direction:column;gap:8px;">' +
-          '<button type="button" class="user-pill-btn primary" onclick="document.getElementById(\'camera-native-input\').click()" style="margin:0 auto;display:inline-flex;padding:10px 18px;font-weight:800;gap:6px;">' +
+          '<div style="font-size:0.8rem;color:#94A3B8;line-height:1.5;margin-bottom:16px;">Gunakan kamera ponsel langsung untuk mengambil dokumentasi lapangan:</div>' +
+          '<div style="display:flex;justify-content:center;">' +
+          '<button type="button" class="user-pill-btn primary" onclick="document.getElementById(\'camera-native-input\').click()" style="margin:0 auto;display:inline-flex;padding:11px 22px;font-weight:800;gap:8px;">' +
           '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>' +
           'Buka Kamera HP Langsung</button>' +
-          '<button type="button" class="user-pill-btn" onclick="generateSimulatedCurrentPhoto()" style="margin:0 auto;display:inline-flex;background:#1E293B;border:1px solid #334155;color:#F8FAFC;padding:9px 16px;font-weight:700;">Buat Foto GPS Instan</button>' +
           '</div></div>';
       }
     }
@@ -5505,7 +5632,9 @@ try {
         center: [initialLat, initialLng],
         zoom: 16,
         zoomControl: true,
-        attributionControl: false
+        attributionControl: false,
+        dragging: !L.Browser.mobile,
+        tap: false
       });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -5955,7 +6084,7 @@ try {
   // ==========================================================
   // SUBMIT LAPORAN HARIAN (1 SESI AWAL 0% -> SESI LANJUTAN SELESAI)
   // ==========================================================
-  function submitMobileLaporan() {
+  async function submitMobileLaporan() {
     // Validasi Langkah 1
     if (!validateStep1()) {
       goToStep(1);
@@ -5964,8 +6093,7 @@ try {
 
     const list = getLaporanDB();
     const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
-    const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
-    const hasSubmitted50 = !!(activeEditingReportId && activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai") && activeLap.foto && activeLap.foto.length >= 2);
+    const { hasSubmitted0, hasSubmitted50 } = getStageStatus(activeLap);
 
     const noHp = document.getElementById("u-nohp-inp") ? document.getElementById("u-nohp-inp").value.trim() : "081234567890";
     const jmlPetugas = document.getElementById("u-jml-petugas-inp") ? parseInt(document.getElementById("u-jml-petugas-inp").value, 10) || 4 : 4;
@@ -6020,7 +6148,7 @@ try {
         anggotaHadir: presentNames,
         wilayah: currentUser ? currentUser.wilayah : "jaktim",
         kelurahan: "Kel. Pekayon",
-        status: "belum",
+        status: "proses",
         progres: 0,
         tanggal: tgl,
         isoDate: currentCalendarDateStr || (now.toISOString().split("T")[0]),
@@ -6030,7 +6158,7 @@ try {
       };
 
       list.unshift(reportData);
-      saveLaporanDB(list);
+      await saveLaporanDB(list);
       userReports = list;
 
       localStorage.setItem("silap_active_task_id", reportId);
@@ -6116,7 +6244,7 @@ try {
       } else {
         list.unshift(updatedReport);
       }
-      saveLaporanDB(list);
+      await saveLaporanDB(list);
       userReports = list;
 
       activeEditingReportId = updatedReport.id || updatedReport.noPekerjaan;
@@ -6188,7 +6316,7 @@ try {
         anggotaHadir: presentNames || oldLap.anggotaHadir,
         wilayah: currentUser ? currentUser.wilayah : "jaktim",
         kelurahan: "Kel. Pekayon",
-        status: "selesai",
+        status: "belum",
         progres: 100,
         tanggal: tgl,
         isoDate: currentCalendarDateStr || (now.toISOString().split("T")[0]),
@@ -6203,14 +6331,14 @@ try {
       } else {
         list.unshift(updatedReport);
       }
-      saveLaporanDB(list);
+      await saveLaporanDB(list);
       userReports = list;
 
       localStorage.removeItem("silap_active_task_id");
       activeEditingReportId = null;
       mobileProgres = 0;
 
-      showToast("Laporan #" + (updatedReport.noPekerjaan || reportId) + " (" + (updatedReport.tugasKe || "Tugas 1") + ") berhasil diselesaikan (100% Tuntas)!", "success");
+      showToast("Laporan #" + (updatedReport.noPekerjaan || reportId) + " (" + (updatedReport.tugasKe || "Tugas 1") + ") berhasil dikirim (100%) & masuk antrean Verifikasi Admin!", "success");
       clearFormDraft();
       resetFormFields();
       updateTaskProgressStates();
@@ -6473,13 +6601,28 @@ try {
     if (!listEl) return;
 
     userReports = getLaporanDB();
-    if (countEl) countEl.textContent = userReports.length;
+    const isAdminUser = currentUser && (currentUser.role === 'admin' || currentUser.is_admin);
+    const currentName = (currentUser && (currentUser.name || currentUser.nama) ? (currentUser.name || currentUser.nama) : "").trim().toLowerCase();
+    const hasAssignedRegu = mobileRegu && mobileRegu !== "Belum Ditugaskan" && mobileRegu.trim() !== "";
+
+    if (countEl) {
+      if (isAdminUser) {
+        countEl.textContent = userReports.length;
+      } else if (hasAssignedRegu) {
+        countEl.textContent = userReports.filter(l => (l.regu || "").toLowerCase() === mobileRegu.toLowerCase()).length;
+      } else {
+        countEl.textContent = currentName ? userReports.filter(l => (l.petugas || "").trim().toLowerCase() === currentName).length : 0;
+      }
+    }
 
     // Filter 1: Per-Regu (agar laporan tidak tercampur dengan regu lain)
-    const activeReguFilter = histFilterRegu || "SEMUA";
+    const activeReguFilter = histFilterRegu || (isAdminUser ? "SEMUA" : (hasAssignedRegu ? mobileRegu : "__UNASSIGNED__"));
     let filtered = userReports.filter(lap => {
+      if (activeReguFilter === "__UNASSIGNED__") {
+        return currentName !== "" && (lap.petugas || "").trim().toLowerCase() === currentName;
+      }
       if (activeReguFilter === "SEMUA") return true;
-      return (lap.regu || "Regu 1").toLowerCase() === activeReguFilter.toLowerCase();
+      return (lap.regu || "").toLowerCase() === activeReguFilter.toLowerCase();
     });
 
     // Filter 2: Periode Waktu (Hari ini, kemarin, 2 hari, 3 hari, 7 hari, 14 hari, 30 hari)
@@ -6537,23 +6680,24 @@ try {
         relativeBadgeHtml = '<span class="badge-time-chip today">Hari Ini</span>';
       }
 
-      const photoList = lap.foto || [];
+      const photoList = (lap.foto || []).filter(f => f && f.src && typeof f.src === "string" && f.src.trim() !== "" && f.src !== "null" && f.src !== "undefined");
       const photoCount = Math.min(3, Math.max(1, photoList.length));
       const gridTemplate = photoCount === 1 ? 'repeat(auto-fit, minmax(110px, 140px))' : `repeat(${photoCount}, 1fr)`;
       const justifyGrid = photoCount === 1 ? 'justify-content:center;' : '';
 
       const photosHtml = photoList.length > 0 ? photoList.map((f, pIdx) => {
-        const validSrc = typeof getReportPhotoUrl === "function" ? getReportPhotoUrl(f, lap, pIdx) : (f && f.src ? f.src : "foto/silap.png");
+        const validSrc = f.src;
+        const cleanLabel = (f.tahap || f.name || 'Dokumentasi').replace('Proses (0%)', 'Proses (50%)');
         return `
           <div class="riwayat-photo-item">
             <img src="${validSrc}" class="uh-thumb-grid" alt="Foto Dokumentasi" onerror="this.onerror=null;this.src='foto/silap.png'">
-            <div class="riwayat-photo-label">${f.tahap || f.name || 'Dokumentasi'}</div>
+            <div class="riwayat-photo-label">${cleanLabel}</div>
           </div>
         `;
       }).join("") : '<div style="font-size:0.75rem;color:#94A3B8;padding:8px 0;grid-column:1/-1;text-align:center;">Belum ada dokumentasi foto.</div>';
 
-      // Tombol / Callout Selesaikan Pekerjaan Ini jika belum 100%
-      const resumeBtnHtml = (lap.progres < 100 || lap.status !== "selesai") ? `
+      // Tombol / Callout Selesaikan Pekerjaan Ini jika progres belum 100%, atau info Menunggu Verifikasi jika sudah 100% tapi belum disahkan Admin
+      const resumeBtnHtml = (parseInt(lap.progres, 10) || 0) < 100 ? `
         <div class="riwayat-action-card">
           <div class="riwayat-action-top">
             <span class="riwayat-pulse-dot"></span>
@@ -6565,7 +6709,15 @@ try {
             <span>Lanjutkan & Selesaikan Pekerjaan</span>
           </button>
         </div>
-      ` : '';
+      ` : (lap.status !== "selesai" ? `
+        <div class="riwayat-action-card" style="background:#FFFBEB;border-color:#FDE68A;">
+          <div class="riwayat-action-top">
+            <span class="riwayat-pulse-dot" style="background:#D97706;"></span>
+            <span class="riwayat-action-title" style="color:#B45309;">Menunggu Verifikasi Admin (100%)</span>
+          </div>
+          <div class="riwayat-action-desc" style="color:#92400E;">3 foto dokumentasi lengkap telah dikirim. Menunggu peninjauan &amp; persetujuan Admin.</div>
+        </div>
+      ` : '');
 
       const friendlyCardTitle = getLaporanHumanTitle(lap);
 

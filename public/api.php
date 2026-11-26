@@ -1,8 +1,24 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 header('Content-Type: application/json; charset=utf-8');
+
+if (!isset($_SESSION['user'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Unauthorized: Sesi login tidak valid.']);
+    exit;
+}
+
 require_once __DIR__ . '/koneksi.php';
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
+$adminActions = ['delete_anggota', 'delete_report', 'delete_all_reports', 'save_all_regu', 'save_all_anggota'];
+if (in_array($action, $adminActions, true) && ($_SESSION['user']['role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Forbidden: Membutuhkan hak akses Administrator.']);
+    exit;
+}
 
 function normalizePhone08($ph) {
     if (!$ph) return '';
@@ -42,11 +58,11 @@ if ($action === 'get_reports') {
                 'progres'        => (int)$r['progres'],
                 'status'         => $r['status'],
                 'tanggal'        => $r['tanggal'],
-                'foto'           => [
-                    ['src' => $r['foto_sebelum'] ?? '', 'tahap' => 'Sebelum (0%)'],
-                    ['src' => $r['foto_proses'] ?? '', 'tahap' => 'Proses (' . $r['progres'] . '%)'],
-                    ['src' => $r['foto_sesudah'] ?? '', 'tahap' => 'Sesudah (100%)']
-                ]
+                'foto'           => array_values(array_filter([
+                    !empty($r['foto_sebelum']) ? ['src' => $r['foto_sebelum'], 'tahap' => 'Sebelum (0%)'] : null,
+                    !empty($r['foto_proses'])  ? ['src' => $r['foto_proses'],  'tahap' => 'Proses (50%)'] : null,
+                    !empty($r['foto_sesudah']) ? ['src' => $r['foto_sesudah'], 'tahap' => 'Sesudah (100%)'] : null,
+                ]))
             ];
         }
         echo json_encode(['success' => true, 'data' => $formatted]);
@@ -140,6 +156,32 @@ if ($action === 'save_all_reports' || $action === 'sync_reports') {
     exit;
 }
 
+if ($action === 'delete_report') {
+    $id = $_GET['id'] ?? ($_POST['id'] ?? '');
+    if (!$id) {
+        echo json_encode(['success' => false, 'error' => 'ID laporan wajib disertakan']);
+        exit;
+    }
+    try {
+        $del = $conn->prepare("DELETE FROM `laporan` WHERE `id` = ? OR `no_pekerjaan` = ?");
+        $del->execute([$id, $id]);
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'delete_all_reports') {
+    try {
+        $conn->exec("DELETE FROM `laporan`");
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
 if ($action === 'get_anggota') {
     try {
         // Auto-sync: pastikan seluruh petugas dari tabel users masuk ke anggota
@@ -207,6 +249,9 @@ if ($action === 'save_all_anggota') {
     }
     try {
         $conn->beginTransaction();
+        $reguMap = $conn->query("SELECT id, nama FROM `regu`")->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        $reguWilMap = $conn->query("SELECT id, wilayah FROM `regu`")->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+
         $stmt = $conn->prepare("
             INSERT INTO `anggota` (`id`, `nama`, `hp`, `role`, `regu_id`, `regu`, `wilayah`)
             VALUES (:id, :nama, :hp, :role, :regu_id, :regu, :wilayah)
@@ -218,24 +263,57 @@ if ($action === 'save_all_anggota') {
                 `regu` = VALUES(`regu`),
                 `wilayah` = VALUES(`wilayah`)
         ");
+
+        $stmtFindUser = $conn->prepare("SELECT id, role, username FROM `users` WHERE `no_hp` = ? OR `username` = ? OR LOWER(TRIM(`nama`)) = LOWER(TRIM(?)) LIMIT 1");
+        $stmtInsUser  = $conn->prepare("INSERT INTO `users` (`nama`, `no_hp`, `username`, `password`, `role`, `wilayah`) VALUES (?, ?, ?, ?, 'petugas', ?)");
+        $stmtUpdUser  = $conn->prepare("UPDATE `users` SET `nama` = ?, `no_hp` = ?, `username` = ? WHERE `id` = ?");
+        $defaultKetuaHash = null;
+
         foreach ($payload as $a) {
-            $reguId = $a['reguId'] ?? ($a['regu_id'] ?? '');
-            $reguName = $a['regu'] ?? '';
-            if (empty($reguName)) {
-                if ($reguId === 'REG-01') $reguName = 'Regu Jalan';
-                elseif ($reguId === 'REG-02') $reguName = 'Regu Taman';
-                elseif ($reguId === 'REG-03') $reguName = 'Regu Kantor';
-                else $reguName = 'Belum Ditugaskan';
+            $reguId = trim((string)($a['reguId'] ?? ($a['regu_id'] ?? '')));
+            if ($reguId !== '' && isset($reguMap[$reguId])) {
+                $reguName = $reguMap[$reguId];
+                $wilVal = $reguWilMap[$reguId] ?? ($a['wilayah'] ?? '-');
+            } else {
+                $reguName = 'Belum Ditugaskan';
+                $wilVal = '-';
             }
+            $namaVal = trim((string)($a['nama'] ?? 'Petugas'));
+            $hpVal = normalizePhone08($a['hp'] ?? '');
+            $roleVal = $a['role'] ?? 'Anggota Regu';
+
             $stmt->execute([
                 ':id'      => $a['id'] ?? ('AGT-' . uniqid()),
-                ':nama'    => $a['nama'] ?? 'Petugas',
-                ':hp'      => $a['hp'] ?? '081234567890',
-                ':role'    => $a['role'] ?? 'Anggota Regu',
+                ':nama'    => $namaVal,
+                ':hp'      => $hpVal,
+                ':role'    => $roleVal,
                 ':regu_id' => $reguId,
                 ':regu'    => $reguName,
-                ':wilayah' => $a['wilayah'] ?? '10 RW'
+                ':wilayah' => $wilVal
             ]);
+
+            // Sinkronkan otomatis akun login untuk Ketua Regu (ID = No. WA, Password default = Ketua123)
+            if ($roleVal === 'Ketua Regu' && $hpVal !== '') {
+                $stmtFindUser->execute([$hpVal, $hpVal, $namaVal]);
+                $uRow = $stmtFindUser->fetch(PDO::FETCH_ASSOC);
+                if (!$uRow) {
+                    if ($defaultKetuaHash === null) {
+                        $defaultKetuaHash = password_hash('Ketua123', PASSWORD_DEFAULT);
+                    }
+                    $stmtInsUser->execute([$namaVal, $hpVal, $hpVal, $defaultKetuaHash, $wilVal]);
+                } elseif (($uRow['role'] ?? '') !== 'admin') {
+                    $newUname = preg_match('/^[0-9]+$/', (string)$uRow['username']) ? $hpVal : $uRow['username'];
+                    $stmtUpdUser->execute([$namaVal, $hpVal, $newUname, $uRow['id']]);
+                }
+            }
+
+            // Sinkronkan nama ketua regu ke tabel regu secara otomatis
+            if ($roleVal === 'Ketua Regu' && $reguId !== '') {
+                try {
+                    $updReguKetua = $conn->prepare("UPDATE `regu` SET `ketua` = ?, `no_hp` = ? WHERE `id` = ?");
+                    $updReguKetua->execute([$namaVal, $hpVal, $reguId]);
+                } catch (Exception $e) {}
+            }
         }
 
         // Hapus dari database anggota yang sudah tidak ada di payload
@@ -340,6 +418,23 @@ if ($action === 'save_all_regu') {
                 ':wilayah'   => $r['wilayah'] ?? '10 RW (RW 01 - RW 10)',
                 ':deskripsi' => $r['deskripsi'] ?? 'Operasional Regu Lapangan'
             ]);
+
+            // Sinkronkan role anggota menjadi Ketua Regu jika ditunjuk sebagai ketua regu
+            if (!empty($r['ketua']) && $r['ketua'] !== '-' && !empty($r['id'])) {
+                try {
+                    $updAgtRole = $conn->prepare("UPDATE `anggota` SET `role` = 'Ketua Regu' WHERE `regu_id` = ? AND LOWER(TRIM(`nama`)) = LOWER(TRIM(?))");
+                    $updAgtRole->execute([$r['id'], $r['ketua']]);
+                } catch (Exception $e) {}
+            }
+        }
+
+        if (!empty($payload)) {
+            $keepReguIds = array_filter(array_column($payload, 'id'));
+            if (!empty($keepReguIds)) {
+                $placeholders = implode(',', array_fill(0, count($keepReguIds), '?'));
+                $delReguStmt = $conn->prepare("DELETE FROM `regu` WHERE `id` NOT IN ($placeholders)");
+                $delReguStmt->execute(array_values($keepReguIds));
+            }
         }
         $conn->commit();
         echo json_encode(['success' => true, 'count' => count($payload)]);
@@ -452,11 +547,11 @@ if ($action === 'sync_realtime') {
                 'progres'        => (int)$r['progres'],
                 'status'         => $r['status'],
                 'tanggal'        => $r['tanggal'],
-                'foto'           => [
-                    ['src' => $r['foto_sebelum'] ?? '', 'tahap' => 'Sebelum (0%)'],
-                    ['src' => $r['foto_proses'] ?? '', 'tahap' => 'Proses (' . $r['progres'] . '%)'],
-                    ['src' => $r['foto_sesudah'] ?? '', 'tahap' => 'Sesudah (100%)']
-                ]
+                'foto'           => array_values(array_filter([
+                    !empty($r['foto_sebelum']) ? ['src' => $r['foto_sebelum'], 'tahap' => 'Sebelum (0%)'] : null,
+                    !empty($r['foto_proses'])  ? ['src' => $r['foto_proses'],  'tahap' => 'Proses (50%)'] : null,
+                    !empty($r['foto_sesudah']) ? ['src' => $r['foto_sesudah'], 'tahap' => 'Sesudah (100%)'] : null,
+                ]))
             ];
         }
 

@@ -255,14 +255,14 @@
               </div>
             </div>
 
-            <!-- Wilayah RW (Wajib Diisi) -->
+            <!-- Wilayah RW / Lokasi (Wajib Diisi) -->
             <div class="form-field-item">
               <div class="field-label">
-                <span>Wilayah RW (Pekayon)&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
+                <span>Wilayah / RW (Pekayon)&nbsp;<span style="color:#DC2626;font-weight:800;">*</span></span>
                 <span class="field-tag-required">Wajib Diisi</span>
               </div>
               <select id="u-rw-select" class="u-input-field" onchange="onRwSelectChange(); this.style.borderColor=''; this.style.boxShadow='';" required>
-                <option value="" disabled selected>-- Pilih Wilayah RW --</option>
+                <option value="" disabled selected>-- Pilih Wilayah / RW --</option>
                 <option value="RW 01">RW 01 - Jl. Lapan</option>
                 <option value="RW 02">RW 02 - Jl. Gandaria</option>
                 <option value="RW 03">RW 03 - Jl. Gandaria</option>
@@ -273,6 +273,9 @@
                 <option value="RW 08">RW 08 - Jl. Sukamto</option>
                 <option value="RW 09">RW 09 - Jl. Haji Balok</option>
                 <option value="RW 10">RW 10 - Jl. Lewa</option>
+                <option value="Kantor Kel. Pekayon">Kantor Kel. Pekayon</option>
+                <option value="Jalan Raya Pekayon">Jalan Raya Pekayon</option>
+                <option value="Taman & RTH Pekayon">Taman &amp; RTH Pekayon</option>
               </select>
             </div>
 

@@ -1,5 +1,5 @@
       <!-- ==================== 4. REKAP VIEW ==================== -->
-      <section class="admin-tab-pane" id="pane-rekap">
+      <section class="admin-tab-pane <?= (isset($_GET['tab']) && $_GET['tab'] === 'rekap') ? 'active' : '' ?>" id="pane-rekap">
         <div class="admin-welcome-bar">
           <div>
             <h1 class="admin-welcome-heading">Rekapitulasi Penanganan Prasarana</h1>

@@ -1,37 +1,63 @@
 <?php
 /**
  * SILAP – Sistem Informasi Laporan PPSU
- * Database Connection Module (Dikonfigurasi Khusus untuk MAMP di macOS)
- * 
- * Pengaturan MAMP Default:
- * - Host: 127.0.0.1
- * - Port: 8889
- * - Socket: /Applications/MAMP/tmp/mysql/mysql.sock
- * - Database: silap_db
- * - Username: root
- * - Password: root
+ * Database Connection Module
+ * Mendukung konfigurasi .env (Hosting/Production) & auto-fallback lokal (XAMPP/MAMP/SQLite)
  */
 
-$db_name = 'silap_db';
+// Muat konfigurasi dari .env jika tersedia (untuk hosting/cPanel/VPS)
+$env_config = [];
+foreach ([dirname(__DIR__) . '/.env', __DIR__ . '/.env'] as $env_path) {
+    if (is_file($env_path) && is_readable($env_path)) {
+        foreach (file($env_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+            $line = trim($line);
+            if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) continue;
+            [$k, $v] = explode('=', $line, 2);
+            $env_config[trim($k)] = trim(trim($v), "\"'");
+        }
+        break;
+    }
+}
+
+$env_get = function ($key, $default = null) use ($env_config) {
+    if (isset($env_config[$key])) return $env_config[$key];
+    $val = getenv($key);
+    return ($val !== false) ? $val : $default;
+};
+
+$db_host = $env_get('DB_HOST', '127.0.0.1');
+$db_port = $env_get('DB_PORT', '3306');
+$db_name = $env_get('DB_DATABASE', 'silap_db');
+$db_user = $env_get('DB_USERNAME', 'root');
+$db_pass = $env_get('DB_PASSWORD', '');
+$app_env = $env_get('APP_ENV', 'local');
+
 $conn = null;
 $db_type = 'mysql';
 
-// Daftar opsi koneksi prioritas (XAMPP 3306 -> MySQL -> MAMP)
-$connection_attempts = [
+// Daftar opsi koneksi prioritas (.env/Hosting -> XAMPP 3306 -> MySQL -> MAMP)
+$connection_attempts = [];
+if (!empty($env_config) || getenv('DB_HOST') !== false) {
+    $connection_attempts[] = [
+        'dsn'  => "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4",
+        'user' => $db_user,
+        'pass' => $db_pass,
+        'desc' => 'Configured .env MySQL'
+    ];
+}
+$connection_attempts[] = [
     // 1. MySQL Standar XAMPP Port 3306 (user root / tanpa password)
-    [
-        'dsn'  => "mysql:host=127.0.0.1;port=3306;dbname={$db_name};charset=utf8mb4",
-        'user' => 'root',
-        'pass' => '',
-        'desc' => 'XAMPP MySQL Port 3306 (pass kosong)'
-    ],
+    'dsn'  => "mysql:host=127.0.0.1;port=3306;dbname={$db_name};charset=utf8mb4",
+    'user' => 'root',
+    'pass' => '',
+    'desc' => 'XAMPP MySQL Port 3306 (pass kosong)'
+];
+$connection_attempts[] = [
     // 2. MySQL Standar Port 3306 (user root / pass root)
-    [
-        'dsn'  => "mysql:host=127.0.0.1;port=3306;dbname={$db_name};charset=utf8mb4",
-        'user' => 'root',
-        'pass' => 'root',
-        'desc' => 'MySQL Port 3306 (pass root)'
-    ]
+    'dsn'  => "mysql:host=127.0.0.1;port=3306;dbname={$db_name};charset=utf8mb4",
+    'user' => 'root',
+    'pass' => 'root',
+    'desc' => 'MySQL Port 3306 (pass root)'
 ];
 
 // Tambahkan opsi MAMP hanya jika dijalankan di macOS
@@ -66,8 +92,11 @@ foreach ($connection_attempts as $attempt) {
     }
 }
 
-// Jika MAMP MySQL belum berjalan, gunakan fallback SQLite lokal
+// Jika MySQL gagal pada mode production, hentikan dengan pesan jelas; di lokal fallback SQLite
 if (!$conn) {
+    if ($app_env === 'production') {
+        die("Koneksi Database MySQL Gagal. Periksa konfigurasi .env (DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD).");
+    }
     $db_type = 'sqlite';
     $sqlite_file = __DIR__ . '/silap.sqlite';
     try {
@@ -127,6 +156,7 @@ function initSQLiteSchema($pdo) {
             kat TEXT NOT NULL,
             jenis_pekerjaan TEXT NOT NULL,
             judul TEXT NOT NULL,
+            target_meter TEXT DEFAULT '',
             alamat TEXT NOT NULL,
             lokasi_detail TEXT,
             kendala TEXT,

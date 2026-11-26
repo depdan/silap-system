@@ -1,3 +1,8 @@
+  <!-- Credit Header Mahasiswa Gunadarma -->
+  <div style="background:linear-gradient(90deg,#F5F3FF,#EDE9FE);border-bottom:1px solid #DDD6FE;color:#5B21B6;font-size:0.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 12px;letter-spacing:0.01em;">
+    <img src="foto/gunadarma.png" alt="Logo Universitas Gunadarma" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;">
+    <span>Aplikasi ini dibuat oleh Mahasiswa Gunadarma</span>
+  </div>
   <!-- Modern Figma Header Bar -->
   <header class="user-portal-topbar">
     <div class="user-topbar-brand">
@@ -62,7 +67,7 @@
       </div>
       <div class="dock-item">
         <span class="dock-label">Wilayah</span>
-        <span class="dock-value" id="u-header-badge"><?= ($userRole === 'admin') ? 'Semua RW' : $userBadge ?></span>
+        <span class="dock-value" id="u-header-badge"><?= ($userRole === 'admin') ? 'Semua RW' : htmlspecialchars(!empty($userOfficialRegu) ? ($userOfficialWilayah ?: '-') : '-') ?></span>
       </div>
       <div class="dock-item">
         <span class="dock-label">GPS</span>
