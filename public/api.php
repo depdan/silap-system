@@ -13,7 +13,7 @@ if (!isset($_SESSION['user'])) {
 require_once __DIR__ . '/koneksi.php';
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
-$adminActions = ['delete_anggota', 'delete_report', 'delete_all_reports', 'save_all_regu', 'save_all_anggota'];
+$adminActions = ['delete_anggota', 'delete_report', 'delete_all_reports', 'save_all_regu', 'save_all_anggota', 'update_admin_credentials'];
 if (in_array($action, $adminActions, true) && ($_SESSION['user']['role'] ?? '') !== 'admin') {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Forbidden: Membutuhkan hak akses Administrator.']);
@@ -564,6 +564,88 @@ if ($action === 'sync_realtime') {
         ]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'update_admin_credentials') {
+    try {
+        $raw = file_get_contents('php://input');
+        $payload = json_decode($raw, true) ?: $_POST;
+
+        $adminId = $_SESSION['user']['id'] ?? null;
+        $sessionUsername = $_SESSION['user']['username'] ?? '';
+
+        $stmt = $conn->prepare("SELECT * FROM `users` WHERE `role` = 'admin' AND (`id` = ? OR LOWER(`username`) = LOWER(?)) LIMIT 1");
+        $stmt->execute([$adminId, $sessionUsername]);
+        $adminRow = $stmt->fetch();
+
+        if (!$adminRow) {
+            echo json_encode(['success' => false, 'error' => 'Data akun administrator tidak ditemukan di sistem.']);
+            exit;
+        }
+
+        $namaBaru = trim($payload['nama'] ?? $adminRow['nama']);
+        $usernameBaru = strtolower(trim($payload['username'] ?? $adminRow['username']));
+        $currentPass = (string)($payload['current_password'] ?? '');
+        $newPass = (string)($payload['new_password'] ?? '');
+        $confirmPass = (string)($payload['confirm_password'] ?? '');
+
+        if (empty($currentPass)) {
+            echo json_encode(['success' => false, 'error' => 'Masukkan kata sandi saat ini untuk memverifikasi perubahan!']);
+            exit;
+        }
+
+        if (!password_verify($currentPass, $adminRow['password'])) {
+            echo json_encode(['success' => false, 'error' => 'Kata sandi saat ini yang Anda masukkan salah!']);
+            exit;
+        }
+
+        if ($usernameBaru !== strtolower($adminRow['username'])) {
+            if (strlen($usernameBaru) < 3 || strlen($usernameBaru) > 30 || !preg_match('/^[a-z0-9_]+$/', $usernameBaru)) {
+                echo json_encode(['success' => false, 'error' => 'Username baru harus 3-30 karakter, huruf kecil atau angka tanpa spasi!']);
+                exit;
+            }
+
+            $chkU = $conn->prepare("SELECT `id` FROM `users` WHERE LOWER(`username`) = LOWER(?) AND `id` != ? LIMIT 1");
+            $chkU->execute([$usernameBaru, $adminRow['id']]);
+            if ($chkU->fetch()) {
+                echo json_encode(['success' => false, 'error' => 'Username baru tersebut sudah digunakan oleh akun lain!']);
+                exit;
+            }
+        }
+
+        $finalHash = $adminRow['password'];
+        if (!empty($newPass)) {
+            if (strlen($newPass) < 6) {
+                echo json_encode(['success' => false, 'error' => 'Kata sandi baru minimal 6 karakter!']);
+                exit;
+            }
+            if ($newPass !== $confirmPass) {
+                echo json_encode(['success' => false, 'error' => 'Konfirmasi kata sandi baru tidak sesuai!']);
+                exit;
+            }
+            $finalHash = password_hash($newPass, PASSWORD_DEFAULT);
+        }
+
+        if (empty($namaBaru)) {
+            $namaBaru = $adminRow['nama'];
+        }
+
+        $stmtUpd = $conn->prepare("UPDATE `users` SET `nama` = ?, `username` = ?, `password` = ? WHERE `id` = ?");
+        $stmtUpd->execute([$namaBaru, $usernameBaru, $finalHash, $adminRow['id']]);
+
+        $_SESSION['user']['nama'] = $namaBaru;
+        $_SESSION['user']['username'] = $usernameBaru;
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Kredensial administrator berhasil diperbarui! Silakan gunakan username & password baru saat login berikutnya.',
+            'username' => $usernameBaru,
+            'nama' => $namaBaru
+        ]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => 'Gagal memperbarui database: ' . $e->getMessage()]);
     }
     exit;
 }

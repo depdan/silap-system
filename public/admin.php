@@ -1983,21 +1983,79 @@ try {
     downloadLaporanExcel();
   }
 
-  function simpanPengaturanAdmin() {
+  async function simpanPengaturanAdmin() {
+    const btn = document.getElementById("btn-save-admin-cfg");
     const nameInp = document.getElementById("cfg-admin-name");
-    const newName = nameInp ? nameInp.value.trim() : "";
-    if (newName) {
-      const userDisplay = document.getElementById("user-name-display");
-      if (userDisplay) userDisplay.textContent = newName;
-      const dashName = document.getElementById("dash-user-name");
-      if (dashName) dashName.textContent = newName.split(" ")[0];
-      const avatarEl = document.getElementById("user-avatar");
-      if (avatarEl) {
-        const parts = newName.split(" ");
-        avatarEl.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+    const userInp = document.getElementById("cfg-admin-username");
+    const curPassInp = document.getElementById("cfg-admin-cur-pass");
+    const newPassInp = document.getElementById("cfg-admin-new-pass");
+    const cfmPassInp = document.getElementById("cfg-admin-cfm-pass");
+
+    const nama = nameInp ? nameInp.value.trim() : "";
+    const username = userInp ? userInp.value.trim() : "";
+    const current_password = curPassInp ? curPassInp.value : "";
+    const new_password = newPassInp ? newPassInp.value : "";
+    const confirm_password = cfmPassInp ? cfmPassInp.value : "";
+
+    if (!current_password) {
+      showToast("Mohon masukkan kata sandi saat ini untuk konfirmasi keamanan!", "warning");
+      if (curPassInp) curPassInp.focus();
+      return;
+    }
+
+    if (new_password) {
+      if (new_password.length < 6) {
+        showToast("Kata sandi baru minimal 6 karakter!", "warning");
+        if (newPassInp) newPassInp.focus();
+        return;
+      }
+      if (new_password !== confirm_password) {
+        showToast("Konfirmasi kata sandi baru tidak cocok!", "error");
+        if (cfmPassInp) cfmPassInp.focus();
+        return;
       }
     }
-    showToast("Pengaturan profil berhasil disimpan.", "success");
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+    }
+
+    try {
+      const resp = await fetch("api.php?action=update_admin_credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nama, username, current_password, new_password, confirm_password })
+      });
+      const res = await resp.json();
+
+      if (res.success) {
+        if (nama) {
+          const userDisplay = document.getElementById("user-name-display");
+          if (userDisplay) userDisplay.textContent = nama;
+          const dashName = document.getElementById("dash-user-name");
+          if (dashName) dashName.textContent = nama.split(" ")[0];
+          const avatarEl = document.getElementById("user-avatar");
+          if (avatarEl) {
+            const parts = nama.split(" ");
+            avatarEl.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+          }
+        }
+        if (curPassInp) curPassInp.value = "";
+        if (newPassInp) newPassInp.value = "";
+        if (cfmPassInp) cfmPassInp.value = "";
+        showToast(res.message || "Pengaturan profil & kredensial berhasil disimpan.", "success");
+      } else {
+        showToast(res.error || "Gagal memperbarui pengaturan.", "error");
+      }
+    } catch (e) {
+      showToast("Terjadi kendala jaringan saat menghubungi server.", "error");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Simpan Perubahan Akun";
+      }
+    }
   }
 
   const STANDARD_ROLES = ["Ketua Regu", "Anggota Regu"];
