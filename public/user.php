@@ -4342,7 +4342,7 @@ try {
   }
 
   function isSuperAdminMode() {
-    return !!(currentUser && (currentUser.role === "admin" || currentUser.is_admin));
+    return !!(typeof PHP_USER !== "undefined" && PHP_USER && PHP_USER.role === "admin");
   }
 
   // ==========================================================
