@@ -17,6 +17,7 @@
             <thead>
               <tr>
                 <th>Nama Lengkap</th>
+                <th>Regu / Penempatan</th>
                 <th>Role / Peran</th>
                 <th>No. Telepon / WA</th>
                 <th style="text-align:right;">Aksi</th>

@@ -168,3 +168,24 @@
     </button>
   </div>
 </div>
+
+<!-- ==================== POPUP KONFIRMASI FOTO ULANG ==================== -->
+<div id="modal-confirm-retake-photo" class="confirm-modal-overlay" style="display:none;z-index:99999;background:rgba(15,23,42,0.72);backdrop-filter:blur(4px);" onclick="if(event.target===this) closeRetakeConfirmModal()">
+  <div class="confirm-modal-card" style="border:1.5px solid #FED7AA;box-shadow:0 20px 40px -12px rgba(15,23,42,0.3);text-align:center;padding:24px 22px;max-width:390px;">
+    <div style="width:54px;height:54px;border-radius:50%;background:#FFF7ED;border:1.5px solid #FED7AA;color:#EA580C;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 14px auto;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+    </div>
+    <h3 style="font-size:1.06rem;font-weight:800;color:#0F172A;margin:0 0 8px 0;">Foto Tahap Ini Sudah Tersimpan</h3>
+    <p id="retake-confirm-desc" style="font-size:0.84rem;color:#475467;margin:0 0 20px 0;line-height:1.5;">
+      Apakah Anda yakin ingin mengambil foto ulang untuk mengganti foto yang sudah ada?
+    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button type="button" onclick="closeRetakeConfirmModal()" style="padding:11px 14px;background:#F1F5F9;color:#334155;border:1px solid #CBD5E1;border-radius:10px;font-weight:700;font-size:0.86rem;cursor:pointer;">
+        Tidak
+      </button>
+      <button type="button" id="btn-confirm-retake-yes" style="padding:11px 14px;background:#EA580C;color:#FFFFFF;border:none;border-radius:10px;font-weight:700;font-size:0.86rem;cursor:pointer;box-shadow:0 4px 10px rgba(234,88,12,0.22);">
+        Ya, Foto Ulang
+      </button>
+    </div>
+  </div>
+</div>

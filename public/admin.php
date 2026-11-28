@@ -2129,6 +2129,10 @@ try {
       `;
 
       const cleanHp = typeof formatPhone08 === "function" ? formatPhone08(a.hp) : (a.hp || "").replace(/-/g, "").replace(/^\+?62/, "0").trim();
+      const reguLabel = reg ? reg.nama : (a.regu && a.regu !== "Belum Ditugaskan" ? a.regu : "Belum Ditugaskan");
+      const reguBadgeHtml = reg
+        ? `<span style="display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:0.76rem;font-weight:700;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">${reguLabel}</span>`
+        : `<span style="display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:0.76rem;font-weight:600;background:#F1F5F9;color:#64748B;">Belum Ditugaskan</span>`;
 
       // 1. Desktop Table Row
       tableRows.push(`
@@ -2141,12 +2145,16 @@ try {
               <strong style="color:#0F172A;font-size:0.9rem;">${a.nama}</strong>
             </div>
           </td>
+          <td>${reguBadgeHtml}</td>
           <td>${roleSelectHtml}</td>
           <td>
-            <span style="color:#0F172A;font-weight:700;font-size:0.86rem;user-select:all;cursor:text;letter-spacing:0.2px;">${cleanHp}</span>
+            <span style="color:#0F172A;font-weight:700;font-size:0.86rem;user-select:all;cursor:text;letter-spacing:0.2px;">${cleanHp || "-"}</span>
           </td>
-          <td style="text-align:right;">
-            <button type="button" onclick="hapusAnggotaDirect('${a.id}')" title="Hapus Anggota" style="border:none;background:none;color:#DC2626;cursor:pointer;font-size:0.8rem;font-weight:600;padding:4px 8px;">
+          <td style="text-align:right;white-space:nowrap;">
+            <button type="button" onclick="openEditAnggotaModal('${a.id}')" title="Edit Anggota" style="border:1px solid #CBD5E1;background:#FFFFFF;color:#334155;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:600;padding:4px 10px;margin-right:4px;">
+              Edit
+            </button>
+            <button type="button" onclick="hapusAnggotaDirect('${a.id}')" title="Hapus Anggota" style="border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:600;padding:4px 10px;">
               Hapus
             </button>
           </td>
@@ -2160,14 +2168,18 @@ try {
             <div class="pmc-avatar">${a.nama.charAt(0).toUpperCase()}</div>
             <div class="pmc-info">
               <div class="pmc-name" title="${a.nama}">${a.nama}</div>
+              <div style="margin:3px 0 4px 0;">${reguBadgeHtml}</div>
               <div class="pmc-phone">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                <span>${cleanHp}</span>
+                <span>${cleanHp || "-"}</span>
               </div>
             </div>
           </div>
           <div class="pmc-right">
             ${roleSelectHtml}
+            <button type="button" onclick="openEditAnggotaModal('${a.id}')" class="pmc-del-btn" style="background:#F8FAFC;border-color:#CBD5E1;color:#334155;" title="Edit Anggota" aria-label="Edit Anggota">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
             <button type="button" onclick="hapusAnggotaDirect('${a.id}')" class="pmc-del-btn" title="Hapus Anggota" aria-label="Hapus Anggota">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </button>
@@ -2262,6 +2274,14 @@ try {
 
   // Modals & Forms Logic
   function openTambahAnggotaModal(preselectedReguId) {
+    document.getElementById("form-tambah-anggota").reset();
+    const editIdEl = document.getElementById("inp-agt-edit-id");
+    if (editIdEl) editIdEl.value = "";
+    const titleEl = document.getElementById("modal-agt-title");
+    if (titleEl) titleEl.textContent = "Tambah Anggota PPSU";
+    const btnEl = document.getElementById("btn-agt-submit");
+    if (btnEl) btnEl.textContent = "Simpan Anggota";
+
     const reguSelect = document.getElementById("inp-agt-regu");
     if (reguSelect) {
       reguSelect.innerHTML = `<option value="">-- Belum Ditempatkan (Personel Bebas) --</option>` +
@@ -2271,12 +2291,44 @@ try {
     document.getElementById("modal-tambah-anggota").classList.remove("hidden");
   }
 
+  function openEditAnggotaModal(agtId) {
+    const agt = allAnggota.find(a => a.id === agtId);
+    if (!agt) return;
+
+    const editIdEl = document.getElementById("inp-agt-edit-id");
+    if (editIdEl) editIdEl.value = agt.id;
+    const titleEl = document.getElementById("modal-agt-title");
+    if (titleEl) titleEl.textContent = "Edit Data Anggota PPSU";
+    const btnEl = document.getElementById("btn-agt-submit");
+    if (btnEl) btnEl.textContent = "Perbarui Anggota";
+
+    document.getElementById("inp-agt-nama").value = agt.nama || "";
+    const roleEl = document.getElementById("inp-agt-role");
+    if (roleEl) roleEl.value = agt.role === "Ketua Regu" ? "Ketua Regu" : "Anggota Regu";
+    document.getElementById("inp-agt-hp").value = agt.hp || "";
+    const bidangEl = document.getElementById("inp-agt-bidang");
+    if (bidangEl && agt.bidang) bidangEl.value = agt.bidang;
+
+    const currentRegu = allRegu.find(r => r.id === agt.reguId || (r.anggotaIds && r.anggotaIds.includes(agt.id)));
+    const activeReguId = currentRegu ? currentRegu.id : (agt.reguId || "");
+    const reguSelect = document.getElementById("inp-agt-regu");
+    if (reguSelect) {
+      reguSelect.innerHTML = `<option value="">-- Belum Ditempatkan (Personel Bebas) --</option>` +
+        allRegu.map(r => `<option value="${r.id}" ${r.id === activeReguId ? 'selected' : ''}>${r.nama}</option>`).join("");
+      reguSelect.value = activeReguId;
+    }
+
+    document.getElementById("modal-tambah-anggota").classList.remove("hidden");
+  }
+
   function closeTambahAnggotaModal() {
     document.getElementById("modal-tambah-anggota").classList.add("hidden");
   }
 
   function handleSimpanAnggota(e) {
     e.preventDefault();
+    const editIdEl = document.getElementById("inp-agt-edit-id");
+    const editId = editIdEl ? editIdEl.value.trim() : "";
     const nama = document.getElementById("inp-agt-nama").value.trim();
     const roleEl = document.getElementById("inp-agt-role");
     const role = roleEl ? roleEl.value : "Anggota Regu";
@@ -2308,7 +2360,88 @@ try {
       }
     }
 
+    // Validasi Anti-Duplikat & Bentrok Regu (Tolak jika nama/HP sudah terdaftar atau sudah jadi Anggota/Ketua di regu lain)
+    const duplicatePerson = allAnggota.find(x => {
+      if (editId && x.id === editId) return false;
+      const sameName = (x.nama || "").trim().toLowerCase() === nama.toLowerCase();
+      const xHp = (x.hp || "").replace(/[- ]/g, "");
+      const sameHp = cleanHp !== "" && xHp !== "" && xHp === cleanHp;
+      return sameName || sameHp;
+    });
+
+    if (duplicatePerson) {
+      const dupRegu = allRegu.find(r => r.id === duplicatePerson.reguId || (r.anggotaIds && r.anggotaIds.includes(duplicatePerson.id)));
+      if (dupRegu) {
+        showToast(`Ditolak! "${duplicatePerson.nama}" sudah terdaftar sebagai ${duplicatePerson.role || "Anggota Regu"} di ${dupRegu.nama}.`, "error");
+      } else {
+        showToast(`Ditolak! Personel "${duplicatePerson.nama}"${cleanHp ? " / No. HP " + cleanHp : ""} sudah terdaftar di sistem.`, "error");
+      }
+      return;
+    }
+
     const targetRegu = allRegu.find(r => r.id === reguId);
+
+    // Tolak jika target regu sudah memiliki Ketua Regu yang berbeda
+    if (targetRegu && role === "Ketua Regu") {
+      const existingKetua = allAnggota.find(other => {
+        if (editId && other.id === editId) return false;
+        const inTarget = other.reguId === targetRegu.id || (targetRegu.anggotaIds && targetRegu.anggotaIds.includes(other.id));
+        return inTarget && (other.role === "Ketua Regu" || (targetRegu.ketua && (other.nama || "").trim().toLowerCase() === targetRegu.ketua.trim().toLowerCase()));
+      });
+      if (existingKetua) {
+        showToast(`Ditolak! ${targetRegu.nama} sudah memiliki Ketua Regu (${existingKetua.nama}).`, "error");
+        return;
+      }
+    }
+
+    if (editId) {
+      const agt = allAnggota.find(a => a.id === editId);
+      if (!agt) return;
+
+      const oldName = agt.nama;
+      const oldRegu = allRegu.find(r => r.id === agt.reguId || (r.anggotaIds && r.anggotaIds.includes(agt.id)));
+
+      if (oldRegu && (!targetRegu || oldRegu.id !== targetRegu.id)) {
+        if (Array.isArray(oldRegu.anggotaIds)) {
+          oldRegu.anggotaIds = oldRegu.anggotaIds.filter(id => id !== agt.id);
+        }
+        if (oldRegu.ketua && oldRegu.ketua.trim().toLowerCase() === oldName.trim().toLowerCase()) {
+          oldRegu.ketua = "-";
+          oldRegu.noHp = "";
+        }
+      }
+
+      agt.nama = nama;
+      agt.role = role;
+      agt.hp = cleanHp;
+      agt.bidang = bidang;
+      agt.reguId = reguId;
+      agt.regu = targetRegu ? targetRegu.nama : "Belum Ditugaskan";
+      agt.wilayah = targetRegu ? (targetRegu.wilayah || "-") : "-";
+
+      if (targetRegu) {
+        if (!targetRegu.anggotaIds) targetRegu.anggotaIds = [];
+        if (!targetRegu.anggotaIds.includes(agt.id)) targetRegu.anggotaIds.push(agt.id);
+        if (role === "Ketua Regu") {
+          targetRegu.ketua = agt.nama;
+          targetRegu.noHp = cleanHp;
+        } else if (targetRegu.ketua && targetRegu.ketua.trim().toLowerCase() === oldName.trim().toLowerCase()) {
+          targetRegu.ketua = "-";
+        }
+      }
+
+      saveAnggotaDB(allAnggota);
+      saveReguDB(allRegu);
+      renderAnggotaTable(allAnggota);
+      renderReguCards(allRegu);
+      renderDashboardReguTable();
+      updateStats();
+      closeTambahAnggotaModal();
+      document.getElementById("form-tambah-anggota").reset();
+      showToast(`Data personel "${nama}" berhasil diperbarui.`, "success");
+      return;
+    }
+
     let maxAgtNum = 0;
     allAnggota.forEach(a => {
       const m = String(a.id || "").match(/AGT-(\d+)/);
@@ -2326,14 +2459,6 @@ try {
       wilayah: targetRegu ? (targetRegu.wilayah || "-") : "-",
       status: "aktif"
     };
-
-    if (targetRegu && role === "Ketua Regu") {
-      allAnggota.forEach(other => {
-        if (other.reguId === targetRegu.id || (targetRegu.anggotaIds && targetRegu.anggotaIds.includes(other.id))) {
-          other.role = "Anggota Regu";
-        }
-      });
-    }
 
     allAnggota.push(newAgt);
     saveAnggotaDB(allAnggota);
@@ -2505,11 +2630,11 @@ try {
             }).join("") + `</optgroup>`;
         }
         if (otherReguPersonnel.length > 0) {
-          optsHtml += `<optgroup label="Pindahkan dari Regu Lain (${otherReguPersonnel.length})">` +
+          optsHtml += `<optgroup label="Sudah Terdaftar di Regu Lain (Terkunci)">` +
             otherReguPersonnel.map(a => {
               const regObj = allRegu.find(r => r.id === a.reguId);
               const regLabel = regObj ? regObj.nama : (a.regu || 'Regu Lain');
-              return `<option value="${a.id}">${a.nama} (Saat ini: ${regLabel})</option>`;
+              return `<option value="${a.id}" disabled>${a.nama} — Sudah ${a.role || 'Anggota'} di ${regLabel}</option>`;
             }).join("") + `</optgroup>`;
         }
         unassignedSelect.innerHTML = optsHtml;
@@ -2529,9 +2654,15 @@ try {
     const sel = document.getElementById("edit-regu-select-unassigned");
     if (!sel || !sel.value) return;
     const agtId = sel.value;
+    const addedAgt = allAnggota.find(x => x.id === agtId);
+    if (addedAgt && addedAgt.reguId && addedAgt.reguId !== "" && addedAgt.reguId !== editingReguId) {
+      const regObj = allRegu.find(r => r.id === addedAgt.reguId);
+      const regLabel = regObj ? regObj.nama : (addedAgt.regu || "Regu Lain");
+      showToast(`Ditolak! ${addedAgt.nama} sudah menjadi ${addedAgt.role || "Anggota Regu"} di ${regLabel}. Keluarkan dari regu tersebut terlebih dahulu!`, "error");
+      return;
+    }
     if (!tempEditingMemberIds.includes(agtId)) {
       tempEditingMemberIds.push(agtId);
-      const addedAgt = allAnggota.find(x => x.id === agtId);
       const ketuaSelect = document.getElementById("edit-regu-ketua");
       let currentKetua = ketuaSelect ? ketuaSelect.value : "";
       if (!currentKetua && addedAgt && addedAgt.role === "Ketua Regu") {

@@ -4277,6 +4277,14 @@ try {
       try { initOfficerRole(); } catch(e) {}
       try { updateTaskProgressStates(); } catch(e) {}
       try { renderUserHistory(); } catch(e) {}
+      try {
+        if (!activeEditingReportId && !mobilePhotoSebelum && !mobilePhotoProses && !mobilePhotoSesudah) {
+          checkAndAutoResumeActiveReport(true);
+        } else if (activeEditingReportId) {
+          const activeLap = findActiveReport(userReports, activeEditingReportId);
+          if (activeLap) updateSesiState(activeLap);
+        }
+      } catch(e) {}
     };
 
     const handleAnggotaSync = () => {
@@ -5002,32 +5010,107 @@ try {
   }
 
   // ==========================================================
-  // AUTO-RESUME LAPORAN AKTIF (SESI AWAL 0% MENUJU 50% / 100%)
-  // Hanya aktif jika user secara eksplisit memilih melanjutkan tugas
+  // PER-SLOT PHOTO DRAFT HELPERS (ANTI-RESET HP KENTANG / LOGOUT)
   // ==========================================================
-  function checkAndAutoResumeActiveReport() {
-    const activeId = localStorage.getItem("silap_active_task_id");
-    if (!activeId) return false;
+  function getPhotoDraftKey(slot) {
+    const owner = (mobileRegu && mobileRegu !== "Belum Ditugaskan" ? mobileRegu : (currentUser ? (currentUser.username || currentUser.nama || "user") : "user")).replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    const tgl = (currentCalendarDateStr || "today").replace(/[^a-z0-9-]/gi, "");
+    const tgs = (mobileSelectedTugas || "Tugas 1").replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    return `silap_p_${owner}_${tgl}_${tgs}_${slot}`;
+  }
 
+  function savePhotoSlotDraft(slot, src, ts) {
+    if (!src) return;
+    try {
+      localStorage.setItem(getPhotoDraftKey(slot), JSON.stringify({ src, ts: ts || "Tersimpan", savedAt: Date.now() }));
+    } catch(e) {}
+  }
+
+  function loadPhotoSlotDraft(slot) {
+    try {
+      const raw = localStorage.getItem(getPhotoDraftKey(slot));
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return (parsed && parsed.src) ? parsed : null;
+    } catch(e) { return null; }
+  }
+
+  function clearAllPhotoSlotDrafts() {
+    ["sebelum", "proses", "sesudah"].forEach(s => {
+      try { localStorage.removeItem(getPhotoDraftKey(s)); } catch(e) {}
+    });
+  }
+
+  function findActiveTodayReportForUser(list) {
+    if (!Array.isArray(list) || list.length === 0) return null;
+    const hasAssignedRegu = mobileRegu && mobileRegu !== "Belum Ditugaskan" && mobileRegu.trim() !== "";
+    const uName = currentUser ? (currentUser.name || currentUser.nama || "").trim().toLowerCase() : "";
+    const targetDateStr = currentCalendarDateStr;
+    const moShorts = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+
+    return list.find(r => {
+      let matchOwner = false;
+      if (hasAssignedRegu) {
+        matchOwner = (r.regu || "").toLowerCase() === mobileRegu.toLowerCase();
+      } else if (uName) {
+        matchOwner = (r.petugas || "").toLowerCase().indexOf(uName) !== -1;
+      }
+      if (!matchOwner) return false;
+
+      let matchDate = false;
+      if (r.isoDate && targetDateStr) {
+        matchDate = (r.isoDate === targetDateStr);
+      } else if (r.tanggal && targetDateStr) {
+        const parts = targetDateStr.split("-");
+        if (parts.length === 3) {
+          const dNum = parseInt(parts[2], 10);
+          const moShort = moShorts[parseInt(parts[1], 10) - 1] || "";
+          if (r.tanggal.indexOf(dNum + " " + moShort + " " + parts[0]) !== -1 || r.tanggal === targetDateStr) matchDate = true;
+        }
+      } else {
+        matchDate = true;
+      }
+      const prog = parseInt(r.progres, 10) || 0;
+      return matchDate && r.status !== "selesai" && prog < 100;
+    }) || null;
+  }
+
+  // ==========================================================
+  // AUTO-RESUME LAPORAN AKTIF (SESI AWAL 0% MENUJU 50% / 100%)
+  // ==========================================================
+  function checkAndAutoResumeActiveReport(silent = false) {
     const list = getLaporanDB();
-    const target = findActiveReport(list, activeId);
+    const activeId = localStorage.getItem("silap_active_task_id");
+    let target = activeId ? findActiveReport(list, activeId) : null;
+
+    if (!target || parseInt(target.progres, 10) >= 100 || target.status === "selesai") {
+      target = findActiveTodayReportForUser(list);
+    }
 
     if (target && (parseInt(target.progres, 10) < 100 && target.status !== "selesai")) {
-      resumeReportFromHistory(target.id || target.noPekerjaan);
-      // Gabungkan foto draft lokal (jika sempat memotret foto 50%/100% sebelum keluar/refresh sebelum klik Kirim)
+      resumeReportFromHistory(target.id || target.noPekerjaan, silent);
+      // Gabungkan foto draft lokal (jika sempat memotret foto 0%/50%/100% sebelum keluar/refresh sebelum klik Kirim)
       try {
         const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
         if (rawDraft) {
           const d = JSON.parse(rawDraft);
-          if (d && String(d.activeEditingReportId) === String(target.id || target.noPekerjaan)) {
+          if (d && (!d.activeEditingReportId || String(d.activeEditingReportId) === String(target.id || target.noPekerjaan))) {
+            if (!mobilePhotoSebelum && d.photoSebelum) setMobilePhotoSlot("sebelum", d.photoSebelum, "Draft");
             if (!mobilePhotoProses && d.photoProses) setMobilePhotoSlot("proses", d.photoProses, "Draft");
             if (!mobilePhotoSesudah && d.photoSesudah) setMobilePhotoSlot("sesudah", d.photoSesudah, "Draft");
           }
         }
       } catch(eDraftMerge) {}
+      ["sebelum", "proses", "sesudah"].forEach(slot => {
+        const hasVar = slot === "sebelum" ? mobilePhotoSebelum : (slot === "proses" ? mobilePhotoProses : mobilePhotoSesudah);
+        if (!hasVar) {
+          const pDraft = loadPhotoSlotDraft(slot);
+          if (pDraft && pDraft.src) setMobilePhotoSlot(slot, pDraft.src, pDraft.ts || "Draft");
+        }
+      });
       return true;
     }
-    localStorage.removeItem("silap_active_task_id");
+    if (activeId) localStorage.removeItem("silap_active_task_id");
     return false;
   }
 
@@ -5045,32 +5128,39 @@ try {
   }
 
   function saveFormDraft() {
+    const baseDraft = {
+      step: currentWizardStep,
+      activeEditingReportId: activeEditingReportId,
+      regu: mobileRegu,
+      hari: mobileSelectedHari,
+      tugasKe: mobileSelectedTugas,
+      job: mobileSelectedJob,
+      kat: mobileSelectedKat,
+      petugas: document.getElementById("u-petugas-inp") ? document.getElementById("u-petugas-inp").value : "",
+      noHp: document.getElementById("u-nohp-inp") ? document.getElementById("u-nohp-inp").value : "",
+      jmlPetugas: document.getElementById("u-jml-petugas-inp") ? document.getElementById("u-jml-petugas-inp").value : 4,
+      rw: document.getElementById("u-rw-select") ? document.getElementById("u-rw-select").value : "RW 01",
+      lat: liveCoords.lat,
+      lng: liveCoords.lng,
+      jalan: document.getElementById("u-custom-address-inp") ? document.getElementById("u-custom-address-inp").value : "",
+      patokan: document.getElementById("u-patokan-inp") ? document.getElementById("u-patokan-inp").value : "",
+      targetMeter: document.getElementById("u-target-meter-inp") ? document.getElementById("u-target-meter-inp").value : "",
+      progres: mobileProgres,
+      catatan: document.getElementById("u-catatan-inp") ? document.getElementById("u-catatan-inp").value : ""
+    };
     try {
-      const draft = {
-        step: currentWizardStep,
-        activeEditingReportId: activeEditingReportId,
-        regu: mobileRegu,
-        hari: mobileSelectedHari,
-        tugasKe: mobileSelectedTugas,
-        job: mobileSelectedJob,
-        kat: mobileSelectedKat,
-        petugas: document.getElementById("u-petugas-inp") ? document.getElementById("u-petugas-inp").value : "",
-        noHp: document.getElementById("u-nohp-inp") ? document.getElementById("u-nohp-inp").value : "",
-        jmlPetugas: document.getElementById("u-jml-petugas-inp") ? document.getElementById("u-jml-petugas-inp").value : 4,
-        rw: document.getElementById("u-rw-select") ? document.getElementById("u-rw-select").value : "RW 01",
-        lat: liveCoords.lat,
-        lng: liveCoords.lng,
-        jalan: document.getElementById("u-custom-address-inp") ? document.getElementById("u-custom-address-inp").value : "",
-        patokan: document.getElementById("u-patokan-inp") ? document.getElementById("u-patokan-inp").value : "",
-        targetMeter: document.getElementById("u-target-meter-inp") ? document.getElementById("u-target-meter-inp").value : "",
-        progres: mobileProgres,
-        catatan: document.getElementById("u-catatan-inp") ? document.getElementById("u-catatan-inp").value : "",
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({
+        ...baseDraft,
         photoSebelum: mobilePhotoSebelum || "",
         photoProses: mobilePhotoProses || "",
         photoSesudah: mobilePhotoSesudah || ""
-      };
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-    } catch(e) {}
+      }));
+    } catch(eQuota) {
+      // Fallback jika kuota penuh: simpan metadata saja (foto tetap aman di key per-slot)
+      try {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(baseDraft));
+      } catch(e2) {}
+    }
   }
 
   function manualSaveDraftClick() {
@@ -5106,7 +5196,7 @@ try {
       if (d.activeEditingReportId) activeEditingReportId = d.activeEditingReportId;
       if (d.regu) selectReguPill(d.regu);
       if (d.hari) selectHariKerja(d.hari);
-      if (d.tugasKe) selectTugasKe(d.tugasKe);
+      if (d.tugasKe) selectTugasKe(d.tugasKe, true);
 
       if (d.job) {
         mobileSelectedJob = d.job;
@@ -5136,19 +5226,28 @@ try {
 
       if (d.photoSebelum) {
         setMobilePhotoSlot("sebelum", d.photoSebelum, "Draft");
+      } else {
+        const p0 = loadPhotoSlotDraft("sebelum");
+        if (p0 && p0.src) setMobilePhotoSlot("sebelum", p0.src, p0.ts || "Draft");
       }
       if (d.photoProses) {
         setMobilePhotoSlot("proses", d.photoProses, "Draft");
+      } else {
+        const p50 = loadPhotoSlotDraft("proses");
+        if (p50 && p50.src) setMobilePhotoSlot("proses", p50.src, p50.ts || "Draft");
       }
       if (d.photoSesudah) {
         setMobilePhotoSlot("sesudah", d.photoSesudah, "Draft");
+      } else {
+        const p100 = loadPhotoSlotDraft("sesudah");
+        if (p100 && p100.src) setMobilePhotoSlot("sesudah", p100.src, p100.ts || "Draft");
       }
 
       if (d.progres !== undefined) setQuickProgres(d.progres);
       updateLocationDisplay();
 
-      // Jika foto sebelum sudah ada atau disimpan pada langkah 2, langsung buka Langkah 2
-      if (d.step === 2 || d.photoSebelum) {
+      // Jika sudah masuk Langkah 2 atau ada foto tersimpan, langsung buka Langkah 2
+      if (d.step === 2 || mobilePhotoSebelum || mobilePhotoProses || mobilePhotoSesudah) {
         goToStep(2);
       }
     } catch(e) {}
@@ -5156,6 +5255,7 @@ try {
 
   function clearFormDraft() {
     activeEditingReportId = null;
+    clearAllPhotoSlotDrafts();
     selectReguPill("Regu 1");
     selectTugasKe("Tugas 1");
     try {
@@ -5168,7 +5268,7 @@ try {
   // FITUR LANJUTKAN PROGRES DARI RIWAYAT
   // (Mengisi progres 0% -> 50% -> 100% selang beberapa jam)
   // ==========================================================
-  function resumeReportFromHistory(id) {
+  function resumeReportFromHistory(id, silent = false) {
     const list = getLaporanDB();
     const lap = findActiveReport(list, id);
     if (!lap) return;
@@ -5235,17 +5335,24 @@ try {
     switchUserTab("form");
     goToStep(2);
     updateSesiState(lap);
-    if (curProg < 50) {
-      showToast("Sesi Lanjutan aktif: " + getLaporanHumanTitle(lap) + ". Silakan ambil Foto Proses Kerja (50%)!", "info");
-    } else {
-      showToast("Sesi Lanjutan aktif: " + getLaporanHumanTitle(lap) + ". Silakan ambil Foto Sesudah (100%) untuk menuntaskan laporan!", "info");
+    if (!silent) {
+      if (curProg < 50) {
+        showToast("Sesi Lanjutan aktif: " + getLaporanHumanTitle(lap) + ". Silakan ambil Foto Proses Kerja (50%)!", "info");
+      } else {
+        showToast("Sesi Lanjutan aktif: " + getLaporanHumanTitle(lap) + ". Silakan ambil Foto Sesudah (100%) untuk menuntaskan laporan!", "info");
+      }
     }
+  }
+
+  function closeRetakeConfirmModal() {
+    const m = document.getElementById("modal-confirm-retake-photo");
+    if (m) m.style.display = "none";
   }
 
   // ==========================================================
   // MODUL KAMERA GPS BERTANDA AIR (LIVE VIEWFINDER - 3 SLOT)
   // ==========================================================
-  async function openCameraModal(slot) {
+  async function openCameraModal(slot, forceRetake = false) {
     const list = getLaporanDB();
     const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
     const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
@@ -5262,6 +5369,28 @@ try {
       }
       if (!hasSubmitted50) {
         showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
+        return;
+      }
+    }
+
+    // Cegah kamera langsung terbuka jika foto pada slot ini sudah ada (konfirmasi Ya/Tidak)
+    const hasExistingPhoto = (slot === "sebelum" && !!mobilePhotoSebelum) || (slot === "proses" && !!mobilePhotoProses) || (slot === "sesudah" && !!mobilePhotoSesudah);
+    if (hasExistingPhoto && !forceRetake) {
+      const m = document.getElementById("modal-confirm-retake-photo");
+      const desc = document.getElementById("retake-confirm-desc");
+      const btnYes = document.getElementById("btn-confirm-retake-yes");
+      const stageLabel = slot === "sebelum" ? "Sebelum (0%)" : slot === "proses" ? "Proses Kerja (50%)" : "Sesudah (100%)";
+      if (desc) {
+        desc.innerHTML = `Foto tahap <strong>${stageLabel}</strong> sudah tersimpan. Apakah Anda yakin ingin mengambil foto ulang?`;
+      }
+      if (btnYes) {
+        btnYes.onclick = () => {
+          closeRetakeConfirmModal();
+          openCameraModal(slot, true);
+        };
+      }
+      if (m) {
+        m.style.display = "flex";
         return;
       }
     }
@@ -5557,6 +5686,7 @@ try {
       card.innerHTML = '<img src="' + src + '" class="photo-slot-img" alt="Foto ' + type + '">' +
                        '<div class="photo-slot-badge">' + labelTitle + ' • ' + ts + '</div>';
     }
+    savePhotoSlotDraft(type, src, ts);
     updateSesiState();
     triggerDraftAutoSave();
   }

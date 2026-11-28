@@ -79,7 +79,7 @@
   <div class="modal-card" style="max-width: 540px;">
     <div class="modal-head">
       <div>
-        <h2 class="modal-title">Tambah Anggota PPSU</h2>
+        <h2 class="modal-title" id="modal-agt-title">Tambah Anggota PPSU</h2>
         <p style="font-size:0.8rem;color:#64748B;margin-top:2px;">Masukkan biodata personel lapangan untuk penugasan wilayah.</p>
       </div>
       <button class="btn-close-modal" type="button" onclick="closeTambahAnggotaModal()" title="Tutup" aria-label="Tutup">
@@ -88,6 +88,7 @@
     </div>
     <div class="modal-body">
       <form id="form-tambah-anggota" onsubmit="handleSimpanAnggota(event)">
+        <input type="hidden" id="inp-agt-edit-id" value="">
         <div style="margin-bottom:14px;">
           <label style="display:block;font-size:0.8rem;font-weight:700;color:#475467;margin-bottom:4px;">Nama Lengkap Petugas *</label>
           <input type="text" id="inp-agt-nama" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="Contoh: Budi Prasetyo" required>
@@ -128,7 +129,7 @@
 
         <div style="display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #E2E8F0;padding-top:14px;">
           <button type="button" class="btn-modal-secondary" onclick="closeTambahAnggotaModal()">Batal</button>
-          <button type="submit" class="btn-modal-primary">Simpan Anggota</button>
+          <button type="submit" id="btn-agt-submit" class="btn-modal-primary">Simpan Anggota</button>
         </div>
       </form>
     </div>
