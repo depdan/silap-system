@@ -4585,8 +4585,10 @@ try {
 
     // Status resmi pengiriman bertahap ke sistem (wajib cek foto valid + progres; Mode Admin bebas uji semua slot):
     const stageRaw = getStageStatus(activeLap);
-    const hasSubmitted0 = isSuperAdminMode() ? true : stageRaw.hasSubmitted0;
-    const hasSubmitted50 = isSuperAdminMode() ? true : stageRaw.hasSubmitted50;
+    const hasSubmitted0 = stageRaw.hasSubmitted0;
+    const hasSubmitted50 = stageRaw.hasSubmitted50;
+    const canOpen50 = isSuperAdminMode() || hasSubmitted0;
+    const canOpen100 = isSuperAdminMode() || hasSubmitted50;
 
     const isResume = !!activeEditingReportId;
     const sesiNoticeEl = document.getElementById("sesi-notice-container");
@@ -4619,7 +4621,7 @@ try {
     }
 
     if (range) {
-      range.disabled = true;
+      range.disabled = !isSuperAdminMode();
       range.value = mobileProgres;
     }
     const badge = document.getElementById("u-progres-badge");
@@ -4631,14 +4633,14 @@ try {
       p0.title = "Tahap 0% (Mulai Bekerja)";
     }
     if (p50) {
-      p50.classList.toggle("locked", !hasSubmitted0);
+      p50.classList.toggle("locked", !canOpen50);
       p50.classList.toggle("active", mobileProgres === 50);
-      p50.title = hasSubmitted0 ? "Tahap 50% (Sedang Dikerjakan)" : "Terkunci: Kirim Foto 0% Dulu";
+      p50.title = canOpen50 ? "Tahap 50% (Sedang Dikerjakan)" : "Terkunci: Kirim Foto 0% Dulu";
     }
     if (p100) {
-      p100.classList.toggle("locked", !hasSubmitted50);
+      p100.classList.toggle("locked", !canOpen100);
       p100.classList.toggle("active", mobileProgres === 100);
-      p100.title = hasSubmitted50 ? "Tahap 100% (Selesai Tuntas)" : "Terkunci: Kirim Foto 50% Dulu";
+      p100.title = canOpen100 ? "Tahap 100% (Selesai Tuntas)" : "Terkunci: Kirim Foto 50% Dulu";
     }
 
     // ==========================================================
@@ -4673,7 +4675,7 @@ try {
         cardProses.classList.add("has-photo");
         cardProses.classList.remove("locked");
         cardProses.onclick = () => openCameraModal("proses");
-      } else if (hasSubmitted0) {
+      } else if (canOpen50) {
         cardProses.className = "photo-slot-card";
         cardProses.classList.remove("locked", "has-photo");
         cardProses.onclick = () => openCameraModal("proses");
@@ -4704,7 +4706,7 @@ try {
         cardSesudah.classList.add("has-photo");
         cardSesudah.classList.remove("locked");
         cardSesudah.onclick = () => openCameraModal("sesudah");
-      } else if (hasSubmitted50) {
+      } else if (canOpen100) {
         cardSesudah.className = "photo-slot-card";
         cardSesudah.classList.remove("locked", "has-photo");
         cardSesudah.onclick = () => openCameraModal("sesudah");
@@ -6250,7 +6252,7 @@ try {
     // TAHAP 1: KIRIM LAPORAN AWAL (0%) -> MEMBUKA TAHAP 50%
     // -------------------------------------------------------------
     if (!hasSubmitted0) {
-      if (!mobilePhotoSebelum) {
+      if (!mobilePhotoSebelum && !isSuperAdminMode()) {
         showToast("Wajib mengambil Foto 1 (Sebelum 0%) terlebih dahulu sebelum mengirim!", "warning");
         const c1 = document.getElementById("slot-sebelum");
         if (c1) c1.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -6259,9 +6261,9 @@ try {
       const reportId = generateNextJobNumber();
       const presentNames = teamMembers.filter(m => m.present).map(m => m.name).join(", ");
       
-      const fotoList = [
-        { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" }
-      ];
+      const fotoList = mobilePhotoSebelum
+        ? [{ src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" }]
+        : [];
 
       const reportData = {
         id: reportId,
@@ -6321,7 +6323,7 @@ try {
     // TAHAP 2: KIRIM PROGRES LAPANGAN (50%) -> MEMBUKA TAHAP 100%
     // -------------------------------------------------------------
     if (!hasSubmitted50) {
-      if (!mobilePhotoProses) {
+      if (!mobilePhotoProses && !isSuperAdminMode()) {
         showToast("Wajib mengambil Foto 2 (Proses Kerja 50%) terlebih dahulu sebelum mengirim!", "warning");
         const c2 = document.getElementById("slot-proses");
         if (c2) c2.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -6339,10 +6341,15 @@ try {
       const oldLap = existingIndex !== -1 ? list[existingIndex] : {};
       const presentNames = teamMembers.filter(m => m.present).map(m => m.name).join(", ");
 
-      const fotoList = [
-        (oldLap.foto && oldLap.foto[0] && oldLap.foto[0].src) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
-        { src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" }
-      ];
+      const fotoList = [];
+      if (oldLap.foto && oldLap.foto[0] && oldLap.foto[0].src) {
+        fotoList.push(oldLap.foto[0]);
+      } else if (mobilePhotoSebelum) {
+        fotoList.push({ src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" });
+      }
+      if (mobilePhotoProses) {
+        fotoList.push({ src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" });
+      }
 
       const updatedReport = {
         ...oldLap,
@@ -6407,7 +6414,7 @@ try {
     // TAHAP 3: KIRIM LAPORAN TUNTAS (100% SELESAI)
     // -------------------------------------------------------------
     {
-      if (!mobilePhotoSesudah) {
+      if (!mobilePhotoSesudah && !isSuperAdminMode()) {
         showToast("Wajib mengambil Foto 3 (Sesudah 100%) terlebih dahulu untuk menyelesaikan laporan!", "warning");
         const c3 = document.getElementById("slot-sesudah");
         if (c3) c3.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -6425,11 +6432,20 @@ try {
       const oldLap = existingIndex !== -1 ? list[existingIndex] : {};
       const presentNames = teamMembers.filter(m => m.present).map(m => m.name).join(", ");
 
-      const fotoList = [
-        (oldLap.foto && oldLap.foto[0] && oldLap.foto[0].src) ? oldLap.foto[0] : { src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" },
-        (oldLap.foto && oldLap.foto[1] && oldLap.foto[1].src) ? oldLap.foto[1] : { src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" },
-        { src: mobilePhotoSesudah, timestamp: tgl, name: "sesudah_" + reportId + ".jpg", tahap: "Sesudah (100%)" }
-      ];
+      const fotoList = [];
+      if (oldLap.foto && oldLap.foto[0] && oldLap.foto[0].src) {
+        fotoList.push(oldLap.foto[0]);
+      } else if (mobilePhotoSebelum) {
+        fotoList.push({ src: mobilePhotoSebelum, timestamp: tgl, name: "sebelum_" + reportId + ".jpg", tahap: "Sebelum (0%)" });
+      }
+      if (oldLap.foto && oldLap.foto[1] && oldLap.foto[1].src) {
+        fotoList.push(oldLap.foto[1]);
+      } else if (mobilePhotoProses) {
+        fotoList.push({ src: mobilePhotoProses, timestamp: tgl, name: "proses_" + reportId + ".jpg", tahap: "Proses (50%)" });
+      }
+      if (mobilePhotoSesudah) {
+        fotoList.push({ src: mobilePhotoSesudah, timestamp: tgl, name: "sesudah_" + reportId + ".jpg", tahap: "Sesudah (100%)" });
+      }
 
       const updatedReport = {
         ...oldLap,
