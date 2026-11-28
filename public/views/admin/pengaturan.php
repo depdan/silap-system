@@ -42,7 +42,7 @@
             </h3>
             
             <div style="margin-bottom:14px;">
-              <label style="display:block;font-size:0.8rem;font-weight:700;color:#DC2626;margin-bottom:6px;">Kata Sandi Saat Ini <span style="font-size:0.75rem;font-weight:400;color:#64748B;">(Wajib diisi untuk konfirmasi keamanan)</span></label>
+              <label style="display:block;font-size:0.8rem;font-weight:700;color:#DC2626;margin-bottom:6px;">Kata Sandi Saat Ini <span style="font-size:0.75rem;font-weight:400;color:#64748B;">(Wajib diisi HANYA jika mengubah Username/ID atau Password Baru)</span></label>
               <input type="password" id="cfg-admin-cur-pass" class="form-input" placeholder="Masukkan password admin saat ini" style="width:100%;box-sizing:border-box;">
             </div>
 

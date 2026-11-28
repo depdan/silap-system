@@ -704,7 +704,7 @@ try {
     allReports = getLaporanDB();
     const total = allReports.length;
     const selesai = allReports.filter(r => r.status === "selesai").length;
-    const belum = allReports.filter(r => r.status === "belum" || (r.status !== "selesai" && parseInt(r.progres, 10) >= 100)).length;
+    const belum = allReports.filter(r => r.status !== "selesai").length;
     const proses = allReports.filter(r => r.status === "proses" && parseInt(r.progres, 10) < 100).length;
 
     document.getElementById("ds-total").textContent = total;
@@ -1753,12 +1753,12 @@ try {
     container.innerHTML = list.map(lap => renderTaskCardHtml(lap)).join("");
   }
 
-  // Render Verifikasi List
+  // Render Verifikasi List (Menampilkan seluruh laporan aktif 0%, 50%, dan 100% yang belum disahkan Admin)
   function renderVerifikasiList(list) {
     const container = document.getElementById("verifikasi-list-container");
     if (!container) return;
 
-    const pending = list.filter(r => r.status === "belum" || (r.status !== "selesai" && parseInt(r.progres, 10) >= 100));
+    const pending = list.filter(r => r.status !== "selesai");
     if (pending.length === 0) {
       container.innerHTML = '<div style="text-align:center;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:3rem;color:#64748B;">Semua laporan telah diverifikasi dan disetujui.</div>';
       return;
@@ -1766,6 +1766,11 @@ try {
 
     container.innerHTML = pending.map(lap => {
       const ki = KATEGORI_INFO[lap.kat] || { label: "Prasarana" };
+      const curProg = parseInt(lap.progres, 10) || 0;
+      const validPhotoCount = (lap.foto || []).filter(f => f && f.src && f.src.trim() !== '').length;
+      const progColor = curProg >= 100 ? '#059669' : (curProg >= 50 ? '#D97706' : '#0284C7');
+      const progBg = curProg >= 100 ? '#ECFDF5' : (curProg >= 50 ? '#FFFBEB' : '#F0F9FF');
+      const progLabel = curProg >= 100 ? '100% Siap Verifikasi' : (curProg >= 50 ? '50% Proses' : '0% Awal');
       return `
         <div style="background:#FFFFFF;border:1.5px solid #E2E8F0;border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;">
           <div style="flex:1;min-width:280px;">
@@ -1774,6 +1779,7 @@ try {
               <span class="badge-rw">${lap.rw || 'RW 01'}</span>
               <span class="badge-minggu">${lap.minggu || 'Laporan Mingguan'}</span>
               <span class="badge-regu" onclick="event.stopPropagation(); filterTugasRegu('${lap.regu}')" style="cursor:pointer;" title="Klik untuk saring tugas regu ini">${lap.regu || 'Regu PPSU'}</span>
+              <span style="padding:3px 9px;border-radius:999px;font-size:0.74rem;font-weight:800;background:${progBg};color:${progColor};">${progLabel}</span>
               <span style="font-size:0.78rem;font-weight:800;color:#FF5416;">#${lap.noPekerjaan || lap.id}</span>
             </div>
             <h3 style="font-size:1.02rem;font-weight:800;color:#0F172A;margin:0 0 4px 0;">${lap.jenisPekerjaan || lap.judul}</h3>
@@ -1784,10 +1790,10 @@ try {
             ${lap.kendala ? `<div style="margin-top:6px;font-size:0.78rem;color:#92400E;">Kendala: ${lap.kendala}</div>` : ''}
           </div>
           <div style="display:flex;gap:10px;">
-            <button type="button" class="btn-lihat-detail" onclick="openDetailModal('${lap.id}')">Tinjau Foto (${(lap.foto || []).filter(f => f && f.src && f.src.trim() !== '').length}/3)</button>
-            ${((parseInt(lap.progres, 10) || 0) >= 100 && (lap.foto || []).filter(f => f && f.src && f.src.trim() !== '').length >= 3)
+            <button type="button" class="btn-lihat-detail" onclick="openDetailModal('${lap.id}')">Tinjau Foto (${validPhotoCount}/3)</button>
+            ${(curProg >= 100 && validPhotoCount >= 3)
               ? `<button type="button" class="admin-btn-primary" onclick="quickVerify('${lap.id}')">Setujui Sekarang</button>`
-              : `<button type="button" class="admin-btn-primary" onclick="quickVerify('${lap.id}')" style="background:#94A3B8;border-color:#94A3B8;cursor:not-allowed;opacity:0.75;" title="Menunggu 3 foto & progres 100%">Belum Lengkap</button>`}
+              : `<button type="button" class="admin-btn-primary" onclick="quickVerify('${lap.id}')" style="background:#94A3B8;border-color:#94A3B8;cursor:not-allowed;opacity:0.75;" title="Menunggu 3 foto & progres 100%">Belum Lengkap (${curProg}%)</button>`}
           </div>
         </div>
       `;
@@ -1983,6 +1989,8 @@ try {
     downloadLaporanExcel();
   }
 
+  let currentAdminUsernameSnapshot = "<?= htmlspecialchars($_SESSION['user']['username'] ?? 'admin') ?>";
+
   async function simpanPengaturanAdmin() {
     const btn = document.getElementById("btn-save-admin-cfg");
     const nameInp = document.getElementById("cfg-admin-name");
@@ -1992,13 +2000,16 @@ try {
     const cfmPassInp = document.getElementById("cfg-admin-cfm-pass");
 
     const nama = nameInp ? nameInp.value.trim() : "";
-    const username = userInp ? userInp.value.trim() : "";
+    const username = userInp ? userInp.value.trim().toLowerCase() : "";
     const current_password = curPassInp ? curPassInp.value : "";
     const new_password = newPassInp ? newPassInp.value : "";
     const confirm_password = cfmPassInp ? cfmPassInp.value : "";
 
-    if (!current_password) {
-      showToast("Mohon masukkan kata sandi saat ini untuk konfirmasi keamanan!", "warning");
+    const isChangingUsername = username !== "" && username !== currentAdminUsernameSnapshot.toLowerCase();
+    const isChangingPassword = new_password !== "";
+
+    if ((isChangingUsername || isChangingPassword) && !current_password) {
+      showToast("Masukkan kata sandi saat ini untuk mengubah Username atau Password!", "warning");
       if (curPassInp) curPassInp.focus();
       return;
     }
@@ -2030,6 +2041,7 @@ try {
       const res = await resp.json();
 
       if (res.success) {
+        if (res.username) currentAdminUsernameSnapshot = res.username;
         if (nama) {
           const userDisplay = document.getElementById("user-name-display");
           if (userDisplay) userDisplay.textContent = nama;
@@ -2291,14 +2303,14 @@ try {
     document.getElementById("modal-tambah-anggota").classList.remove("hidden");
   }
 
-  function openEditAnggotaModal(agtId) {
+  async function openEditAnggotaModal(agtId) {
     const agt = allAnggota.find(a => a.id === agtId);
     if (!agt) return;
 
     const editIdEl = document.getElementById("inp-agt-edit-id");
     if (editIdEl) editIdEl.value = agt.id;
     const titleEl = document.getElementById("modal-agt-title");
-    if (titleEl) titleEl.textContent = "Edit Data Anggota PPSU";
+    if (titleEl) titleEl.textContent = "Edit Data & Akun Anggota PPSU";
     const btnEl = document.getElementById("btn-agt-submit");
     if (btnEl) btnEl.textContent = "Perbarui Anggota";
 
@@ -2308,6 +2320,11 @@ try {
     document.getElementById("inp-agt-hp").value = agt.hp || "";
     const bidangEl = document.getElementById("inp-agt-bidang");
     if (bidangEl && agt.bidang) bidangEl.value = agt.bidang;
+
+    const unameEl = document.getElementById("inp-agt-username");
+    const passEl = document.getElementById("inp-agt-password");
+    if (unameEl) unameEl.value = agt.hp || "";
+    if (passEl) passEl.value = "";
 
     const currentRegu = allRegu.find(r => r.id === agt.reguId || (r.anggotaIds && r.anggotaIds.includes(agt.id)));
     const activeReguId = currentRegu ? currentRegu.id : (agt.reguId || "");
@@ -2319,13 +2336,36 @@ try {
     }
 
     document.getElementById("modal-tambah-anggota").classList.remove("hidden");
+
+    if (unameEl) {
+      try {
+        const res = await fetch(`api.php?action=get_user_credentials&nama=${encodeURIComponent(agt.nama || "")}&hp=${encodeURIComponent(agt.hp || "")}`);
+        const data = await res.json();
+        if (data && data.success && data.username) {
+          unameEl.value = data.username;
+        }
+      } catch(e) {}
+    }
   }
 
   function closeTambahAnggotaModal() {
     document.getElementById("modal-tambah-anggota").classList.add("hidden");
   }
 
-  function handleSimpanAnggota(e) {
+  async function syncKetuaCredentialsToDB(payload) {
+    try {
+      const resp = await fetch("api.php?action=update_user_credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      return await resp.json();
+    } catch (e) {
+      return { success: false, error: "Gagal menghubungi server." };
+    }
+  }
+
+  async function handleSimpanAnggota(e) {
     e.preventDefault();
     const editIdEl = document.getElementById("inp-agt-edit-id");
     const editId = editIdEl ? editIdEl.value.trim() : "";
@@ -2399,6 +2439,7 @@ try {
       if (!agt) return;
 
       const oldName = agt.nama;
+      const oldHp = agt.hp || "";
       const oldRegu = allRegu.find(r => r.id === agt.reguId || (r.anggotaIds && r.anggotaIds.includes(agt.id)));
 
       if (oldRegu && (!targetRegu || oldRegu.id !== targetRegu.id)) {
@@ -2432,13 +2473,26 @@ try {
 
       saveAnggotaDB(allAnggota);
       saveReguDB(allRegu);
+
+      const unameVal = (document.getElementById("inp-agt-username") ? document.getElementById("inp-agt-username").value.trim().toLowerCase() : "");
+      const passVal = (document.getElementById("inp-agt-password") ? document.getElementById("inp-agt-password").value : "");
+      if (role === "Ketua Regu" || unameVal !== "" || passVal !== "") {
+        const credRes = await syncKetuaCredentialsToDB({
+          nama, old_nama: oldName, hp: cleanHp, old_hp: oldHp,
+          username: unameVal, password: passVal, wilayah: agt.wilayah
+        });
+        if (!credRes.success) {
+          showToast(credRes.error || "Data tersimpan, namun gagal memperbarui ID/Password.", "warning");
+        }
+      }
+
       renderAnggotaTable(allAnggota);
       renderReguCards(allRegu);
       renderDashboardReguTable();
       updateStats();
       closeTambahAnggotaModal();
       document.getElementById("form-tambah-anggota").reset();
-      showToast(`Data personel "${nama}" berhasil diperbarui.`, "success");
+      showToast(`Data & akun personel "${nama}" berhasil diperbarui.`, "success");
       return;
     }
 
@@ -2473,13 +2527,26 @@ try {
       saveReguDB(allRegu);
     }
 
+    const unameNew = (document.getElementById("inp-agt-username") ? document.getElementById("inp-agt-username").value.trim().toLowerCase() : "");
+    const passNew = (document.getElementById("inp-agt-password") ? document.getElementById("inp-agt-password").value : "");
+    if (role === "Ketua Regu" && (unameNew !== "" || passNew !== "")) {
+      const credRes = await syncKetuaCredentialsToDB({
+        nama, old_nama: nama, hp: cleanHp, old_hp: cleanHp,
+        username: unameNew, password: passNew, wilayah: newAgt.wilayah
+      });
+      if (!credRes.success) {
+        showToast(credRes.error || "Personel ditambahkan, namun gagal mengatur ID/Password.", "warning");
+      }
+    }
+
     renderAnggotaTable(allAnggota);
     renderReguCards(allRegu);
     renderDashboardReguTable();
     updateStats();
     closeTambahAnggotaModal();
     document.getElementById("form-tambah-anggota").reset();
-    const loginHint = role === "Ketua Regu" ? ` (Akun Login Aktif: ${cleanHp} / PW: Ketua123)` : "";
+    const usedId = unameNew || cleanHp;
+    const loginHint = role === "Ketua Regu" ? ` (Akun Login Aktif: ${usedId} / PW: ${passNew ? "Sesuai Input" : "Ketua123"})` : "";
     showToast("Anggota " + nama + " berhasil ditambahkan ke " + (targetRegu ? targetRegu.nama : "Daftar Personel") + "." + loginHint, "success");
   }
 

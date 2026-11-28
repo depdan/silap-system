@@ -13,7 +13,7 @@ if (!isset($_SESSION['user'])) {
 require_once __DIR__ . '/koneksi.php';
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
-$adminActions = ['delete_anggota', 'delete_report', 'delete_all_reports', 'save_all_regu', 'save_all_anggota', 'update_admin_credentials'];
+$adminActions = ['delete_anggota', 'delete_report', 'delete_all_reports', 'save_all_regu', 'save_all_anggota', 'update_admin_credentials', 'get_user_credentials', 'update_user_credentials'];
 if (in_array($action, $adminActions, true) && ($_SESSION['user']['role'] ?? '') !== 'admin') {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Forbidden: Membutuhkan hak akses Administrator.']);
@@ -591,17 +591,21 @@ if ($action === 'update_admin_credentials') {
         $newPass = (string)($payload['new_password'] ?? '');
         $confirmPass = (string)($payload['confirm_password'] ?? '');
 
-        if (empty($currentPass)) {
-            echo json_encode(['success' => false, 'error' => 'Masukkan kata sandi saat ini untuk memverifikasi perubahan!']);
-            exit;
+        $isChangingUsername = ($usernameBaru !== '' && $usernameBaru !== strtolower($adminRow['username']));
+        $isChangingPassword = ($newPass !== '');
+
+        if ($isChangingUsername || $isChangingPassword) {
+            if (empty($currentPass)) {
+                echo json_encode(['success' => false, 'error' => 'Masukkan kata sandi saat ini untuk mengubah Username atau Password!']);
+                exit;
+            }
+            if (!password_verify($currentPass, $adminRow['password'])) {
+                echo json_encode(['success' => false, 'error' => 'Kata sandi saat ini yang Anda masukkan salah!']);
+                exit;
+            }
         }
 
-        if (!password_verify($currentPass, $adminRow['password'])) {
-            echo json_encode(['success' => false, 'error' => 'Kata sandi saat ini yang Anda masukkan salah!']);
-            exit;
-        }
-
-        if ($usernameBaru !== strtolower($adminRow['username'])) {
+        if ($isChangingUsername) {
             if (strlen($usernameBaru) < 3 || strlen($usernameBaru) > 30 || !preg_match('/^[a-z0-9_]+$/', $usernameBaru)) {
                 echo json_encode(['success' => false, 'error' => 'Username baru harus 3-30 karakter, huruf kecil atau angka tanpa spasi!']);
                 exit;
@@ -646,6 +650,92 @@ if ($action === 'update_admin_credentials') {
         ]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'error' => 'Gagal memperbarui database: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'get_user_credentials') {
+    try {
+        $nama = trim($_GET['nama'] ?? '');
+        $hp = normalizePhone08($_GET['hp'] ?? '');
+        $stmt = $conn->prepare("SELECT `id`, `username`, `no_hp`, `nama`, `role` FROM `users` WHERE `role` != 'admin' AND ((? != '' AND `no_hp` = ?) OR (? != '' AND LOWER(TRIM(`nama`)) = LOWER(TRIM(?)))) LIMIT 1");
+        $stmt->execute([$hp, $hp, $nama, $nama]);
+        $u = $stmt->fetch(PDO::FETCH_ASSOC);
+        echo json_encode([
+            'success' => true,
+            'found' => (bool)$u,
+            'username' => $u ? $u['username'] : $hp
+        ]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'update_user_credentials') {
+    try {
+        $raw = file_get_contents('php://input');
+        $payload = json_decode($raw, true) ?: $_POST;
+
+        $nama = trim($payload['nama'] ?? '');
+        $oldNama = trim($payload['old_nama'] ?? $nama);
+        $hp = normalizePhone08($payload['hp'] ?? '');
+        $oldHp = normalizePhone08($payload['old_hp'] ?? $hp);
+        $newUsername = strtolower(trim($payload['username'] ?? ''));
+        $newPassword = (string)($payload['password'] ?? '');
+        $wilayah = trim($payload['wilayah'] ?? '10 RW');
+
+        if ($newUsername !== '' && (strlen($newUsername) < 3 || strlen($newUsername) > 40 || !preg_match('/^[a-z0-9_]+$/', $newUsername))) {
+            echo json_encode(['success' => false, 'error' => 'Username / ID Login user harus 3-40 karakter (huruf kecil, angka, atau underscore, tanpa spasi).']);
+            exit;
+        }
+
+        if ($newPassword !== '' && strlen($newPassword) < 6) {
+            echo json_encode(['success' => false, 'error' => 'Password baru user minimal 6 karakter!']);
+            exit;
+        }
+
+        $stmt = $conn->prepare("SELECT * FROM `users` WHERE `role` != 'admin' AND ((? != '' AND `no_hp` = ?) OR (? != '' AND `no_hp` = ?) OR (? != '' AND LOWER(TRIM(`nama`)) = LOWER(TRIM(?))) OR (? != '' AND LOWER(TRIM(`nama`)) = LOWER(TRIM(?)))) LIMIT 1");
+        $stmt->execute([$oldHp, $oldHp, $hp, $hp, $oldNama, $oldNama, $nama, $nama]);
+        $uRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($uRow) {
+            $finalUsername = $newUsername !== '' ? $newUsername : $uRow['username'];
+            if ($finalUsername !== strtolower($uRow['username'])) {
+                $chk = $conn->prepare("SELECT `id` FROM `users` WHERE LOWER(`username`) = LOWER(?) AND `id` != ? LIMIT 1");
+                $chk->execute([$finalUsername, $uRow['id']]);
+                if ($chk->fetch()) {
+                    echo json_encode(['success' => false, 'error' => "Username '$finalUsername' sudah dipakai akun lain!"]);
+                    exit;
+                }
+            }
+            $finalHash = $newPassword !== '' ? password_hash($newPassword, PASSWORD_DEFAULT) : $uRow['password'];
+            $upd = $conn->prepare("UPDATE `users` SET `nama` = ?, `no_hp` = ?, `username` = ?, `password` = ? WHERE `id` = ?");
+            $upd->execute([$nama ?: $uRow['nama'], $hp ?: $uRow['no_hp'], $finalUsername, $finalHash, $uRow['id']]);
+        } else {
+            $finalUsername = $newUsername !== '' ? $newUsername : $hp;
+            if ($finalUsername === '') {
+                echo json_encode(['success' => false, 'error' => 'Isi Username / ID Login atau No. HP untuk membuat akun login Ketua Regu!']);
+                exit;
+            }
+            $chk = $conn->prepare("SELECT `id` FROM `users` WHERE LOWER(`username`) = LOWER(?) LIMIT 1");
+            $chk->execute([$finalUsername]);
+            if ($chk->fetch()) {
+                echo json_encode(['success' => false, 'error' => "Username '$finalUsername' sudah dipakai akun lain!"]);
+                exit;
+            }
+            $finalHash = password_hash($newPassword !== '' ? $newPassword : 'Ketua123', PASSWORD_DEFAULT);
+            $ins = $conn->prepare("INSERT INTO `users` (`nama`, `no_hp`, `username`, `password`, `role`, `wilayah`) VALUES (?, ?, ?, ?, 'petugas', ?)");
+            $ins->execute([$nama, $hp, $finalUsername, $finalHash, $wilayah]);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'ID Login & Password Ketua Regu berhasil diperbarui!',
+            'username' => $finalUsername
+        ]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => 'Gagal menyimpan kredensial user: ' . $e->getMessage()]);
     }
     exit;
 }

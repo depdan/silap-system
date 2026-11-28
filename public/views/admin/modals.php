@@ -127,6 +127,24 @@
           </div>
         </div>
 
+        <div id="agt-credentials-box" style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:14px;margin-bottom:18px;">
+          <div style="font-size:0.78rem;font-weight:800;color:#C2410C;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Akun Login Ketua Regu (ID &amp; Password)</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label style="display:block;font-size:0.76rem;font-weight:700;color:#475467;margin-bottom:4px;">ID / Username Login</label>
+              <input type="text" id="inp-agt-username" class="form-input" style="width:100%;box-sizing:border-box;background:#FFFFFF;" placeholder="Otomatis No. HP / ketik ID baru">
+            </div>
+            <div>
+              <label style="display:block;font-size:0.76rem;font-weight:700;color:#475467;margin-bottom:4px;">Password Baru <span style="font-weight:500;color:#64748B;">(Min. 6)</span></label>
+              <input type="password" id="inp-agt-password" class="form-input" style="width:100%;box-sizing:border-box;background:#FFFFFF;" placeholder="Kosongkan jika tak ubah">
+            </div>
+          </div>
+          <div style="font-size:0.7rem;color:#9A3412;margin-top:6px;">Khusus Ketua Regu. Password bawaan jika baru dibuat: <strong>Ketua123</strong>.</div>
+        </div>
+
         <div style="display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #E2E8F0;padding-top:14px;">
           <button type="button" class="btn-modal-secondary" onclick="closeTambahAnggotaModal()">Batal</button>
           <button type="submit" id="btn-agt-submit" class="btn-modal-primary">Simpan Anggota</button>
