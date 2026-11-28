@@ -3855,8 +3855,8 @@ try {
 
       const isCompleted = completedTasks.has(tName);
       const inProg = inProgressTasks.get(tName);
-      // Validasi Berurutan: Tugas i terbuka HANYA jika i === 1 ATAU Tugas sebelumnya (i-1) sudah selesai 100%
-      const isPrevCompleted = (i === 1) || completedTasks.has("Tugas " + (i - 1));
+      // Validasi Berurutan: Tugas i terbuka HANYA jika i === 1 ATAU Tugas sebelumnya (i-1) sudah selesai 100% (Admin mode bebas cek)
+      const isPrevCompleted = isSuperAdminMode() || (i === 1) || completedTasks.has("Tugas " + (i - 1));
 
       if (isCompleted) {
         completedCount++;
@@ -3917,7 +3917,7 @@ try {
 
     // Jika tugas aktif saat ini ternyata terkunci, otomatis alihkan ke tugas pertama yang tersedia
     const currentNum = parseInt((mobileSelectedTugas || "Tugas 1").replace(/\D/g, ""), 10) || 1;
-    if (currentNum > 1 && !completedTasks.has("Tugas " + (currentNum - 1))) {
+    if (!isSuperAdminMode() && currentNum > 1 && !completedTasks.has("Tugas " + (currentNum - 1))) {
       selectTugasKe(firstAvailableTask || "Tugas 1");
       return;
     }
@@ -3936,8 +3936,8 @@ try {
     const taskNum = parseInt(tugas.replace(/\D/g, ""), 10) || 1;
     const btn = Array.from(document.querySelectorAll(".btn-tugas-pill")).find(b => b.dataset.tugas === tugas);
 
-    // KUNCI BERURUTAN: Tugas N terkunci jika Tugas (N - 1) belum 100% selesai
-    if (taskNum > 1) {
+    // KUNCI BERURUTAN: Tugas N terkunci jika Tugas (N - 1) belum 100% selesai (kecuali Mode Admin)
+    if (taskNum > 1 && !isSuperAdminMode()) {
       const list = getLaporanDB();
       const targetDateStr = currentCalendarDateStr;
       const hasAssignedRegu = mobileRegu && mobileRegu !== "Belum Ditugaskan" && mobileRegu.trim() !== "";
@@ -4341,11 +4341,16 @@ try {
     }
   }
 
+  function isSuperAdminMode() {
+    return !!(currentUser && (currentUser.role === "admin" || currentUser.is_admin));
+  }
+
   // ==========================================================
   // VALIDASI LANGKAH 1 (LOKASI & PERSONEL)
   // Wajib Diisi: Wilayah RW, Nama Jalan, dan Patokan Lokasi
   // ==========================================================
   function validateStep1(showFeedback = true) {
+    if (isSuperAdminMode()) return true;
     const rwInp = document.getElementById("u-rw-select");
     const alamatInp = document.getElementById("u-custom-address-inp");
     const patokanInp = document.getElementById("u-patokan-inp");
@@ -4578,8 +4583,10 @@ try {
     const list = getLaporanDB();
     const activeLap = forcedReport || (activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null);
 
-    // Status resmi pengiriman bertahap ke sistem (wajib cek foto valid + progres):
-    const { hasSubmitted0, hasSubmitted50 } = getStageStatus(activeLap);
+    // Status resmi pengiriman bertahap ke sistem (wajib cek foto valid + progres; Mode Admin bebas uji semua slot):
+    const stageRaw = getStageStatus(activeLap);
+    const hasSubmitted0 = isSuperAdminMode() ? true : stageRaw.hasSubmitted0;
+    const hasSubmitted50 = isSuperAdminMode() ? true : stageRaw.hasSubmitted50;
 
     const isResume = !!activeEditingReportId;
     const sesiNoticeEl = document.getElementById("sesi-notice-container");
@@ -4746,11 +4753,11 @@ try {
     const activeLap = activeEditingReportId ? findActiveReport(list, activeEditingReportId) : null;
     const { hasSubmitted0, hasSubmitted50 } = getStageStatus(activeLap);
 
-    if (val >= 50 && !hasSubmitted0) {
+    if (val >= 50 && !hasSubmitted0 && !isSuperAdminMode()) {
       showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
       return;
     }
-    if (val >= 100 && !hasSubmitted50) {
+    if (val >= 100 && !hasSubmitted50 && !isSuperAdminMode()) {
       showToast("Kirim Progres Lapangan (50%) terlebih dahulu untuk membuka tahap 100%!", "warning");
       return;
     }
@@ -5358,11 +5365,11 @@ try {
     const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
     const hasSubmitted50 = !!(activeEditingReportId && activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai") && activeLap.foto && activeLap.foto.length >= 2);
 
-    if (slot === "proses" && !hasSubmitted0) {
+    if (slot === "proses" && !hasSubmitted0 && !isSuperAdminMode()) {
       showToast("Kirim Laporan Awal (0%) terlebih dahulu untuk membuka tahap 50%!", "warning");
       return;
     }
-    if (slot === "sesudah") {
+    if (slot === "sesudah" && !isSuperAdminMode()) {
       if (!hasSubmitted0) {
         showToast("Kirim Laporan Awal (0%) dan Progres (50%) terlebih dahulu!", "warning");
         return;
@@ -6120,9 +6127,9 @@ try {
     const hasSubmitted0 = !!(activeEditingReportId && activeLap && activeLap.foto && activeLap.foto.length >= 1);
     const hasSubmitted50 = !!(activeEditingReportId && activeLap && (parseInt(activeLap.progres, 10) >= 50 || activeLap.status === "proses" || activeLap.status === "selesai") && activeLap.foto && activeLap.foto.length >= 2);
 
-    // 1. TAHAP AWAL (0%): Belum kirim 0% -> Kirim Laporan Awal
+    // 1. TAHAP AWAL (0%): Belum kirim 0% -> Kirim Laporan Awal (Admin mode bebas cek tanpa wajib foto)
     if (!hasSubmitted0) {
-      if (!mobilePhotoSebelum) {
+      if (!mobilePhotoSebelum && !isSuperAdminMode()) {
         showToast("Wajib mengambil Foto 1 (Sebelum 0%) terlebih dahulu sebelum mengirim laporan awal!", "warning");
         const c1 = document.getElementById("slot-sebelum");
         if (c1) c1.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -6134,7 +6141,7 @@ try {
 
     // 2. TAHAP PROGRES (50%): Sudah kirim 0%, belum kirim 50% -> Kirim Progres Lapangan
     if (!hasSubmitted50) {
-      if (!mobilePhotoProses) {
+      if (!mobilePhotoProses && !isSuperAdminMode()) {
         showToast("Wajib mengambil Foto 2 (Proses Kerja 50%) terlebih dahulu sebelum mengirim progres lapangan!", "warning");
         const c2 = document.getElementById("slot-proses");
         if (c2) c2.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -6145,7 +6152,7 @@ try {
     }
 
     // 3. TAHAP TUNTAS (100%): Sudah kirim 50% -> Munculkan peringatan konfirmasi sebelum kirim final ke Admin
-    if (!mobilePhotoSesudah) {
+    if (!mobilePhotoSesudah && !isSuperAdminMode()) {
       showToast("Wajib mengambil Foto 3 (Sesudah 100%) terlebih dahulu untuk menyelesaikan laporan!", "warning");
       const c3 = document.getElementById("slot-sesudah");
       if (c3) c3.scrollIntoView({ behavior: "smooth", block: "center" });
